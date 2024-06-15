@@ -7,6 +7,8 @@ services:
             - 8080:8080
         volumes:
             - ./app:/app
+        env_file:
+            - ./app/.env
     db:
         image: postgres:alpine
         environment:
