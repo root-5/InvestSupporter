@@ -5,7 +5,7 @@
 今回の環境構築には Docker を使用して、基本的に開発もその中で行う形をとった。
 また、Air を使用したコード改変時ホットリロードと、Godoc でのドキュメント生成を行っている。
 
-Air によって出力されるログなどは Docker Decktop の各コンテナの「Logs」項目から閲覧できる。
+Air によって出力されるログなどは Docker Decktop の各コンテナの「Logs」項目から閲覧するか、`docker compose logs app -f`
 
 ### 構築手順
 
@@ -17,7 +17,9 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 ### コマンド
 
 -   `docker compose up -d` : コンテナを立ち上げる
+-   `docker compose down` : コンテナを停止する
 -   `docker compose exec app sh` : app コンテナに入る
+-   `docker compose logs app -f` : app コンテナのログを表示する
 
 ## ドキュメント
 
