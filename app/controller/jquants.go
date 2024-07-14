@@ -15,8 +15,7 @@ import (
 // HTTPクライアント
 var httpClient = &http.Client{}
 
-/*
-GET, POSTリクエストを行い、レスポンスボディを取得する関数
+/* POSTリクエストを行い、レスポンスボディを取得する関数
 	- 入力) url - リクエスト先URL文字列
 	- 入力) queryParam - クエリパラメータ構造体
 	- 入力) reqBody - リクエストボディ構造体
@@ -75,8 +74,7 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	return nil
 }
 
-/*
-JQuants に登録したメールアドレスとパスワードを入力して、リフレッシュトークン（期限: 1週間）を取得する関数
+/* JQuants に登録したメールアドレスとパスワードを入力して、リフレッシュトークン（期限: 1週間）を取得する関数
 	- 入力) email - JQuant に登録したメールアドレス
 	- 入力) pass - JQuant に登録したパスワード
 	- 出力) refreshToken - リフレッシュトークン
@@ -121,8 +119,7 @@ func getRefreshToken(email string, pass string) (refreshToken string, err error)
 	return refreshToken, nil
 }
 
-/*
-リフレッシュトークンを渡して、ID トークン（期限: 24時間）を取得する関数
+/* リフレッシュトークンを渡して、ID トークン（期限: 24時間）を取得する関数
 	- 入力) refreshToken - getRefreshToken 関数で取得したトークン
 	- 出力) idToken - ID トークン
 	- 出力) err - エラー
@@ -164,8 +161,7 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	return idToken, nil
 }
 
-/*
-メールアドレスとパスワードを入力して、ID トークン（期限: 24時間）を取得する関数
+/* メールアドレスとパスワードを入力して、ID トークン（期限: 24時間）を取得する関数
 	- 入力) email - JQuant に登録したメールアドレス
 	- 入力) pass - JQuant に登録したパスワード
 	- 出力) idToken - ID トークン
