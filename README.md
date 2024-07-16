@@ -15,11 +15,14 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
     2. compose.yaml, app.local.dockerfile は参考リンクなどをもとに作成
 
 ### コマンド
-
+**基本用途**
 -   `docker compose up -d` : コンテナを立ち上げる
 -   `docker compose down` : コンテナを停止する
 -   `docker compose exec app sh` : app コンテナに入る
 -   `docker compose logs app -f` : app コンテナのログを表示する
+
+**作業用**
+-   `go mod tidy` : go.mod に記載されているパッケージを整理する（.goファイルで使われていないパッケージの削除）
 
 ## ドキュメント
 

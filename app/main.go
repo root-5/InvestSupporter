@@ -3,18 +3,13 @@ package main
 import (
 	jquants "app/controller"
 
+	"database/sql"
 	"fmt"
 	"os"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq"
 )
 
-type Product struct {
-	gorm.Model
-	Code  string
-	Price uint
-  }
 
 func main() {
 	fmt.Println("Program started")
@@ -36,36 +31,56 @@ func main() {
 	fmt.Println(dsn)
 
 	
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// DB に接続
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-	  panic("failed to connect database")
+		fmt.Println(err)
+		return
 	}
-  
-	// Migrate the schema
-	db.AutoMigrate(&Product{})
-  
-	// Create
-	db.Create(&Product{Code: "D42", Price: 100})
-  
-	// Read
-	var product Product
-	db.First(&product, 1) // find product with integer primary key
-	db.First(&product, "code = ?", "D42") // find product with code D42
-  
-	// Update - update product's price to 200
-	db.Model(&product).Update("Price", 200)
-	// Update - update multiple fields
-	db.Model(&product).Updates(Product{Price: 200, Code: "F42"}) // non-zero fields
-	db.Model(&product).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
-  
-	// Delete - delete product
-	// db.Delete(&product, 1)
+	defer db.Close()
 
-	// Read
-	var productAlfa Product
-	db.First(&productAlfa, 1) // find product with integer primary key
-	fmt.Printf("ProductCode: %v\n", productAlfa.Code)
-	fmt.Printf("ProductPrice: %v\n", productAlfa.Price)
+	// テーブル削除
+	_, err = db.Exec("DROP TABLE IF EXISTS jquants")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// テーブルの作成
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS jquants (id SERIAL PRIMARY KEY, email TEXT, pass TEXT)")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// データの挿入
+	_, err = db.Exec("INSERT INTO jquants (email, pass) VALUES ($1, $2)", email, pass)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// データの取得
+	rows, err := db.Query("SELECT * FROM jquants")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	// 取得したデータを表示
+	for rows.Next() {
+		var id int
+
+		var email string
+		var pass string
+
+		err = rows.Scan(&id, &email, &pass)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("id: %d, email: %s, pass: %s\n", id, email, pass)
+	}
+	defer rows.Close()
 
 	// ID トークンをセット
 	idToken, err := jquants.SetIdToken(email, pass)
@@ -74,4 +89,5 @@ func main() {
 		return
 	}
 	_ = idToken
+	fmt.Printf("ID Token: %s\n", idToken)
 }
