@@ -1,0 +1,5 @@
+CREATE DATABASE IF NOT EXISTS sada;
+CREATE TABLE IF NOT EXISTS sada.masashi(
+  `id` int(11) NOT NULL,
+  `name` varchar NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

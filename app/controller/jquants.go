@@ -168,7 +168,7 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	- 出力) err - エラー
 */
 func SetIdToken(email string, pass string) (idToken string, err error) {
-	return "aaa", nil
+	return "idToken_for_test ", nil
 
 	// リフレッシュトークンを取得
 	refreshToken, err := getRefreshToken(email, pass)

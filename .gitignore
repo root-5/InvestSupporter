@@ -1,3 +1,9 @@
+# ビルド後ディレクトリ
 /app/tmp
+
+# 環境変数ファイル
 /infra/app/.env
 /infra/db/.env
+
+# モックアップファイル
+*mockup.js
