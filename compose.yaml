@@ -18,7 +18,7 @@ services:
         env_file:
             - ./infra/db/.env
         volumes:
-            - ./infra/db/:/docker-entrypoint-initdb.d/
+            - ./infra/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
         ports:
             - 5432:5432
         networks:
