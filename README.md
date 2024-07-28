@@ -20,6 +20,8 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 -   `docker compose down` : コンテナを停止する
 -   `docker compose exec app sh` : app コンテナに入る
 -   `docker compose logs app -f` : app コンテナのログを表示する
+-   `docker compose exec db sh` : db コンテナに入る
+    -   `psql -h 127.0.0.1 -p 5432 -U user db` : db に接続する
 
 **作業用**
 -   `go mod tidy` : go.mod に記載されているパッケージを整理する（.goファイルで使われていないパッケージの削除）

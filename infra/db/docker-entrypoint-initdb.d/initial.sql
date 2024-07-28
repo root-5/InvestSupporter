@@ -88,3 +88,9 @@ CREATE TABLE price_info (
 CREATE INDEX idx_code_companies_info ON companies_info (code);
 CREATE INDEX idx_code_financial_info ON financial_info (code);
 CREATE INDEX idx_code_price_info ON price_info (code);
+
+-- csv ファイルの読み込み
+COPY sector17_info FROM '/docker-entrypoint-initdb.d/sector17_info.csv' WITH (FORMAT csv, HEADER true);
+COPY sector33_info FROM '/docker-entrypoint-initdb.d/sector33_info.csv' WITH (FORMAT csv, HEADER true);
+COPY market_info FROM '/docker-entrypoint-initdb.d/market_info.csv' WITH (FORMAT csv, HEADER true);
+COPY margin_info FROM '/docker-entrypoint-initdb.d/margin_info.csv' WITH (FORMAT csv, HEADER true);
