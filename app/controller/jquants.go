@@ -168,7 +168,7 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	- 出力) err - エラー
 */
 func SetIdToken(email string, pass string) (idToken string, err error) {
-	return "idToken_for_test ", nil
+	// return "idToken_for_test ", nil
 
 	// リフレッシュトークンを取得
 	refreshToken, err := getRefreshToken(email, pass)
@@ -183,4 +183,38 @@ func SetIdToken(email string, pass string) (idToken string, err error) {
 	}
 
 	return idToken, nil
+}
+
+/* 上場銘柄一覧を取得する関数
+	- 入力) idToken - SetIdToken 関数で取得したトークン
+	- 出力) stockList - 上場銘柄一覧
+*/
+func GetStockList(idToken string) (stockList []string, err error) {
+	// リクエスト先URL
+	url := "https://api.jquants.com/v1/listed/info"
+
+	// クエリパラメータ
+	type queryParamsType struct {}
+	queryParams := queryParamsType{}
+
+	// リクエストボディ
+	type reqBodyType struct {}
+	reqBody := reqBodyType{}
+
+	// レスポンスボディ
+	type resBodyStruct struct {
+		StockList []string `json:"stockList"`
+	}
+	var resBody resBodyStruct
+
+	// POSTリクエスト
+	err = post(url, queryParams, reqBody, &resBody)
+	if err != nil {
+		return nil, fmt.Errorf("post Error: %v", err)
+	}
+
+	// 上場銘柄一覧を取得
+	stockList = resBody.StockList
+
+	return stockList, nil
 }
