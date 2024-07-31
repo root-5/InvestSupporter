@@ -1,5 +1,5 @@
--- 1. 会社情報テーブル (companies_info)
-CREATE TABLE companies_info (
+-- 1. 上場銘柄テーブル (stocks_info)
+CREATE TABLE stocks_info (
     code CHAR(5) PRIMARY KEY,
     company_name VARCHAR(50),
     company_name_english VARCHAR(100),
@@ -69,7 +69,7 @@ CREATE TABLE financial_info (
     next_year_forecast_profit DECIMAL(20,0),
     next_year_forecast_earnings_per_share DECIMAL(10,2),
     number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock DECIMAL(20,0),
-    FOREIGN KEY (code) REFERENCES companies_info(code)
+    FOREIGN KEY (code) REFERENCES stocks_info(code)
 );
 
 -- 7. 株価情報テーブル (price_info)
@@ -81,11 +81,11 @@ CREATE TABLE price_info (
     adjustment_low DECIMAL(10,2),
     adjustment_close DECIMAL(10,2),
     adjustment_volume DECIMAL(20,0),
-    FOREIGN KEY (code) REFERENCES companies_info(code)
+    FOREIGN KEY (code) REFERENCES stocks_info(code)
 );
 
 -- インデックスの作成
-CREATE INDEX idx_code_companies_info ON companies_info (code);
+CREATE INDEX idx_code_stocks_info ON stocks_info (code);
 CREATE INDEX idx_code_financial_info ON financial_info (code);
 CREATE INDEX idx_code_price_info ON price_info (code);
 
