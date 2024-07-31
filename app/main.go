@@ -26,10 +26,8 @@ func main() {
 	user := os.Getenv("POSTGRES_USER")
 	password := os.Getenv("POSTGRES_PASSWORD")
 	dbname := os.Getenv("POSTGRES_DB")
-
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + port + " sslmode=disable TimeZone=Asia/Tokyo"
 	fmt.Println(dsn)
-
 	
 	// DB に接続
 	db, err := sql.Open("postgres", dsn)
@@ -39,48 +37,48 @@ func main() {
 	}
 	defer db.Close()
 
-	// テーブル削除
-	_, err = db.Exec("DROP TABLE IF EXISTS jquants")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// // テーブル削除
+	// _, err = db.Exec("DROP TABLE IF EXISTS jquants")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
-	// テーブルの作成
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS jquants (id SERIAL PRIMARY KEY, email TEXT, pass TEXT)")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// // テーブルの作成
+	// _, err = db.Exec("CREATE TABLE IF NOT EXISTS jquants (id SERIAL PRIMARY KEY, email TEXT, pass TEXT)")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
-	// データの挿入
-	_, err = db.Exec("INSERT INTO jquants (email, pass) VALUES ($1, $2)", email, pass)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// // データの挿入
+	// _, err = db.Exec("INSERT INTO jquants (email, pass) VALUES ($1, $2)", email, pass)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
-	// データの取得
-	rows, err := db.Query("SELECT * FROM jquants")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	// 取得したデータを表示
-	for rows.Next() {
-		var id int
+	// // データの取得
+	// rows, err := db.Query("SELECT * FROM jquants")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// // 取得したデータを表示
+	// for rows.Next() {
+	// 	var id int
 
-		var email string
-		var pass string
+	// 	var email string
+	// 	var pass string
 
-		err = rows.Scan(&id, &email, &pass)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Printf("id: %d, email: %s, pass: %s\n", id, email, pass)
-	}
-	defer rows.Close()
+	// 	err = rows.Scan(&id, &email, &pass)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		return
+	// 	}
+	// 	fmt.Printf("id: %d, email: %s, pass: %s\n", id, email, pass)
+	// }
+	// defer rows.Close()
 
 	// ID トークンをセット
 	idToken, err := jquants.SetIdToken(email, pass)
@@ -89,5 +87,13 @@ func main() {
 		return
 	}
 	_ = idToken
-	fmt.Printf("ID Token: %s\n", idToken)
+	// fmt.Printf("ID Token: %s\n", idToken)
+
+	// 上場銘柄一覧を取得
+	stocks, err := jquants.GetStockList(idToken)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(stocks)
 }

@@ -12,8 +12,72 @@ import (
 	"strings"
 )
 
+// ====================================================================================
+// 基本
+// ====================================================================================
 // HTTPクライアント
 var httpClient = &http.Client{}
+
+/* GETリクエストを行い、レスポンスボディを取得する関数
+	- 入力) url - リクエスト先URL文字列
+	- 入力) queryParam - クエリパラメータ構造体
+	- 入力) headers - ヘッダー構造体
+	- 入力) resBody - レスポンスボディ構造体のポインタ
+	- 出力) err - エラー
+*/
+func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err error) {
+	// クエリパラメータをreqURLに追加
+	if queryParams != struct{}{} {
+		queryParamVal := reflect.ValueOf(queryParams)
+		queryParamType := reflect.TypeOf(queryParams)
+		params := url.Values{}
+		for i := 0; i < queryParamVal.NumField(); i++ {
+			params.Add(strings.ToLower(queryParamType.Field(i).Name), fmt.Sprintf("%v", queryParamVal.Field(i).Interface()))
+		}
+		reqUrl += "?" + params.Encode()
+	}
+
+	// GETリクエスト作成
+	req, err := http.NewRequest("GET", reqUrl, nil)
+	if err != nil {
+		return fmt.Errorf("http.NewRequest Error: %v", err)
+	}
+
+	// ヘッダー設定
+	req.Header.Set("Content-Type", "application/json")
+	if headers != struct{}{} {
+		headerVal := reflect.ValueOf(headers)
+		headerType := reflect.TypeOf(headers)
+		for i := 0; i < headerVal.NumField(); i++ {
+			req.Header.Set(strings.ToLower(headerType.Field(i).Name), fmt.Sprintf("%v", headerVal.Field(i).Interface()))
+		}
+	}
+
+	// リクエスト送信
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("httpClient.Do Error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// ステータスコードを確認
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("StatusCode Error: %v", resp.StatusCode)
+	}
+
+	// レスポンスボディを読み込み
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("io.ReadAll Error: %v", err)
+	}
+
+	// レスポンスボディを構造体に変換
+	if err := json.Unmarshal(body, resBody); err != nil {
+		return fmt.Errorf("json.Unmarshal Error: %v", err)
+	}
+
+	return nil
+}
 
 /* POSTリクエストを行い、レスポンスボディを取得する関数
 	- 入力) url - リクエスト先URL文字列
@@ -43,12 +107,16 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 		}
 	}
 
-	// POSTリクエスト
+	// POSTリクエスト作成
 	req, err := http.NewRequest("POST", reqUrl, bytes.NewBuffer(reqBodyJson))
 	if err != nil {
 		return fmt.Errorf("http.NewRequest Error: %v", err)
 	}
+
+	// ヘッダー設定
 	req.Header.Set("Content-Type", "application/json")
+
+	// リクエスト送信
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("httpClient.Do Error: %v", err)
@@ -74,6 +142,30 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	return nil
 }
 
+// ====================================================================================
+// レスポンス構造体
+// ====================================================================================
+// 上場銘柄一覧
+type stockInfo struct {
+	// Date              string `json:"Date"`
+	Code              string `json:"Code"`
+	CompanyName       string `json:"CompanyName"`
+	CompanyNameEnglish string `json:"CompanyNameEnglish"`
+	Sector17Code      string `json:"Sector17Code"`
+	// Sector17CodeName  string `json:"Sector17CodeName"`
+	Sector33Code      string `json:"Sector33Code"`
+	// // Sector33CodeName  string `json:"Sector33CodeName"`
+	ScaleCategory     string `json:"ScaleCategory"`
+	MarketCode        string `json:"MarketCode"`
+	// // MarketCodeName    string `json:"MarketCodeName"`
+	MarginCode        string `json:"MarginCode"`
+	// // MarginCodeName    string `json:"MarginCodeName"`
+}
+
+
+// ====================================================================================
+// API関数
+// ====================================================================================
 /* JQuants に登録したメールアドレスとパスワードを入力して、リフレッシュトークン（期限: 1週間）を取得する関数
 	- 入力) email - JQuant に登録したメールアドレス
 	- 入力) pass - JQuant に登録したパスワード
@@ -187,9 +279,9 @@ func SetIdToken(email string, pass string) (idToken string, err error) {
 
 /* 上場銘柄一覧を取得する関数
 	- 入力) idToken - SetIdToken 関数で取得したトークン
-	- 出力) stockList - 上場銘柄一覧
+	- 出力) stockList - 上場銘柄情報の配列
 */
-func GetStockList(idToken string) (stockList []string, err error) {
+func GetStockList(idToken string) (stockList []stockInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/listed/info"
 
@@ -197,24 +289,29 @@ func GetStockList(idToken string) (stockList []string, err error) {
 	type queryParamsType struct {}
 	queryParams := queryParamsType{}
 
-	// リクエストボディ
-	type reqBodyType struct {}
-	reqBody := reqBodyType{}
+	// ヘッダー
+	type headersType struct {
+		Authorization string `json:"Authorization"`
+	}
+	headers := headersType {
+		Authorization: idToken,
+	}
+	fmt.Println(headers)
 
 	// レスポンスボディ
 	type resBodyStruct struct {
-		StockList []string `json:"stockList"`
+		Info []stockInfo `json:"info"`
 	}
 	var resBody resBodyStruct
 
-	// POSTリクエスト
-	err = post(url, queryParams, reqBody, &resBody)
+	// GETリクエスト
+	err = get(url, queryParams, headers, &resBody)
 	if err != nil {
 		return nil, fmt.Errorf("post Error: %v", err)
 	}
 
 	// 上場銘柄一覧を取得
-	stockList = resBody.StockList
+	stockList = resBody.Info
 
 	return stockList, nil
 }
