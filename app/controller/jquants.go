@@ -8,12 +8,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"strings"
 )
 
 // ====================================================================================
-// 基本
+// 基本モジュール
 // ====================================================================================
 // HTTPクライアント
 var httpClient = &http.Client{}
@@ -154,12 +155,12 @@ type stockInfo struct {
 	Sector17Code      string `json:"Sector17Code"`
 	// Sector17CodeName  string `json:"Sector17CodeName"`
 	Sector33Code      string `json:"Sector33Code"`
-	// // Sector33CodeName  string `json:"Sector33CodeName"`
+	// Sector33CodeName  string `json:"Sector33CodeName"`
 	ScaleCategory     string `json:"ScaleCategory"`
 	MarketCode        string `json:"MarketCode"`
-	// // MarketCodeName    string `json:"MarketCodeName"`
+	// MarketCodeName    string `json:"MarketCodeName"`
 	MarginCode        string `json:"MarginCode"`
-	// // MarginCodeName    string `json:"MarginCodeName"`
+	// MarginCodeName    string `json:"MarginCodeName"`
 }
 
 
@@ -172,9 +173,12 @@ type stockInfo struct {
 	- 出力) refreshToken - リフレッシュトークン
 	- 出力) err - エラー
 */
-func getRefreshToken(email string, pass string) (refreshToken string, err error) {
+func getRefreshToken() (refreshToken string, err error) {
 	// return "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.lEvoH4XOE-grkUGtMLDwvuhiDtkIHEG4k2COyW9UtTqcxjeRKRVNmJqQZ2jb0WqNXcmUcEwAV6T6katBLZseg8Z2IkE0_-J2_BW1NRRYl_PbuXSH42SbuQgzTAtduLnMSliK17kGBSyvG_e0cd6GoivG0NRpmry9GUHgdYqvq_i0VYr2noWai1JOB3Is0_O2cJHPrSV3CdjH22X7u07qZWAQJekj1KioUAAQJb0Igu0I0-HiY2fO9cM-5tkobIJCdNy9zY-1iFKD3MtaXoCXqyXn6wpa-ao3ErfKBIwqV_b2OmuoiVbpT5Ab3fawcmq4bLcOMihOZJZ-oMVClmEriA.UrkYH_mZjHiBRE37.4uhGdOjUFDAahYCoD2XLf5JNuNZz7sLCMVMYOIGC4WJn5Eu88Pw7QP7tboeeqoKXv4FUoQ5Tve1mdvD3OwWfe8hlb0kXYYjqxaVSFlVPF2w0JJzHToiWRNBoRmzaNJe1ImJ3p8dVFrN7d7w5kyDxfKFTdnxvuYLZJMqmYdMUMn8M4ALKU-MTP9BxdA42qiCiomxAVLbX2zhM7VNC1Y_sXWnnSG9Lw9pUkWEoLV0ccJLyraRIa5oUSQ9WIuf-kuVb3Bu6KfwPFnl4lcEyaDoXObXd9b2xzTxmNm-CjAwHxFX5S577xaXR2oDEoQjpZjFFvjIM1ISBLFCVvx7zT6aB1Olpt-OnqaR2kumOy5jb7126R79TgdIsdyMbpNIDHxBtTXFhsFaI2bp5i9Uko3hC_TZdofyxmreYChHYPcCO1PO-j_857JnH5W_qExm3_HqQl5Io9ZmUaNW5UDfbzeCN2hp3-FAQ3fU41-kp1Vt1manP0-JAUagtDUtKc76j2S94JbZiSZiWEVKVI_cUZlfeePvok4R5g4qJslXSpql5vA27Hz_LoD8LOf1J_CvnylLDWStrOgth0QBz3mWJeH2G9n1Qww-SOd8bsKPtBXtqGroO5LfE9nTNPr1QFGDryNEjR653d1Sq-76N4oaRIZ9pv-JlclY0_0hNH6NkVgpZcWDEt4BL8wkEaZNJJSBuCHC6tX6W87_Ece6rkq9XYT-HQajNEF_eSePlAhw6RmjIGpUDdlf4UtOQNCnrqNfokca21zS6uM-2SGq0I-nQFtO-rkmjVEgXE8oXszNHG3P63yvPbof1YGK7Qz0cI27FSNUnIR42NpX0ft6U-KZoO96uJmf49zhS_dRUgv_8y7jaa-9zmwhCg-mC9ZLnn6FFWS4ONNKGCCdTNDhy1VEpDI7okX37Q56j61pebe6rhuLFDHeEUpEOBOwH8JhmwP7niTa6xbFm7HjooTnRlhY0SltMoulFAydgzCQNCIwKtsOMGqqqu7EJTMIxmeXQb8z4AGO-VD9vM9o3OUzN-ohnO2VTa3n_pAJOQf6x4kiDPfyyvTCUhRY3GL4ML-nwyntNVrC1wlHB1MiQoQjdrKCHA6Ppy2B07wYA4e9jqaPNZYXiiBh9q6XB1jojc9OPuHZJvKV64TQPIP9RRDt8GMYDv0jC2Wz7jKTbp_boim9DQTIgRaFsa3miSjYL6ikQOMW_Viq9Nm0WI32t2mTOQQ2gREhdWNLuks6YaXoaNI17_NYjp6Bl4NpaDD_-GOdeJiXtKgF64ZCAJJadGolkN5aQPsfT4oMsRLUwCX4S6f9b-dR0jH4ppTqz95XxT94uU2hN8E48GhelP4YIZlRqrw.WyO9VqhsLA4Og65fcm2VhA", nil
 	// return "dummy_refreshtoken", nil
+	// 環境変数からメールアドレスとパスワードを取得
+	email := os.Getenv("JQUANTS_EMAIL")
+	pass := os.Getenv("JQUANTS_PASS")
 
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/token/auth_user"
@@ -259,11 +263,11 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	- 出力) idToken - ID トークン
 	- 出力) err - エラー
 */
-func SetIdToken(email string, pass string) (idToken string, err error) {
+func SetIdToken() (idToken string, err error) {
 	// return "idToken_for_test ", nil
 
 	// リフレッシュトークンを取得
-	refreshToken, err := getRefreshToken(email, pass)
+	refreshToken, err := getRefreshToken()
 	if err != nil {
 		return "", fmt.Errorf("getRefreshToken Error: %v", err)
 	}

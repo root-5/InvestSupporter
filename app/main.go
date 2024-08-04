@@ -14,12 +14,6 @@ import (
 func main() {
 	fmt.Println("Program started")
 
-	// 環境変数からメールアドレスとパスワードを取得
-	email := os.Getenv("JQUANTS_EMAIL")
-	pass := os.Getenv("JQUANTS_PASS")
-
-
-
 	// DB の初期化
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
@@ -81,7 +75,7 @@ func main() {
 	// defer rows.Close()
 
 	// ID トークンをセット
-	idToken, err := jquants.SetIdToken(email, pass)
+	idToken, err := jquants.SetIdToken()
 	if err != nil {
 		fmt.Println(err)
 		return
