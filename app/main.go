@@ -1,7 +1,7 @@
 package main
 
 import (
-	jquants "app/controller"
+	jquants "app/controller/jquants"
 
 	"database/sql"
 	"fmt"
