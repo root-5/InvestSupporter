@@ -8,17 +8,27 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// DB の初期化
-var dsn = "host=" + os.Getenv("POSTGRES_HOST") + " user=" + os.Getenv("POSTGRES_USER") + " password=" + os.Getenv("POSTGRES_PASSWORD") + " dbname=" + os.Getenv("POSTGRES_DB") + " port=" + os.Getenv("POSTGRES_PORT") + " sslmode=disable TimeZone=Asia/Tokyo"
-fmt.Println(dsn)
+// 型定義
+var db *sql.DB
+var err error
 
-// DB に接続
-db, err := sql.Open("postgres", dsn)
-if err != nil {
-	fmt.Println(err)
-	return
+/* DB の初期化 */
+func InitDB() {
+	host := os.Getenv("POSTGRES_HOST")
+	port := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	dbname := os.Getenv("POSTGRES_DB")
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + port + " sslmode=disable TimeZone=Asia/Tokyo"
+	db, err = sql.Open("postgres", dsn)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
 }
-defer db.Close()
+
+
 
 func test(){
 	// テーブル削除
