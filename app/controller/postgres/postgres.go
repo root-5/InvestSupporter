@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	model "app/domain/model"
+
 	"database/sql"
 	"fmt"
 	"os"
@@ -24,13 +26,19 @@ func InitDB() {
 	if err != nil {
 		fmt.Println(err)
 		return
-	}
-	defer db.Close()
+	}// defer db.Close()
+
+	dbTest(0)
 }
 
 
+func dbTest(num int) {
+	// テスト実行フラグの判定
+	if num == 0 {
+		// テストを実行せず終了
+		return
+	}
 
-func test(){
 	// テーブル削除
 	_, err = db.Exec("DROP TABLE IF EXISTS jquants")
 	if err != nil {
@@ -46,7 +54,7 @@ func test(){
 	}
 
 	// データの挿入
-	_, err = db.Exec("INSERT INTO jquants (email, pass) VALUES ($1, $2)", email, pass)
+	_, err = db.Exec("INSERT INTO jquants (email, pass) VALUES ($1, $2)", "email", "pass")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -73,4 +81,51 @@ func test(){
 		fmt.Printf("id: %d, email: %s, pass: %s\n", id, email, pass)
 	}
 	defer rows.Close()
+}
+
+func SaveStockList(stocks []model.StockInfo) error {
+	fmt.Println(stocks)
+
+	// 上場銘柄テーブルへの挿入
+	for _, stock := range stocks {
+		// ##############################################################
+		// エラーが発生中
+		// データ型が一致していないため、データの挿入に失敗している模様
+		// pq: invalid input syntax for type smallint: ""
+		// ##############################################################
+		_, err = db.Exec("INSERT INTO stocks_info (code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code, margin_code) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", stock.Code, stock.CompanyName, stock.CompanyNameEnglish, stock.Sector17Code, stock.Sector33Code, stock.ScaleCategory, stock.MarketCode, stock.MarginCode)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+
+	// データの取得
+	rows, err := db.Query("SELECT * FROM stocks_info")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// 取得したデータを表示
+	fmt.Println("stocks_info")
+	for rows.Next() {
+		var code string
+		var company_name string
+		var company_name_english string
+		var sector17_code string
+		var sector33_code string
+		var scale_category string
+		var market_code string
+		var margin_code string
+
+		err = rows.Scan(&code, &company_name, &company_name_english, &sector17_code, &sector33_code, &scale_category, &market_code, &margin_code)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		fmt.Printf("code: %s, company_name: %s, company_name_english: %s, sector17_code: %s, sector33_code: %s, scale_category: %s, market_code: %s, margin_code: %s\n", code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code, margin_code)
+	}
+
+	return nil
 }

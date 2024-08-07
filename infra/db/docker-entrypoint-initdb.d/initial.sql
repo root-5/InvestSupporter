@@ -8,6 +8,10 @@ CREATE TABLE stocks_info (
     scale_category VARCHAR(50),
     market_code SMALLINT,
     margin_code SMALLINT
+    FOREIGN KEY (sector17_code) REFERENCES sector17_info(sector17_code),
+    FOREIGN KEY (sector33_code) REFERENCES sector33_info(sector33_code),
+    FOREIGN KEY (market_code) REFERENCES market_info(market_code),
+    FOREIGN KEY (margin_code) REFERENCES margin_info(margin_code)
 );
 
 -- 2. 17 業種情報テーブル (sector17_info)

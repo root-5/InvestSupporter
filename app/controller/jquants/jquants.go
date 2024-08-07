@@ -2,6 +2,8 @@
 package jquants
 
 import (
+	model "app/domain/model"
+
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -145,28 +147,6 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 }
 
 // ====================================================================================
-// レスポンス構造体
-// ====================================================================================
-
-// 上場銘柄一覧
-type stockInfo struct {
-	// Date              string `json:"Date"`
-	Code              string `json:"Code"`
-	CompanyName       string `json:"CompanyName"`
-	CompanyNameEnglish string `json:"CompanyNameEnglish"`
-	Sector17Code      string `json:"Sector17Code"`
-	// Sector17CodeName  string `json:"Sector17CodeName"`
-	Sector33Code      string `json:"Sector33Code"`
-	// Sector33CodeName  string `json:"Sector33CodeName"`
-	ScaleCategory     string `json:"ScaleCategory"`
-	MarketCode        string `json:"MarketCode"`
-	// MarketCodeName    string `json:"MarketCodeName"`
-	MarginCode        string `json:"MarginCode"`
-	// MarginCodeName    string `json:"MarginCodeName"`
-}
-
-
-// ====================================================================================
 // API関数
 // ====================================================================================
 
@@ -268,6 +248,7 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 */
 func SetIdToken() (idToken string, err error) {
 	// return "idToken_for_test ", nil
+	fmt.Printf("トークンを取得\n")
 
 	// リフレッシュトークンを取得
 	refreshToken, err := getRefreshToken()
@@ -288,13 +269,25 @@ func SetIdToken() (idToken string, err error) {
 	- 入力) idToken - SetIdToken 関数で取得したトークン
 	- 出力) stockList - 上場銘柄情報の配列
 */
-func GetStockList(idToken string) (stockList []stockInfo, err error) {
+func GetStockList(idToken string) (stockList []model.StockInfo, err error) {
+	fmt.Printf("上場銘柄一覧を取得\n")
+
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/listed/info"
 
 	// クエリパラメータ
-	type queryParamsType struct {}
-	queryParams := queryParamsType{}
+	// type queryParamsType struct {}
+	// queryParams := queryParamsType{}
+
+	// テスト用クエリパラメータ
+	type queryParamsType struct {
+		Code string `json:"code"`
+		Date string `json:"date"`
+	}
+	queryParams := queryParamsType{
+		Code: "5253",
+		Date: "2024-08-07",
+	}
 
 	// ヘッダー
 	type headersType struct {
@@ -303,11 +296,10 @@ func GetStockList(idToken string) (stockList []stockInfo, err error) {
 	headers := headersType {
 		Authorization: idToken,
 	}
-	fmt.Println(headers)
 
 	// レスポンスボディ
 	type resBodyStruct struct {
-		Info []stockInfo `json:"info"`
+		Info []model.StockInfo `json:"info"`
 	}
 	var resBody resBodyStruct
 
