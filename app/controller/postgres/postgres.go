@@ -137,15 +137,22 @@ func SaveStockList(stocks []model.StockInfo) error {
 		var sector33_code string
 		var scale_category string
 		var market_code string
-		var margin_code string
 
-		err = rows.Scan(&code, &company_name, &company_name_english, &sector17_code, &sector33_code, &scale_category, &market_code, &margin_code)
+		err = rows.Scan(&code, &company_name, &company_name_english, &sector17_code, &sector33_code, &scale_category, &market_code)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
 
-		fmt.Printf("code: %s, company_name: %s, company_name_english: %s, sector17_code: %s, sector33_code: %s, scale_category: %s, market_code: %s, margin_code: %s\n", code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code, margin_code)
+		fmt.Printf("code: %s, company_name: %s, company_name_english: %s, sector17_code: %s, sector33_code: %s, scale_category: %s, market_code: %s\n",
+			code,
+			company_name,
+			company_name_english,
+			sector17_code,
+			sector33_code,
+			scale_category,
+			market_code,
+		)
 	}
 
 

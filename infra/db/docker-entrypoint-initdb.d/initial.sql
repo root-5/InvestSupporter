@@ -27,7 +27,7 @@ CREATE TABLE stocks_info (
     market_code SMALLINT,
     FOREIGN KEY (sector17_code) REFERENCES sector17_info(sector17_code),
     FOREIGN KEY (sector33_code) REFERENCES sector33_info(sector33_code),
-    FOREIGN KEY (market_code) REFERENCES market_info(market_code),
+    FOREIGN KEY (market_code) REFERENCES market_info(market_code)
 );
 
 -- 5. 財務情報テーブル (financial_info)
