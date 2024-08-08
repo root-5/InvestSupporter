@@ -1,4 +1,28 @@
--- 1. 上場銘柄テーブル (stocks_info)
+-- 1. 17 業種情報テーブル (sector17_info)
+CREATE TABLE sector17_info (
+    sector17_code SMALLINT PRIMARY KEY,
+    sector17_name VARCHAR(50)
+);
+
+-- 2. 33 業種情報テーブル (sector33_info)
+CREATE TABLE sector33_info (
+    sector33_code SMALLINT PRIMARY KEY,
+    sector33_name VARCHAR(50)
+);
+
+-- 3. 市場区分情報テーブル (market_info)
+CREATE TABLE market_info (
+    market_code SMALLINT PRIMARY KEY,
+    market_name VARCHAR(50)
+);
+
+-- 4. 貸借信用区分情報テーブル (margin_info)
+CREATE TABLE margin_info (
+    margin_code SMALLINT PRIMARY KEY,
+    margin_name VARCHAR(50)
+);
+
+-- 5. 上場銘柄テーブル (stocks_info)
 CREATE TABLE stocks_info (
     code CHAR(5) PRIMARY KEY,
     company_name VARCHAR(50),
@@ -7,35 +31,11 @@ CREATE TABLE stocks_info (
     sector33_code SMALLINT,
     scale_category VARCHAR(50),
     market_code SMALLINT,
-    margin_code SMALLINT
+    margin_code SMALLINT,
     FOREIGN KEY (sector17_code) REFERENCES sector17_info(sector17_code),
     FOREIGN KEY (sector33_code) REFERENCES sector33_info(sector33_code),
     FOREIGN KEY (market_code) REFERENCES market_info(market_code),
     FOREIGN KEY (margin_code) REFERENCES margin_info(margin_code)
-);
-
--- 2. 17 業種情報テーブル (sector17_info)
-CREATE TABLE sector17_info (
-    sector17_code SMALLINT PRIMARY KEY,
-    sector17_name VARCHAR(50)
-);
-
--- 3. 33 業種情報テーブル (sector33_info)
-CREATE TABLE sector33_info (
-    sector33_code SMALLINT PRIMARY KEY,
-    sector33_name VARCHAR(50)
-);
-
--- 4. 市場区分情報テーブル (market_info)
-CREATE TABLE market_info (
-    market_code SMALLINT PRIMARY KEY,
-    market_name VARCHAR(50)
-);
-
--- 5. 貸借信用区分情報テーブル (margin_info)
-CREATE TABLE margin_info (
-    margin_code SMALLINT PRIMARY KEY,
-    margin_name VARCHAR(50)
 );
 
 -- 6. 財務情報テーブル (financial_info)
