@@ -13,6 +13,6 @@ type StockInfo struct {
 	ScaleCategory     string `json:"ScaleCategory"`
 	MarketCode        string `json:"MarketCode"`
 	// MarketCodeName    string `json:"MarketCodeName"`
-	MarginCode        string `json:"MarginCode"`
+	// MarginCode        string `json:"MarginCode"`  // Light プランでは取得できない
 	// MarginCodeName    string `json:"MarginCodeName"`
 }

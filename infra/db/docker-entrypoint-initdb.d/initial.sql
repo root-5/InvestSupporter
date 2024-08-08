@@ -16,13 +16,7 @@ CREATE TABLE market_info (
     market_name VARCHAR(50)
 );
 
--- 4. 貸借信用区分情報テーブル (margin_info)
-CREATE TABLE margin_info (
-    margin_code SMALLINT PRIMARY KEY,
-    margin_name VARCHAR(50)
-);
-
--- 5. 上場銘柄テーブル (stocks_info)
+-- 4. 上場銘柄テーブル (stocks_info)
 CREATE TABLE stocks_info (
     code CHAR(5) PRIMARY KEY,
     company_name VARCHAR(50),
@@ -31,14 +25,12 @@ CREATE TABLE stocks_info (
     sector33_code SMALLINT,
     scale_category VARCHAR(50),
     market_code SMALLINT,
-    margin_code SMALLINT,
     FOREIGN KEY (sector17_code) REFERENCES sector17_info(sector17_code),
     FOREIGN KEY (sector33_code) REFERENCES sector33_info(sector33_code),
     FOREIGN KEY (market_code) REFERENCES market_info(market_code),
-    FOREIGN KEY (margin_code) REFERENCES margin_info(margin_code)
 );
 
--- 6. 財務情報テーブル (financial_info)
+-- 5. 財務情報テーブル (financial_info)
 CREATE TABLE financial_info (
     code CHAR(5) PRIMARY KEY,
     disclosed_date DATE,
@@ -76,7 +68,7 @@ CREATE TABLE financial_info (
     FOREIGN KEY (code) REFERENCES stocks_info(code)
 );
 
--- 7. 株価情報テーブル (price_info)
+-- 6. 株価情報テーブル (price_info)
 CREATE TABLE price_info (
     code CHAR(5) PRIMARY KEY,
     ymd DATE,
@@ -97,4 +89,3 @@ CREATE INDEX idx_code_price_info ON price_info (code);
 COPY sector17_info FROM '/docker-entrypoint-initdb.d/sector17_info.csv' WITH (FORMAT csv, HEADER true);
 COPY sector33_info FROM '/docker-entrypoint-initdb.d/sector33_info.csv' WITH (FORMAT csv, HEADER true);
 COPY market_info FROM '/docker-entrypoint-initdb.d/market_info.csv' WITH (FORMAT csv, HEADER true);
-COPY margin_info FROM '/docker-entrypoint-initdb.d/margin_info.csv' WITH (FORMAT csv, HEADER true);

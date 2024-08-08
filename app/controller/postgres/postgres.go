@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 
 	_ "github.com/lib/pq"
 )
@@ -31,6 +32,18 @@ func InitDB() {
 	dbTest(0)
 }
 
+// デフォルト値を設定する関数
+func defaultSmallInt(value string) int {
+    if value == "" {
+        return 0 // デフォルト値を0に設定
+    }
+    // 文字列を整数に変換
+    intValue, err := strconv.Atoi(value)
+    if err != nil {
+        return 0 // 変換に失敗した場合もデフォルト値を0に設定
+    }
+    return intValue
+}
 
 func dbTest(num int) {
 	// テスト実行フラグの判定
@@ -84,7 +97,6 @@ func dbTest(num int) {
 }
 
 func SaveStockList(stocks []model.StockInfo) error {
-	fmt.Println(stocks)
 
 	// 上場銘柄テーブルへの挿入
 	for _, stock := range stocks {
@@ -92,8 +104,17 @@ func SaveStockList(stocks []model.StockInfo) error {
 		// エラーが発生中
 		// データ型が一致していないため、データの挿入に失敗している模様
 		// pq: invalid input syntax for type smallint: ""
+		// [{52530 カバー COVER Corporation 10 5250 - 0113 }]
 		// ##############################################################
-		_, err = db.Exec("INSERT INTO stocks_info (code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code, margin_code) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", stock.Code, stock.CompanyName, stock.CompanyNameEnglish, stock.Sector17Code, stock.Sector33Code, stock.ScaleCategory, stock.MarketCode, stock.MarginCode)
+		_, err = db.Exec("INSERT INTO stocks_info (code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+			stock.Code,
+			stock.CompanyName,
+			stock.CompanyNameEnglish,
+			defaultSmallInt(stock.Sector17Code),
+			defaultSmallInt(stock.Sector33Code),
+			stock.ScaleCategory,
+			defaultSmallInt(stock.MarketCode),
+		)
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -126,6 +147,7 @@ func SaveStockList(stocks []model.StockInfo) error {
 
 		fmt.Printf("code: %s, company_name: %s, company_name_english: %s, sector17_code: %s, sector33_code: %s, scale_category: %s, market_code: %s, margin_code: %s\n", code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code, margin_code)
 	}
+
 
 	return nil
 }
