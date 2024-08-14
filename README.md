@@ -5,7 +5,7 @@
 今回の環境構築には Docker を使用して、基本的に開発もその中で行う形をとった。
 また、Air を使用したコード改変時ホットリロードと、Godoc でのドキュメント生成を行っている。
 
-Air によって出力されるログなどは Docker Decktop の各コンテナの「Logs」項目から閲覧するか、`docker compose logs app -f`
+Air によって出力されるログなどは Docker Decktop の各コンテナの「Logs」項目から閲覧できる。
 
 ### 構築手順
 
@@ -15,7 +15,9 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
     2. compose.yaml, app.local.dockerfile は参考リンクなどをもとに作成
 
 ### コマンド
+
 **基本用途**
+
 -   `docker compose up -d` : コンテナを立ち上げる
 -   `docker compose down` : コンテナを停止する
 -   `docker compose exec app sh` : app コンテナに入る
@@ -24,17 +26,20 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
     -   `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
 
 **作業用**
--   `go mod tidy` : go.mod に記載されているパッケージを整理する（.goファイルで使われていないパッケージの削除）
+
+-   `go mod tidy` : go.mod に記載されているパッケージを整理する（.go ファイルで使われていないパッケージの削除）
 
 ## ドキュメント
+
 [Godoc](http://localhost:8080/)
 
 Godoc を採用しているので、 Docker Compose でコンテナを起動していれば、上記のリンクからドキュメントを確認できる。ただし、記載されている関数や変数は大文字から始まるもの（プライベートでないもの）のみが表示される。
 
 ## 利用ツール
-- GitHub
-- Docker
-- TablePlus
+
+-   [GitHub](https://github.com/root-5/InvestSupporter)
+-   Docker
+-   TablePlus
 
 ## 参考リンク集
 
