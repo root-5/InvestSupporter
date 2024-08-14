@@ -32,4 +32,16 @@ func main() {
 
 	// 取得した上場銘柄を DB に保存
 	err = postgres.SaveStockList(stocks)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// 上場銘柄を取得
+	stocks, err = postgres.GetStockList()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%+v\n", stocks)
 }
