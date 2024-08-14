@@ -14,7 +14,7 @@ import (
 var db *sql.DB
 var err error
 
-/* DB の初期化 */
+/* DB の初期化をする関数 */
 func InitDB() {
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
