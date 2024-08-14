@@ -27,8 +27,14 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 -   `go mod tidy` : go.mod に記載されているパッケージを整理する（.goファイルで使われていないパッケージの削除）
 
 ## ドキュメント
+[Godoc](http://localhost:8080/)
 
-Godoc を採用しているので、 Docker Compose でコンテナを起動していれば、 [Godoc](https://localhost:8080/) にて、ドキュメントを確認できる。
+Godoc を採用しているので、 Docker Compose でコンテナを起動していれば、上記のリンクからドキュメントを確認できる。ただし、記載されている関数や変数は大文字から始まるもの（プライベートでないもの）のみが表示される。
+
+## 利用ツール
+- GitHub
+- Docker
+- TablePlus
 
 ## 参考リンク集
 

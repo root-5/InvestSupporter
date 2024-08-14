@@ -1,3 +1,4 @@
+// PostgreSQL を利用するための関数をまとめたパッケージ
 package postgres
 
 import (

@@ -1,4 +1,4 @@
-// JQuants APIを利用するための関数をまとめたパッケージ
+// JQuants API を利用するための関数をまとめたパッケージ
 package jquants
 
 import (
@@ -17,7 +17,7 @@ import (
 )
 
 // ====================================================================================
-// 基本モジュール
+// 基本関数
 // ====================================================================================
 
 // HTTPクライアント
@@ -147,8 +147,11 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	return nil
 }
 
-// デフォルト値を設定する関数
-func defaultSmallInt(value string) int {
+/* string 型の数値を int 型に変換する関数
+	- value		変換する文字列
+	> intValue	変換後の整数
+*/
+func convertStringToInt(value string) (intValue int) {
     if value == "" {
         return 0 // デフォルト値を0に設定
     }
@@ -329,10 +332,10 @@ func GetStockList(idToken string) (stocksList []model.StocksInfo, err error) {
 			Code:              stock.Code,
 			CompanyName:       stock.CompanyName,
 			CompanyNameEnglish: stock.CompanyNameEnglish,
-			Sector17Code:      defaultSmallInt(stock.Sector17Code),
-			Sector33Code:      defaultSmallInt(stock.Sector33Code),
+			Sector17Code:      convertStringToInt(stock.Sector17Code),
+			Sector33Code:      convertStringToInt(stock.Sector33Code),
 			ScaleCategory:     stock.ScaleCategory,
-			MarketCode:        defaultSmallInt(stock.MarketCode),
+			MarketCode:        convertStringToInt(stock.MarketCode),
 		})
 	}
 
