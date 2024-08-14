@@ -3,6 +3,7 @@ package jquants
 
 import (
 	model "app/domain/model"
+	"strconv"
 
 	"bytes"
 	"encoding/json"
@@ -146,6 +147,19 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	return nil
 }
 
+// デフォルト値を設定する関数
+func defaultSmallInt(value string) int {
+    if value == "" {
+        return 0 // デフォルト値を0に設定
+    }
+    // 文字列を整数に変換
+    intValue, err := strconv.Atoi(value)
+    if err != nil {
+        return 0 // 変換に失敗した場合もデフォルト値を0に設定
+    }
+    return intValue
+}
+
 // ====================================================================================
 // API関数
 // ====================================================================================
@@ -166,7 +180,7 @@ func getRefreshToken() (refreshToken string, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/token/auth_user"
 
-	// クエリパラメータ
+	// クエリパラメータ定義
 	type queryParamsType struct {}
 	queryParams := queryParamsType{}
 
@@ -180,7 +194,7 @@ func getRefreshToken() (refreshToken string, err error) {
 		Password:    pass,
 	}
 
-	// レスポンスボディ
+	// レスポンスボディ定義
 	type resBodyType struct {
 		RefreshToken string `json:"refreshToken"`
 	}
@@ -210,7 +224,7 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/token/auth_refresh"
 
-	// クエリパラメータ
+	// クエリパラメータ定義
 	type queryParamsType struct {
 		RefreshToken string
 	}
@@ -222,7 +236,7 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	type reqBodyType struct {}
 	reqBody := reqBodyType{}
 
-	// レスポンスボディ
+	// レスポンスボディ定義
 	type resBodyStruct struct {
 		IdToken string `json:"idToken"`
 	}
@@ -275,11 +289,11 @@ func GetStockList(idToken string) (stockList []model.StockInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/listed/info"
 
-	// クエリパラメータ
+	// クエリパラメータ定義
 	// type queryParamsType struct {}
 	// queryParams := queryParamsType{}
 
-	// テスト用クエリパラメータ
+	// テスト用クエリパラメータ定義
 	type queryParamsType struct {
 		Code string `json:"code"`
 		Date string `json:"date"`
@@ -289,7 +303,7 @@ func GetStockList(idToken string) (stockList []model.StockInfo, err error) {
 		Date: "2024-08-07",
 	}
 
-	// ヘッダー
+	// ヘッダー定義
 	type headersType struct {
 		Authorization string `json:"Authorization"`
 	}
@@ -297,9 +311,9 @@ func GetStockList(idToken string) (stockList []model.StockInfo, err error) {
 		Authorization: idToken,
 	}
 
-	// レスポンスボディ
+	// レスポンスボディ定義
 	type resBodyStruct struct {
-		Info []model.StockInfo `json:"info"`
+		Info []jquantsStockInfo `json:"info"`
 	}
 	var resBody resBodyStruct
 
@@ -309,8 +323,18 @@ func GetStockList(idToken string) (stockList []model.StockInfo, err error) {
 		return nil, fmt.Errorf("post Error: %v", err)
 	}
 
-	// 上場銘柄一覧を取得
-	stockList = resBody.Info
+	// 型変換（jquantsStockInfo 型の配列から model.StockInfo 型の配列に変換）
+	for _, stock := range resBody.Info {
+		stockList = append(stockList, model.StockInfo{
+			Code:              stock.Code,
+			CompanyName:       stock.CompanyName,
+			CompanyNameEnglish: stock.CompanyNameEnglish,
+			Sector17Code:      defaultSmallInt(stock.Sector17Code),
+			Sector33Code:      defaultSmallInt(stock.Sector33Code),
+			ScaleCategory:     stock.ScaleCategory,
+			MarketCode:        defaultSmallInt(stock.MarketCode),
+		})
+	}
 
 	return stockList, nil
 }
