@@ -1,7 +1,7 @@
 package model
 
 // 上場銘柄一覧
-type StockInfo struct {
+type StocksInfo struct {
 	Code              string `json:"Code"`
 	CompanyName       string `json:"CompanyName"`
 	CompanyNameEnglish string `json:"CompanyNameEnglish"`
