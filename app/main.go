@@ -16,15 +16,8 @@ func main() {
 	// DB の初期化
 	postgres.InitDB()
 
-	// ID トークンをセット
-	idToken, err := jquants.SetIdToken()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 	// 上場銘柄一覧を取得
-	stocks, err := jquants.GetStockList(idToken)
+	stocks, err := jquants.GetStockList()
 	if err != nil {
 		fmt.Println(err)
 		return

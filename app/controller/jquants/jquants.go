@@ -173,7 +173,7 @@ func convertStringToInt(value string) (intValue int) {
 	> refreshToken	リフレッシュトークン
 	> err			エラー
 */
-func getRefreshToken() (refreshToken string, err error) {
+func getRefreshToken(email string, pass string) (refreshToken string, err error) {
 	// 環境変数からリフレッシュトークンと前回取得時刻を取得
 	refreshToken = os.Getenv("JQUANTS_REFRESH_TOKEN")
 	refreshTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_REFRESH_TOKEN_TIME"))
@@ -182,10 +182,6 @@ func getRefreshToken() (refreshToken string, err error) {
 	if refreshToken != "" && time.Since(refreshTokenTime) < 7*24*time.Hour {
 		return refreshToken, nil
 	}
-
-	// 環境変数からメールアドレスとパスワードを取得
-	email := os.Getenv("JQUANTS_EMAIL")
-	pass := os.Getenv("JQUANTS_PASS")
 
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/token/auth_user"
@@ -278,17 +274,16 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	return idToken, nil
 }
 
-/* メールアドレスとパスワードを入力して、ID トークン（期限: 24時間）を取得する関数
-	- email		JQuant に登録したメールアドレス
-	- pass		JQuant に登録したパスワード
+/* ID トークン（期限: 24時間）を取得する関数
 	> idToken	ID トークン
-	> err		エラー
 */
-func SetIdToken() (idToken string, err error) {
-	fmt.Printf("トークンを取得\n")
+func setIdToken() (idToken string, err error) {
+	// 環境変数からメールアドレスとパスワードを取得
+	email := os.Getenv("JQUANTS_EMAIL")
+	pass := os.Getenv("JQUANTS_PASS")
 
 	// リフレッシュトークンを取得
-	refreshToken, err := getRefreshToken()
+	refreshToken, err := getRefreshToken(email, pass)
 	if err != nil {
 		return "", fmt.Errorf("getRefreshToken Error: %v", err)
 	}
@@ -303,11 +298,14 @@ func SetIdToken() (idToken string, err error) {
 }
 
 /* 上場銘柄一覧を取得する関数
-	- idToken	SetIdToken 関数で取得したトークン
 	> stocksList	上場銘柄情報の配列
 */
-func GetStockList(idToken string) (stocksList []model.StocksInfo, err error) {
-	fmt.Printf("上場銘柄一覧を取得\n")
+func GetStockList() (stocksList []model.StocksInfo, err error) {
+	// ID トークンを取得
+	idToken, err := setIdToken()
+	if err != nil {
+		return nil, fmt.Errorf("setIdToken Error: %v", err)
+	}
 
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/listed/info"
