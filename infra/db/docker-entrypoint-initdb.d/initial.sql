@@ -19,11 +19,11 @@ CREATE TABLE market_info (
 -- 4. 上場銘柄テーブル (stocks_info)
 CREATE TABLE stocks_info (
     code CHAR(5) PRIMARY KEY,
-    company_name VARCHAR(50),
-    company_name_english VARCHAR(100),
+    company_name VARCHAR(100),
+    company_name_english VARCHAR(200),
     sector17_code SMALLINT,
     sector33_code SMALLINT,
-    scale_category VARCHAR(50),
+    scale_category VARCHAR(100),
     market_code SMALLINT,
     FOREIGN KEY (sector17_code) REFERENCES sector17_info(sector17_code),
     FOREIGN KEY (sector33_code) REFERENCES sector33_info(sector33_code),
