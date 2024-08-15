@@ -3,8 +3,6 @@ package jquants
 
 import (
 	model "app/domain/model"
-	"strconv"
-
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -13,7 +11,9 @@ import (
 	"net/url"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // ====================================================================================
@@ -174,8 +174,15 @@ func convertStringToInt(value string) (intValue int) {
 	> err			エラー
 */
 func getRefreshToken() (refreshToken string, err error) {
-	// return "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.lEvoH4XOE-grkUGtMLDwvuhiDtkIHEG4k2COyW9UtTqcxjeRKRVNmJqQZ2jb0WqNXcmUcEwAV6T6katBLZseg8Z2IkE0_-J2_BW1NRRYl_PbuXSH42SbuQgzTAtduLnMSliK17kGBSyvG_e0cd6GoivG0NRpmry9GUHgdYqvq_i0VYr2noWai1JOB3Is0_O2cJHPrSV3CdjH22X7u07qZWAQJekj1KioUAAQJb0Igu0I0-HiY2fO9cM-5tkobIJCdNy9zY-1iFKD3MtaXoCXqyXn6wpa-ao3ErfKBIwqV_b2OmuoiVbpT5Ab3fawcmq4bLcOMihOZJZ-oMVClmEriA.UrkYH_mZjHiBRE37.4uhGdOjUFDAahYCoD2XLf5JNuNZz7sLCMVMYOIGC4WJn5Eu88Pw7QP7tboeeqoKXv4FUoQ5Tve1mdvD3OwWfe8hlb0kXYYjqxaVSFlVPF2w0JJzHToiWRNBoRmzaNJe1ImJ3p8dVFrN7d7w5kyDxfKFTdnxvuYLZJMqmYdMUMn8M4ALKU-MTP9BxdA42qiCiomxAVLbX2zhM7VNC1Y_sXWnnSG9Lw9pUkWEoLV0ccJLyraRIa5oUSQ9WIuf-kuVb3Bu6KfwPFnl4lcEyaDoXObXd9b2xzTxmNm-CjAwHxFX5S577xaXR2oDEoQjpZjFFvjIM1ISBLFCVvx7zT6aB1Olpt-OnqaR2kumOy5jb7126R79TgdIsdyMbpNIDHxBtTXFhsFaI2bp5i9Uko3hC_TZdofyxmreYChHYPcCO1PO-j_857JnH5W_qExm3_HqQl5Io9ZmUaNW5UDfbzeCN2hp3-FAQ3fU41-kp1Vt1manP0-JAUagtDUtKc76j2S94JbZiSZiWEVKVI_cUZlfeePvok4R5g4qJslXSpql5vA27Hz_LoD8LOf1J_CvnylLDWStrOgth0QBz3mWJeH2G9n1Qww-SOd8bsKPtBXtqGroO5LfE9nTNPr1QFGDryNEjR653d1Sq-76N4oaRIZ9pv-JlclY0_0hNH6NkVgpZcWDEt4BL8wkEaZNJJSBuCHC6tX6W87_Ece6rkq9XYT-HQajNEF_eSePlAhw6RmjIGpUDdlf4UtOQNCnrqNfokca21zS6uM-2SGq0I-nQFtO-rkmjVEgXE8oXszNHG3P63yvPbof1YGK7Qz0cI27FSNUnIR42NpX0ft6U-KZoO96uJmf49zhS_dRUgv_8y7jaa-9zmwhCg-mC9ZLnn6FFWS4ONNKGCCdTNDhy1VEpDI7okX37Q56j61pebe6rhuLFDHeEUpEOBOwH8JhmwP7niTa6xbFm7HjooTnRlhY0SltMoulFAydgzCQNCIwKtsOMGqqqu7EJTMIxmeXQb8z4AGO-VD9vM9o3OUzN-ohnO2VTa3n_pAJOQf6x4kiDPfyyvTCUhRY3GL4ML-nwyntNVrC1wlHB1MiQoQjdrKCHA6Ppy2B07wYA4e9jqaPNZYXiiBh9q6XB1jojc9OPuHZJvKV64TQPIP9RRDt8GMYDv0jC2Wz7jKTbp_boim9DQTIgRaFsa3miSjYL6ikQOMW_Viq9Nm0WI32t2mTOQQ2gREhdWNLuks6YaXoaNI17_NYjp6Bl4NpaDD_-GOdeJiXtKgF64ZCAJJadGolkN5aQPsfT4oMsRLUwCX4S6f9b-dR0jH4ppTqz95XxT94uU2hN8E48GhelP4YIZlRqrw.WyO9VqhsLA4Og65fcm2VhA", nil
-	// return "dummy_refreshtoken", nil
+	// 環境変数からリフレッシュトークンと前回取得時刻を取得
+	refreshToken = os.Getenv("JQUANTS_REFRESH_TOKEN")
+	refreshTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_REFRESH_TOKEN_TIME"))
+
+	// リフレッシュトークンが存在し、取得時刻から1週間以内の場合はリフレッシュトークンを返す
+	if refreshToken != "" && time.Since(refreshTokenTime) < 7*24*time.Hour {
+		return refreshToken, nil
+	}
+
 	// 環境変数からメールアドレスとパスワードを取得
 	email := os.Getenv("JQUANTS_EMAIL")
 	pass := os.Getenv("JQUANTS_PASS")
@@ -209,8 +216,12 @@ func getRefreshToken() (refreshToken string, err error) {
 		return "", fmt.Errorf("post Error: %v", err)
 	}
 
-	// トークンを取得
+	// リフレッシュトークンを取得
 	refreshToken = resBody.RefreshToken
+
+	// リフレッシュトークンと現在時刻を環境変数に保存
+	os.Setenv("JQUANTS_REFRESH_TOKEN", refreshToken)
+	os.Setenv("JQUANTS_REFRESH_TOKEN_TIME", time.Now().Format(time.RFC3339))
 
 	return refreshToken, nil
 }
@@ -221,8 +232,14 @@ func getRefreshToken() (refreshToken string, err error) {
 	> err			エラー
 */
 func getIdToken(refreshToken string) (idToken string, err error) {
-	// return "eyJraWQiOiJHQXNvU2xxUzMyUktLT2lVYm1xcjU3ekdYNE1TVFhsWFBrbDNJTmhWKzNzPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI3ZWVjNGQ3Ni03NzhmLTQ1NzAtOGY2Ni0zNjRkZjc0MWZkNmIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLW5vcnRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLW5vcnRoZWFzdC0xX0FGNjByeXJ2NCIsImNvZ25pdG86dXNlcm5hbWUiOiI3ZWVjNGQ3Ni03NzhmLTQ1NzAtOGY2Ni0zNjRkZjc0MWZkNmIiLCJvcmlnaW5fanRpIjoiNWRlZTcxODgtYzhhNy00Njk3LWJiZGMtN2VmYmFkNTAwYTVmIiwiYXVkIjoiNXZyN2xiOGppdThvZmhvZmJmYWxmbm1waWkiLCJldmVudF9pZCI6Ijk4Njk1MWM2LTQxNGQtNDIzNy04Nzk4LWZmY2EwZjE0ODJiYiIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzE4NTQwNTM4LCJleHAiOjE3MTg2MjY5NzMsImlhdCI6MTcxODU0MDU3MywianRpIjoiODI2ZTQ2ZGItYTRmZC00Y2M0LTkzNjUtMjdkZTNmNDhiMTA1IiwiZW1haWwiOiJ3YXRlci52aWxsYWdlLnJpZ2h0Lm5lYXJAZ21haWwuY29tIn0.Wv00zXyDqhGetvei6Uet38bxIM87RgyTZTUeh7chgTHuya1FgfWeF-QUdIO6CjiKz87TZdTPC7hhzD6VcJMzRMUv3J7cf6RYcBSiEd1siLJEhtd06qzdROwLOURJSclFKO9HQo0RhU_YmUUj-sWyFJVbtrvYesqQN2jR0dDcQYJs3ITiS3QDl9sQfZvKAXVPJOTU_rm-mCYBpdL1iJAxRNCO2dwqqMTx9rDyplf383ndV4WaUwB9dJefj-LRJdn_r052muQQ68PJfispvOgkqr9GGHtilgcZnXBSN2vn2L0EowqE7cRWHf4DPXM8PAm3WL2E8BiuvNKD_3XZNoFOEA", nil
-	// return "dummy_idtoken", nil
+	// 環境変数から ID トークンと前回取得時刻を取得
+	idToken = os.Getenv("JQUANTS_ID_TOKEN")
+	idTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_ID_TOKEN_TIME"))
+
+	// ID トークンが存在し、取得時刻から24時間以内の場合は ID トークンを返す
+	if idToken != "" && time.Since(idTokenTime) < 24*time.Hour {
+		return idToken, nil
+	}
 
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/token/auth_refresh"
@@ -251,8 +268,12 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 		return "", fmt.Errorf("post Error: %v", err)
 	}
 
-	// トークンを取得
+	// IDトークンを取得
 	idToken = resBody.IdToken
+
+	// IDトークンと現在時刻を環境変数に保存
+	os.Setenv("JQUANTS_ID_TOKEN", idToken)
+	os.Setenv("JQUANTS_ID_TOKEN_TIME", time.Now().Format(time.RFC3339))
 
 	return idToken, nil
 }
@@ -264,7 +285,6 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	> err		エラー
 */
 func SetIdToken() (idToken string, err error) {
-	// return "idToken_for_test ", nil
 	fmt.Printf("トークンを取得\n")
 
 	// リフレッシュトークンを取得
@@ -293,18 +313,8 @@ func GetStockList(idToken string) (stocksList []model.StocksInfo, err error) {
 	url := "https://api.jquants.com/v1/listed/info"
 
 	// クエリパラメータ定義
-	// type queryParamsType struct {}
-	// queryParams := queryParamsType{}
-
-	// テスト用クエリパラメータ定義
-	type queryParamsType struct {
-		Code string `json:"code"`
-		Date string `json:"date"`
-	}
-	queryParams := queryParamsType{
-		Code: "5253",
-		Date: "2024-08-07",
-	}
+	type queryParamsType struct {}
+	queryParams := queryParamsType{}
 
 	// ヘッダー定義
 	type headersType struct {
