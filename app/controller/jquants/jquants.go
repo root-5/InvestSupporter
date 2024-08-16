@@ -16,7 +16,7 @@ import (
 > refreshToken	リフレッシュトークン
 > err			エラー
 */
-func GetRefreshToken() (refreshToken string, err error) {
+func getRefreshToken() (refreshToken string, err error) {
 	// 環境変数からメールアドレスとパスワードを取得
 	email := os.Getenv("JQUANTS_EMAIL")
 	pass := os.Getenv("JQUANTS_PASS")
@@ -75,7 +75,7 @@ func GetRefreshToken() (refreshToken string, err error) {
 	> idToken		ID トークン
 	> err			エラー
 */
-func GetIdToken(refreshToken string) (err error) {
+func getIdToken(refreshToken string) (err error) {
 	// 環境変数から ID トークンと前回取得時刻を取得
 	idToken = os.Getenv("JQUANTS_ID_TOKEN")
 	idTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_ID_TOKEN_TIME"))
@@ -119,6 +119,25 @@ func GetIdToken(refreshToken string) (err error) {
 	// IDトークンと現在時刻を環境変数に保存
 	os.Setenv("JQUANTS_ID_TOKEN", idToken)
 	os.Setenv("JQUANTS_ID_TOKEN_TIME", time.Now().Format(time.RFC3339))
+
+	return nil
+}
+
+/* リフレッシュトークンを取得した上でIDトークンを取得する関数
+	> err	エラー
+*/
+func setIdToken() (err error) {
+	// リフレッシュトークンを取得
+	refreshToken, err := getRefreshToken()
+	if err != nil {
+		return err
+	}
+
+	// ID トークンを取得
+	err = getIdToken(refreshToken)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

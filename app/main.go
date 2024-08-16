@@ -9,9 +9,9 @@ import (
 func main() {
 	fmt.Println("")
 
-	// DB の初期化
-	usercase.InitDB()
+	// 各コントローラーの初期化
+	usercase.Init()
 
 	// 定期実行を開始
-	scheduler.SchedulerStart()
+	defer scheduler.SchedulerStart()
 }

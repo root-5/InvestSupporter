@@ -7,37 +7,16 @@ import (
 	"fmt"
 )
 
-/* DB の初期化を行う関数 */
-func InitDB() (err error) {
-	fmt.Println(">> InitDB")
+// 各コントローラーの初期化関数を呼び出す関数
+func Init() {
+	// DB の初期化
+	postgres.Init()
 
-	err = postgres.InitDB()
-
-	return err
+	// Jquants の初期化
+	jquants.Init()
 }
 
-/* リフレッシュトークンを取得した上でIDトークンを取得する関数
-	> err	エラー
-*/
-func SetIdToken() (err error) {
-	fmt.Println(">> SetIdToken")
-
-	// リフレッシュトークンを取得
-	refreshToken, err := jquants.GetRefreshToken()
-	if err != nil {
-		return err
-	}
-
-	// ID トークンを取得
-	err = jquants.GetIdToken(refreshToken)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-/* Jquants API から上場銘柄一覧を取得し、DB に保存する関数 */
+// Jquants API から上場銘柄一覧を取得し、DB に保存する関数
 func GetAndUpdateStocksInfo() (err error) {
 	fmt.Println(">> GetAndUpdateStocksInfo")
 

@@ -13,7 +13,14 @@ import (
 // 型定義
 var db *sql.DB
 
-/* DB の初期化をする関数 */
+// 初期化関数
+func Init() {
+	InitDB()
+}
+
+/* DB の初期化をする関数
+	> err	エラー
+*/
 func InitDB() (err error) {
 	// 環境変数から接続情報を取得
 	host := os.Getenv("POSTGRES_HOST")
