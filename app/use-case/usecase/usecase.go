@@ -9,7 +9,8 @@ import (
 
 /* DB の初期化を行う関数 */
 func InitDB() (err error) {
-	fmt.Println("InitDB")
+	fmt.Println(">> InitDB")
+
 	err = postgres.InitDB()
 
 	return err
@@ -19,6 +20,8 @@ func InitDB() (err error) {
 	> err	エラー
 */
 func SetIdToken() (err error) {
+	fmt.Println(">> SetIdToken")
+
 	// リフレッシュトークンを取得
 	refreshToken, err := jquants.GetRefreshToken()
 	if err != nil {
@@ -36,7 +39,8 @@ func SetIdToken() (err error) {
 
 /* Jquants API から上場銘柄一覧を取得し、DB に保存する関数 */
 func GetAndUpdateStocksInfo() (err error) {
-	fmt.Println("GetAndUpdateStocksInfo")
+	fmt.Println(">> GetAndUpdateStocksInfo")
+
 	// 上場銘柄一覧を取得
 	stocks, err := jquants.GetStocksInfo()
 	if err != nil {

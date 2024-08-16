@@ -2,6 +2,7 @@
 package jquants
 
 import (
+	log "app/controller/log"
 	model "app/domain/model"
 	"bytes"
 	"encoding/json"
@@ -19,6 +20,9 @@ import (
 // ====================================================================================
 // 基本関数
 // ====================================================================================
+
+// IDトークン
+var idToken string
 
 // HTTPクライアント
 var httpClient = &http.Client{}
@@ -45,7 +49,8 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 	// GETリクエスト作成
 	req, err := http.NewRequest("GET", reqUrl, nil)
 	if err != nil {
-		return fmt.Errorf("http.NewRequest Error: %v", err)
+		log.Error(err)
+		return err
 	}
 
 	// ヘッダー設定
@@ -61,24 +66,22 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 	// リクエスト送信
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("httpClient.Do Error: %v", err)
+		log.Error(err)
+		return err
 	}
 	defer resp.Body.Close()
-
-	// ステータスコードを確認
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("StatusCode Error: %v", resp.StatusCode)
-	}
 
 	// レスポンスボディを読み込み
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("io.ReadAll Error: %v", err)
+		log.Error(err)
+		return err
 	}
 
 	// レスポンスボディを構造体に変換
 	if err := json.Unmarshal(body, resBody); err != nil {
-		return fmt.Errorf("json.Unmarshal Error: %v", err)
+		log.Error(err)
+		return err
 	}
 
 	return nil
@@ -108,14 +111,16 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	if reqBody != struct{}{} {
 		reqBodyJson, err = json.Marshal(reqBody)
 		if err != nil {
-			return fmt.Errorf("json.Marshal Error: %v", err)
+			log.Error(err)
+			return err
 		}
 	}
 
 	// POSTリクエスト作成
 	req, err := http.NewRequest("POST", reqUrl, bytes.NewBuffer(reqBodyJson))
 	if err != nil {
-		return fmt.Errorf("http.NewRequest Error: %v", err)
+		log.Error(err)
+		return err
 	}
 
 	// ヘッダー設定
@@ -124,24 +129,22 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	// リクエスト送信
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("httpClient.Do Error: %v", err)
+		log.Error(err)
+		return err
 	}
 	defer resp.Body.Close()
-
-	// ステータスコードを確認
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("StatusCode Error: %v", resp.StatusCode)
-	}
 
 	// レスポンスボディを読み込み
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("io.ReadAll Error: %v", err)
+		log.Error(err)
+		return err
 	}
 
 	// レスポンスボディを構造体に変換
 	if err := json.Unmarshal(body, resBody); err != nil {
-		return fmt.Errorf("json.Unmarshal Error: %v", err)
+		log.Error(err)
+		return err
 	}
 
 	return nil
@@ -168,12 +171,14 @@ func convertStringToInt(value string) (intValue int) {
 // ====================================================================================
 
 /* JQuants に登録したメールアドレスとパスワードを入力して、リフレッシュトークン（期限: 1週間）を取得する関数
-	- email			JQuant に登録したメールアドレス
-	- pass			JQuant に登録したパスワード
 	> refreshToken	リフレッシュトークン
 	> err			エラー
 */
-func getRefreshToken(email string, pass string) (refreshToken string, err error) {
+func GetRefreshToken() (refreshToken string, err error) {
+	// 環境変数からメールアドレスとパスワードを取得
+	email := os.Getenv("JQUANTS_EMAIL")
+	pass := os.Getenv("JQUANTS_PASS")
+
 	// 環境変数からリフレッシュトークンと前回取得時刻を取得
 	refreshToken = os.Getenv("JQUANTS_REFRESH_TOKEN")
 	refreshTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_REFRESH_TOKEN_TIME"))
@@ -209,7 +214,8 @@ func getRefreshToken(email string, pass string) (refreshToken string, err error)
 	// POSTリクエスト
 	err = post(url, queryParams, reqBody, &resBody)
 	if err != nil {
-		return "", fmt.Errorf("post Error: %v", err)
+		log.Error(err)
+		return "", err
 	}
 
 	// リフレッシュトークンを取得
@@ -227,14 +233,14 @@ func getRefreshToken(email string, pass string) (refreshToken string, err error)
 	> idToken		ID トークン
 	> err			エラー
 */
-func getIdToken(refreshToken string) (idToken string, err error) {
+func GetIdToken(refreshToken string) (err error) {
 	// 環境変数から ID トークンと前回取得時刻を取得
 	idToken = os.Getenv("JQUANTS_ID_TOKEN")
 	idTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_ID_TOKEN_TIME"))
 
 	// ID トークンが存在し、取得時刻から24時間以内の場合は ID トークンを返す
 	if idToken != "" && time.Since(idTokenTime) < 24*time.Hour {
-		return idToken, nil
+		return nil
 	}
 
 	// リクエスト先URL
@@ -261,7 +267,8 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	// POSTリクエスト
 	err = post(url, queryParam, reqBody, &resBody)
 	if err != nil {
-		return "", fmt.Errorf("post Error: %v", err)
+		log.Error(err)
+		return err
 	}
 
 	// IDトークンを取得
@@ -271,42 +278,13 @@ func getIdToken(refreshToken string) (idToken string, err error) {
 	os.Setenv("JQUANTS_ID_TOKEN", idToken)
 	os.Setenv("JQUANTS_ID_TOKEN_TIME", time.Now().Format(time.RFC3339))
 
-	return idToken, nil
-}
-
-/* ID トークン（期限: 24時間）を取得する関数
-	> idToken	ID トークン
-*/
-func setIdToken() (idToken string, err error) {
-	// 環境変数からメールアドレスとパスワードを取得
-	email := os.Getenv("JQUANTS_EMAIL")
-	pass := os.Getenv("JQUANTS_PASS")
-
-	// リフレッシュトークンを取得
-	refreshToken, err := getRefreshToken(email, pass)
-	if err != nil {
-		return "", fmt.Errorf("getRefreshToken Error: %v", err)
-	}
-
-	// ID トークンを取得
-	idToken, err = getIdToken(refreshToken)
-	if err != nil {
-		return "", fmt.Errorf("getIdToken Error: %v", err)
-	}
-
-	return idToken, nil
+	return nil
 }
 
 /* 上場銘柄一覧を取得する関数
 	> stocksList	上場銘柄情報の配列
 */
-func GetStockList() (stocksList []model.StocksInfo, err error) {
-	// ID トークンを取得
-	idToken, err := setIdToken()
-	if err != nil {
-		return nil, fmt.Errorf("setIdToken Error: %v", err)
-	}
-
+func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/listed/info"
 
@@ -331,7 +309,8 @@ func GetStockList() (stocksList []model.StocksInfo, err error) {
 	// GETリクエスト
 	err = get(url, queryParams, headers, &resBody)
 	if err != nil {
-		return nil, fmt.Errorf("post Error: %v", err)
+		log.Error(err)
+		return nil, err
 	}
 
 	// 型変換（jquantsStockInfo 型の配列から model.StockInfo 型の配列に変換）

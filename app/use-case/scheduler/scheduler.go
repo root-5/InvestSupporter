@@ -33,8 +33,7 @@ var jobs = Jobs{
 }
 
 // 定期実行を行う関数
-func Run(jobs Jobs) {
-	fmt.Println("Run Start")
+func schedulerExec(jobs Jobs) {
 	var wg sync.WaitGroup
 	for _, job := range jobs {
 		// Jobs を確実に上から実行するために1秒待機
@@ -44,17 +43,16 @@ func Run(jobs Jobs) {
 			wg.Add(1)
 			go func(job Job) {
 				defer wg.Done()
-				fmt.Println(job.Name)
 				job.Function()
 				time.Sleep(job.Duration)
 			}(job)
 		}
 	}
 	wg.Wait()
-	fmt.Println("Run Finish")
 }
 
 // 定期実行を開始する関数
-func Start() {
-	Run(jobs)
+func SchedulerStart() {
+	fmt.Println(">> SchedulerStart")
+	schedulerExec(jobs)
 }
