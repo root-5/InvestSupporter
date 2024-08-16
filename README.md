@@ -18,10 +18,12 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 **基本用途**
 
--   `docker compose up -d` : コンテナを立ち上げる
--   `docker compose down` : コンテナを停止する
+-   `docker compose up -d` : 全てのコンテナを立ち上げる
+-   `docker compose down` : 全てのコンテナを停止する
 -   `docker compose exec app sh` : app コンテナに入る
 -   `docker compose logs app -f` : app コンテナのログを表示する
+-   `docker compose rm -fsv app` : app コンテナを削除する
+-   `docker compose up -d app` : app コンテナを再起動する
 -   `docker compose exec db sh` : db コンテナに入る
     -   `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
 
