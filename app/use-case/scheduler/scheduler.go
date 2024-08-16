@@ -2,7 +2,6 @@
 package scheduler
 
 import (
-	usecase "app/use-case/usecase"
 	"fmt"
 	"sync"
 	"time"
@@ -16,21 +15,6 @@ type Job struct {
 	ExecuteFlag bool
 }
 type Jobs []Job
-
-var jobs = Jobs{
-	{
-		Name: "SetIdToken",
-		Duration: 24 * time.Hour,
-		Function: usecase.SetIdToken,
-		ExecuteFlag: true,
-	},
-	{
-		Name: "GetAndUpdateStocksInfo",
-		Duration: 30 * 24 * time.Hour,
-		Function: usecase.GetAndUpdateStocksInfo,
-		ExecuteFlag: true,
-	},
-}
 
 // 定期実行を行う関数
 func schedulerExec(jobs Jobs) {
