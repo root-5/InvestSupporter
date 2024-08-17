@@ -1,7 +1,7 @@
 package scheduler
 
 import (
-	usecase "app/use-case/usecase"
+	usecase "app/usecase/usecase"
 	"time"
 )
 

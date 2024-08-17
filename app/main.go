@@ -1,8 +1,8 @@
 package main
 
 import (
-	scheduler "app/use-case/scheduler"
-	usercase "app/use-case/usecase"
+	scheduler "app/usecase/scheduler"
+	usercase "app/usecase/usecase"
 	"fmt"
 )
 
