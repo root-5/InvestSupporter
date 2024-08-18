@@ -78,6 +78,12 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 		return err
 	}
 
+	// ステータスコードが200以外の場合はエラー
+	if resp.StatusCode != 200 {
+		log.Error(fmt.Errorf("status Code: %d", resp.StatusCode))
+		return fmt.Errorf("status Code: %d", resp.StatusCode)
+	}
+
 	// レスポンスボディを構造体に変換
 	if err := json.Unmarshal(body, resBody); err != nil {
 		log.Error(err)
@@ -139,6 +145,12 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	if err != nil {
 		log.Error(err)
 		return err
+	}
+
+	// ステータスコードが200以外の場合はエラー
+	if resp.StatusCode != 200 {
+		log.Error(fmt.Errorf("status Code: %d", resp.StatusCode))
+		return fmt.Errorf("status Code: %d", resp.StatusCode)
 	}
 
 	// レスポンスボディを構造体に変換
