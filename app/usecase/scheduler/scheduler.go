@@ -37,6 +37,6 @@ func schedulerExec(jobs Jobs) {
 
 // 定期実行を開始する関数
 func SchedulerStart() {
-	fmt.Println(">> SchedulerStart")
+	fmt.Println("Exec SchedulerStart")
 	schedulerExec(jobs)
 }

@@ -4,6 +4,7 @@ package jquants
 import (
 	log "app/controller/log"
 	model "app/domain/model"
+	"fmt"
 	"os"
 	"time"
 )
@@ -145,6 +146,8 @@ func setIdToken() (err error) {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(">> ID Token: " + idToken)
 
 	return nil
 }

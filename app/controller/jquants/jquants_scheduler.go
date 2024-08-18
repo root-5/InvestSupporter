@@ -3,7 +3,6 @@ package jquants
 
 import (
 	"fmt"
-	"sync"
 	"time"
 )
 
@@ -28,25 +27,22 @@ var jobs = Jobs{
 
 // 定期実行を行う関数
 func schedulerExec(jobs Jobs) {
-	var wg sync.WaitGroup
+	// wg を使った待機は usecase/scheduler/scheduler.go にあるので、ここでは不要
 	for _, job := range jobs {
 		// Jobs を確実に上から実行するために1秒待機
 		time.Sleep(1 * time.Second)
 
 		if job.ExecuteFlag {
-			wg.Add(1)
 			go func(job Job) {
-				defer wg.Done()
 				job.Function()
 				time.Sleep(job.Duration)
 			}(job)
 		}
 	}
-	wg.Wait()
 }
 
 // 定期実行を開始する関数
 func schedulerStart() {
-	fmt.Println(">> SchedulerStart")
+	fmt.Println("Exec jquant.schedulerStart")
 	schedulerExec(jobs)
 }
