@@ -20,9 +20,10 @@ func Init() {
 // API関数
 // ====================================================================================
 
-/* JQuants に登録したメールアドレスとパスワードを入力して、リフレッシュトークン（期限: 1週間）を取得する関数
-> refreshToken	リフレッシュトークン
-> err			エラー
+/*
+JQuants に登録したメールアドレスとパスワードを入力して、リフレッシュトークン（期限: 1週間）を取得する関数
+- arg) refreshToken	リフレッシュトークン
+- arg) err			エラー
 */
 func getRefreshToken() (err error) {
 	// 環境変数からメールアドレスとパスワードを取得
@@ -42,7 +43,7 @@ func getRefreshToken() (err error) {
 	url := "https://api.jquants.com/v1/token/auth_user"
 
 	// クエリパラメータ定義
-	type queryParamsType struct {}
+	type queryParamsType struct{}
 	queryParams := queryParamsType{}
 
 	// リクエストボディ
@@ -78,10 +79,11 @@ func getRefreshToken() (err error) {
 	return nil
 }
 
-/* リフレッシュトークンを渡して、ID トークン（期限: 24時間）を取得する関数
-	- refreshToken	getRefreshToken 関数で取得したトークン
-	> idToken		ID トークン
-	> err			エラー
+/*
+リフレッシュトークンを渡して、ID トークン（期限: 24時間）を取得する関数
+  - return) refreshToken	getRefreshToken 関数で取得したトークン
+  - arg) idToken		ID トークン
+  - arg) err			エラー
 */
 func getIdToken(refreshToken string) (err error) {
 	// 環境変数から ID トークンと前回取得時刻を取得
@@ -100,12 +102,12 @@ func getIdToken(refreshToken string) (err error) {
 	type queryParamsType struct {
 		RefreshToken string
 	}
-	queryParam := queryParamsType {
+	queryParam := queryParamsType{
 		RefreshToken: refreshToken,
 	}
 
 	// リクエストボディ
-	type reqBodyType struct {}
+	type reqBodyType struct{}
 	reqBody := reqBodyType{}
 
 	// レスポンスボディ定義
@@ -131,8 +133,10 @@ func getIdToken(refreshToken string) (err error) {
 	return nil
 }
 
-/* リフレッシュトークンを取得した上でIDトークンを取得する関数
-	> err	エラー
+/*
+リフレッシュトークンを取得した上でIDトークンを取得する関数
+
+  - arg) err	エラー
 */
 func setIdToken() (err error) {
 	// リフレッシュトークンを取得
@@ -154,22 +158,24 @@ func setIdToken() (err error) {
 	return nil
 }
 
-/* 上場銘柄一覧を取得する関数
-	> stocksList	上場銘柄情報の配列
+/*
+上場銘柄一覧を取得する関数
+
+  - arg) stocksList	上場銘柄情報の配列
 */
 func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/listed/info"
 
 	// クエリパラメータ定義
-	type queryParamsType struct {}
+	type queryParamsType struct{}
 	queryParams := queryParamsType{}
 
 	// ヘッダー定義
 	type headersType struct {
 		Authorization string `json:"Authorization"`
 	}
-	headers := headersType {
+	headers := headersType{
 		Authorization: idToken,
 	}
 
@@ -189,22 +195,24 @@ func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 	// 型変換（jquantsStockInfo 型の配列から model.StockInfo 型の配列に変換）
 	for _, stock := range resBody.Info {
 		stocksList = append(stocksList, model.StocksInfo{
-			Code:              stock.Code,
-			CompanyName:       stock.CompanyName,
+			Code:               stock.Code,
+			CompanyName:        stock.CompanyName,
 			CompanyNameEnglish: stock.CompanyNameEnglish,
-			Sector17Code:      convertStringToInt(stock.Sector17Code),
-			Sector33Code:      convertStringToInt(stock.Sector33Code),
-			ScaleCategory:     stock.ScaleCategory,
-			MarketCode:        convertStringToInt(stock.MarketCode),
+			Sector17Code:       convertStringToInt(stock.Sector17Code),
+			Sector33Code:       convertStringToInt(stock.Sector33Code),
+			ScaleCategory:      stock.ScaleCategory,
+			MarketCode:         convertStringToInt(stock.MarketCode),
 		})
 	}
 
 	return stocksList, nil
 }
 
-/* 企業の財務情報を取得する関数
-	> financialInfo	企業の財務情報
-	> err			エラー
+/*
+企業の財務情報を取得する関数
+
+  - arg) financialInfo	企業の財務情報
+  - arg) err			エラー
 */
 func GetFinancialInfo[T string | int](vals T) (financialInfo model.FinancialInfo, err error) {
 	// リクエスト先URL
@@ -241,38 +249,38 @@ func GetFinancialInfo[T string | int](vals T) (financialInfo model.FinancialInfo
 
 	// 型変換（jquantsFinancialInfo 型から model.FinancialInfo 型に変換）
 	financialInfo = model.FinancialInfo{
-		Code:                                                                         resBody.Info.Code,
-		DisclosedDate:                                                                convertStringToTime(resBody.Info.DisclosedDate),
-		DisclosedTime:                                                                convertStringToTime(resBody.Info.DisclosedTime),
-		NetSales:                                                                     convertStringToInt(resBody.Info.NetSales),
-		OperatingProfit:                                                              convertStringToInt(resBody.Info.OperatingProfit),
-		OrdinaryProfit:                                                               convertStringToInt(resBody.Info.OrdinaryProfit),
-		Profit:                                                                       convertStringToInt(resBody.Info.Profit),
-		EarningsPerShare:                                                             convertStringToFloat64(resBody.Info.EarningsPerShare),
-		TotalAssets:                                                                  convertStringToInt(resBody.Info.TotalAssets),
-		Equity:                                                                       convertStringToInt(resBody.Info.Equity),
-		EquityToAssetRatio:                                                           convertStringToFloat64(resBody.Info.EquityToAssetRatio),
-		BookValuePerShare:                                                            convertStringToFloat64(resBody.Info.BookValuePerShare),
-		CashFlowsFromOperatingActivities:                                             convertStringToInt(resBody.Info.CashFlowsFromOperatingActivities),
-		CashFlowsFromInvestingActivities:                                             convertStringToInt(resBody.Info.CashFlowsFromInvestingActivities),
-		CashFlowsFromFinancingActivities: 										   convertStringToInt(resBody.Info.CashFlowsFromFinancingActivities),
-		CashAndEquivalents:                                                           convertStringToInt(resBody.Info.CashAndEquivalents),
-		ResultDividendPerShareAnnual:                                                 convertStringToFloat64(resBody.Info.ResultDividendPerShareAnnual),
-		ResultPayoutRatioAnnual:                                                      convertStringToFloat64(resBody.Info.ResultPayoutRatioAnnual),
-		ForecastDividendPerShareAnnual:                                               convertStringToFloat64(resBody.Info.ForecastDividendPerShareAnnual),
-		ForecastPayoutRatioAnnual:                                                    convertStringToFloat64(resBody.Info.ForecastPayoutRatioAnnual),
-		NextYearForecastDividendPerShareAnnual:                                       convertStringToFloat64(resBody.Info.NextYearForecastDividendPerShareAnnual),
-		NextYearForecastPayoutRatioAnnual:                                            convertStringToFloat64(resBody.Info.NextYearForecastPayoutRatioAnnual),
-		ForecastNetSales:                                                             convertStringToInt(resBody.Info.ForecastNetSales),
-		ForecastOperatingProfit:                                                      convertStringToInt(resBody.Info.ForecastOperatingProfit),
-		ForecastOrdinaryProfit:                                                       convertStringToInt(resBody.Info.ForecastOrdinaryProfit),
-		ForecastProfit:                                                               convertStringToInt(resBody.Info.ForecastProfit),
-		ForecastEarningsPerShare:                                                     convertStringToFloat64(resBody.Info.ForecastEarningsPerShare),
-		NextYearForecastNetSales:                                                     convertStringToInt(resBody.Info.NextYearForecastNetSales),
-		NextYearForecastOperatingProfit:                                              convertStringToInt(resBody.Info.NextYearForecastOperatingProfit),
-		NextYearForecastOrdinaryProfit:                                               convertStringToInt(resBody.Info.NextYearForecastOrdinaryProfit),
-		NextYearForecastProfit:                                                       convertStringToInt(resBody.Info.NextYearForecastProfit),
-		NextYearForecastEarningsPerShare:                                             convertStringToFloat64(resBody.Info.NextYearForecastEarningsPerShare),
+		Code:                                   resBody.Info.Code,
+		DisclosedDate:                          convertStringToTime(resBody.Info.DisclosedDate),
+		DisclosedTime:                          convertStringToTime(resBody.Info.DisclosedTime),
+		NetSales:                               convertStringToInt(resBody.Info.NetSales),
+		OperatingProfit:                        convertStringToInt(resBody.Info.OperatingProfit),
+		OrdinaryProfit:                         convertStringToInt(resBody.Info.OrdinaryProfit),
+		Profit:                                 convertStringToInt(resBody.Info.Profit),
+		EarningsPerShare:                       convertStringToFloat64(resBody.Info.EarningsPerShare),
+		TotalAssets:                            convertStringToInt(resBody.Info.TotalAssets),
+		Equity:                                 convertStringToInt(resBody.Info.Equity),
+		EquityToAssetRatio:                     convertStringToFloat64(resBody.Info.EquityToAssetRatio),
+		BookValuePerShare:                      convertStringToFloat64(resBody.Info.BookValuePerShare),
+		CashFlowsFromOperatingActivities:       convertStringToInt(resBody.Info.CashFlowsFromOperatingActivities),
+		CashFlowsFromInvestingActivities:       convertStringToInt(resBody.Info.CashFlowsFromInvestingActivities),
+		CashFlowsFromFinancingActivities:       convertStringToInt(resBody.Info.CashFlowsFromFinancingActivities),
+		CashAndEquivalents:                     convertStringToInt(resBody.Info.CashAndEquivalents),
+		ResultDividendPerShareAnnual:           convertStringToFloat64(resBody.Info.ResultDividendPerShareAnnual),
+		ResultPayoutRatioAnnual:                convertStringToFloat64(resBody.Info.ResultPayoutRatioAnnual),
+		ForecastDividendPerShareAnnual:         convertStringToFloat64(resBody.Info.ForecastDividendPerShareAnnual),
+		ForecastPayoutRatioAnnual:              convertStringToFloat64(resBody.Info.ForecastPayoutRatioAnnual),
+		NextYearForecastDividendPerShareAnnual: convertStringToFloat64(resBody.Info.NextYearForecastDividendPerShareAnnual),
+		NextYearForecastPayoutRatioAnnual:      convertStringToFloat64(resBody.Info.NextYearForecastPayoutRatioAnnual),
+		ForecastNetSales:                       convertStringToInt(resBody.Info.ForecastNetSales),
+		ForecastOperatingProfit:                convertStringToInt(resBody.Info.ForecastOperatingProfit),
+		ForecastOrdinaryProfit:                 convertStringToInt(resBody.Info.ForecastOrdinaryProfit),
+		ForecastProfit:                         convertStringToInt(resBody.Info.ForecastProfit),
+		ForecastEarningsPerShare:               convertStringToFloat64(resBody.Info.ForecastEarningsPerShare),
+		NextYearForecastNetSales:               convertStringToInt(resBody.Info.NextYearForecastNetSales),
+		NextYearForecastOperatingProfit:        convertStringToInt(resBody.Info.NextYearForecastOperatingProfit),
+		NextYearForecastOrdinaryProfit:         convertStringToInt(resBody.Info.NextYearForecastOrdinaryProfit),
+		NextYearForecastProfit:                 convertStringToInt(resBody.Info.NextYearForecastProfit),
+		NextYearForecastEarningsPerShare:       convertStringToFloat64(resBody.Info.NextYearForecastEarningsPerShare),
 		NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock: convertStringToInt(resBody.Info.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock),
 	}
 

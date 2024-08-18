@@ -13,13 +13,16 @@ import (
 // 型定義
 var db *sql.DB
 
-// 初期化関数
+/*
+初期化関数
+*/
 func Init() {
 	InitDB()
 }
 
-/* DB の初期化をする関数
-	> err	エラー
+/*
+DB の初期化をする関数
+  - return) err	エラー
 */
 func InitDB() (err error) {
 	// 環境変数から接続情報を取得
@@ -40,9 +43,10 @@ func InitDB() (err error) {
 	return nil
 }
 
-/* 上場銘柄テーブルに INSERT する関数
-	- stocks	上場銘柄一覧
-	> err		エラー
+/*
+上場銘柄テーブルに INSERT する関数
+  - arg) stocks	上場銘柄一覧
+  - return) err		エラー
 */
 func InsertStocksInfo(stocks []model.StocksInfo) (err error) {
 	// 上場銘柄テーブルに INSERT
@@ -65,9 +69,10 @@ func InsertStocksInfo(stocks []model.StocksInfo) (err error) {
 	return nil
 }
 
-/* 上場銘柄テーブルを UPDATE する関数
-	- stocks	上場銘柄一覧
-	> err		エラー
+/*
+上場銘柄テーブルを UPDATE する関数
+  - arg) stocks	上場銘柄一覧
+  - return) err		エラー
 */
 func UpdateStocksInfo(stocks []model.StocksInfo) (err error) {
 	// 上場銘柄テーブルを UPDATE
@@ -90,9 +95,10 @@ func UpdateStocksInfo(stocks []model.StocksInfo) (err error) {
 	return nil
 }
 
-/* 上場銘柄テーブルを取得する関数
-	- stocks	上場銘柄一覧
-	> err		エラー
+/*
+上場銘柄テーブルを取得する関数
+  - arg) stocks	上場銘柄一覧
+  - return) err		エラー
 */
 func GetStocksInfo() (stocks []model.StocksInfo, err error) {
 	// データの取得
@@ -103,20 +109,20 @@ func GetStocksInfo() (stocks []model.StocksInfo, err error) {
 	}
 
 	// 取得したデータを格納
-    for rows.Next() {
-        var stock model.StocksInfo
-        err := rows.Scan(&stock.Code, &stock.CompanyName, &stock.CompanyNameEnglish, &stock.Sector17Code, &stock.Sector33Code, &stock.ScaleCategory, &stock.MarketCode)
-        if err != nil {
-            return nil, err
-        }
-        stocks = append(stocks, stock)
-    }
+	for rows.Next() {
+		var stock model.StocksInfo
+		err := rows.Scan(&stock.Code, &stock.CompanyName, &stock.CompanyNameEnglish, &stock.Sector17Code, &stock.Sector33Code, &stock.ScaleCategory, &stock.MarketCode)
+		if err != nil {
+			return nil, err
+		}
+		stocks = append(stocks, stock)
+	}
 
-    // エラーチェック
-    if err = rows.Err(); err != nil {
+	// エラーチェック
+	if err = rows.Err(); err != nil {
 		log.Error(err)
-        return nil, err
-    }
+		return nil, err
+	}
 
-    return stocks, nil
+	return stocks, nil
 }

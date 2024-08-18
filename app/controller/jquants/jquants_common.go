@@ -31,12 +31,13 @@ var httpClient = &http.Client{}
 // 共通関数
 // ====================================================================================
 
-/* GETリクエストを行い、レスポンスボディを取得する関数
-- url			リクエスト先URL文字列
-- queryParam	クエリパラメータ構造体
-- headers		ヘッダー構造体
-- resBody		レスポンスボディ構造体のポインタ
-> err			エラー
+/*
+GETリクエストを行い、レスポンスボディを取得する関数
+  - return) url			リクエスト先URL文字列
+  - return) queryParam	クエリパラメータ構造体
+  - return) headers		ヘッダー構造体
+  - return) resBody		レスポンスボディ構造体のポインタ
+  - arg) err			エラー
 */
 func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err error) {
 	// クエリパラメータをreqURLに追加
@@ -97,12 +98,13 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 	return nil
 }
 
-/* POSTリクエストを行い、レスポンスボディを取得する関数
-	- url			リクエスト先URL文字列
-	- queryParam	クエリパラメータ構造体
-	- reqBody		リクエストボディ構造体
-	- resBody		レスポンスボディ構造体のポインタ
-	> err			エラー
+/*
+POSTリクエストを行い、レスポンスボディを取得する関数
+  - return) url			リクエスト先URL文字列
+  - return) queryParam	クエリパラメータ構造体
+  - return) reqBody		リクエストボディ構造体
+  - return) resBody		レスポンスボディ構造体のポインタ
+  - arg) err			エラー
 */
 func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err error) {
 	// クエリパラメータをreqURLに追加
@@ -115,7 +117,7 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 		}
 		reqUrl += "?" + params.Encode()
 	}
-	
+
 	// リクエストボディをJSONに変換
 	reqBodyJson := []byte{}
 	if reqBody != struct{}{} {
@@ -166,25 +168,27 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	return nil
 }
 
-/* string 型の数値を int 型に変換する関数
-	- stringValue		変換する文字列
-	> intValue	変換後の整数
+/*
+string 型の数値を int 型に変換する関数
+  - return) stringValue		変換する文字列
+  - arg) intValue			変換後の整数
 */
 func convertStringToInt(stringValue string) (intValue int) {
-    if stringValue == "" {
-        return 0 // デフォルト値を0に設定
-    }
-    // 文字列を整数に変換
-    intValue, err := strconv.Atoi(stringValue)
-    if err != nil {
-        return 0 // 変換に失敗した場合もデフォルト値を0に設定
-    }
-    return intValue
+	if stringValue == "" {
+		return 0 // デフォルト値を0に設定
+	}
+	// 文字列を整数に変換
+	intValue, err := strconv.Atoi(stringValue)
+	if err != nil {
+		return 0 // 変換に失敗した場合もデフォルト値を0に設定
+	}
+	return intValue
 }
 
-/* string 型の数値を float64 型に変換する関数
-	- stringValue		変換する文字列
-	> floatValue	変換後の浮動小数点数
+/*
+string 型の数値を float64 型に変換する関数
+  - return) stringValue		変換する文字列
+  - arg) floatValue			変換後の浮動小数点数
 */
 func convertStringToFloat64(stringValue string) (floatValue float64) {
 	if stringValue == "" {
@@ -198,9 +202,10 @@ func convertStringToFloat64(stringValue string) (floatValue float64) {
 	return floatValue
 }
 
-/* string 型の数値を time.Time 型に変換する関数
-	- stringValue		変換する文字列
-	> timeValue	変換後の時刻
+/*
+string 型の数値を time.Time 型に変換する関数
+  - return) stringValue		変換する文字列
+  - arg) timeValue			変換後の時刻
 */
 func convertStringToTime(stringValue string) (timeValue time.Time) {
 	if stringValue == "" {
