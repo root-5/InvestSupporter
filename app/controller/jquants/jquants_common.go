@@ -11,11 +11,15 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ====================================================================================
 // 共通変数
 // ====================================================================================
+
+// リフレッシュトークン
+var refreshToken string
 
 // IDトークン
 var idToken string
@@ -163,17 +167,49 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 }
 
 /* string 型の数値を int 型に変換する関数
-	- value		変換する文字列
+	- stringValue		変換する文字列
 	> intValue	変換後の整数
 */
-func convertStringToInt(value string) (intValue int) {
-    if value == "" {
+func convertStringToInt(stringValue string) (intValue int) {
+    if stringValue == "" {
         return 0 // デフォルト値を0に設定
     }
     // 文字列を整数に変換
-    intValue, err := strconv.Atoi(value)
+    intValue, err := strconv.Atoi(stringValue)
     if err != nil {
         return 0 // 変換に失敗した場合もデフォルト値を0に設定
     }
     return intValue
+}
+
+/* string 型の数値を float64 型に変換する関数
+	- stringValue		変換する文字列
+	> floatValue	変換後の浮動小数点数
+*/
+func convertStringToFloat64(stringValue string) (floatValue float64) {
+	if stringValue == "" {
+		return 0 // デフォルト値を0に設定
+	}
+	// 文字列を浮動小数点数に変換
+	floatValue, err := strconv.ParseFloat(stringValue, 64)
+	if err != nil {
+		return 0 // 変換に失敗した場合もデフォルト値を0に設定
+	}
+	return floatValue
+}
+
+/* string 型の数値を time.Time 型に変換する関数
+	- stringValue		変換する文字列
+	> timeValue	変換後の時刻
+*/
+func convertStringToTime(stringValue string) (timeValue time.Time) {
+	if stringValue == "" {
+		return time.Time{} // デフォルト値を0に設定
+	}
+	// 文字列を時刻に変換
+	timeValue, err := time.Parse("2006-01-02", stringValue)
+	if err != nil {
+		return time.Time{} // 変換に失敗した場合もデフォルト値を0に設定
+	}
+	return timeValue
 }
