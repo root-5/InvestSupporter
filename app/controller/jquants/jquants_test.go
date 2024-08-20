@@ -1,55 +1,58 @@
 // JQuants API を利用するための関数をまとめたパッケージ
-package jquants
+package jquants_test
 
 import (
-	log "app/controller/log"
+	jquants "app/controller/jquants"
 	"fmt"
+	"testing"
 )
 
 // Test は JQuants API 用のテスト関数
-func Test() {
+func TestJQuants(t *testing.T) {
 	fmt.Println("Exec jquants.Test")
-
 	var err error
 
-	// getRefreshToken
-	fmt.Println("Test getRefreshToken")
-	err = getRefreshToken()
-	if err != nil {
-		fmt.Println(">> NG")
-		log.Error(err)
+	/*
+		Init
+	*/
+	fmt.Println("Test Init")
+	jquants.Init()
+
+	// IdTokenForTest が10文字以下ならNG
+	if len(jquants.IdTokenForTest) < 10 {
+		t.Errorf("Init failed: %v", err)
+		return
 	} else {
 		fmt.Println(">> OK")
 	}
 
-	// getIdToken
-	fmt.Println("Test getIdToken")
-	err = getIdToken(refreshToken)
+	/*
+		GetStocksInfo
+	*/
+	fmt.Println("Test GetStocksInfo")
+	stocksInfo, err := jquants.GetStocksInfo()
+
+	// GetStocksInfo がエラーならNG
 	if err != nil {
-		fmt.Println(">> NG")
-		log.Error(err)
+		t.Errorf("GetStocksInfo failed: %v", err)
+		return
 	} else {
+		fmt.Println(">> len(stocksInfo) = ", len(stocksInfo))
 		fmt.Println(">> OK")
 	}
 
-	// setIdToken
-	fmt.Println("Test setIdToken")
-	err = setIdToken()
-	if err != nil {
-		fmt.Println(">> NG")
-		log.Error(err)
-	} else {
-		fmt.Println(">> OK")
-	}
-
-	// GetFinancialInfo
+	/*
+		GetFinancialInfo
+	*/
 	fmt.Println("Test GetFinancialInfo")
-	financialInfo, err := GetFinancialInfo("2023-01-30")
+	financialInfo, err := jquants.GetFinancialInfo("7203")
+
+	// GetFinancialInfo がエラーならNG
 	if err != nil {
-		fmt.Println(">> NG")
-		log.Error(err)
+		t.Errorf("GetFinancialInfo failed: %v", err)
+		return
 	} else {
+		fmt.Println(">> len(financialInfo) = ", len(financialInfo))
 		fmt.Println(">> OK")
-		fmt.Println(financialInfo)
 	}
 }

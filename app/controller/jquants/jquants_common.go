@@ -23,6 +23,7 @@ var refreshToken string
 
 // IDトークン
 var idToken string
+var IdTokenForTest string
 
 // HTTPクライアント
 var httpClient = &http.Client{}
