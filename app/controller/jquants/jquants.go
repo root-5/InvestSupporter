@@ -4,7 +4,6 @@ package jquants
 import (
 	log "app/controller/log"
 	model "app/domain/model"
-	"fmt"
 	"os"
 	"time"
 )
@@ -74,17 +73,17 @@ func getRefreshToken() (err error) {
 
 /*
 リフレッシュトークンを渡して、ID トークン（期限: 24時間）を取得する関数
-- arg) idToken			ID トークン
+- arg) IdToken			ID トークン
 - arg) err				エラー
 - return) refreshToken	getRefreshToken 関数で取得したトークン
 */
 func getIdToken(refreshToken string) (err error) {
 	// 環境変数から ID トークンと前回取得時刻を取得
-	idToken = os.Getenv("JQUANTS_ID_TOKEN")
+	IdToken = os.Getenv("JQUANTS_ID_TOKEN")
 	idTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_ID_TOKEN_TIME"))
 
 	// ID トークンが存在し、取得時刻から24時間以内の場合は ID トークンを返す
-	if idToken != "" && time.Since(idTokenTime) < 24*time.Hour {
+	if IdToken != "" && time.Since(idTokenTime) < 24*time.Hour {
 		return nil
 	}
 
@@ -117,14 +116,11 @@ func getIdToken(refreshToken string) (err error) {
 	}
 
 	// IDトークンを取得
-	idToken = resBody.IdToken
+	IdToken = resBody.IdToken
 
 	// IDトークンと現在時刻を環境変数に保存
-	os.Setenv("JQUANTS_ID_TOKEN", idToken)
+	os.Setenv("JQUANTS_ID_TOKEN", IdToken)
 	os.Setenv("JQUANTS_ID_TOKEN_TIME", time.Now().Format(time.RFC3339))
-
-	// テスト用のグローバル変数にも保存
-	IdTokenForTest = idToken
 
 	return nil
 }
@@ -148,7 +144,7 @@ func setIdToken() (err error) {
 		return err
 	}
 
-	// fmt.Println(">> ID Token: " + idToken)
+	// fmt.Println(">> ID Token: " + IdToken)
 
 	return nil
 }
@@ -170,7 +166,7 @@ func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 		Authorization string `json:"Authorization"`
 	}
 	headers := headersType{
-		Authorization: idToken,
+		Authorization: IdToken,
 	}
 
 	// レスポンスボディ定義
@@ -210,14 +206,15 @@ func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 */
 func GetFinancialInfo(codeOrDate string) (financialInfo []model.FinancialInfo, err error) {
 	// リクエスト先URL
-	url := "https://api.jquants.com/v1/financial/info"
+	url := "https://api.jquants.com/v1/fins/statements"
 
 	// クエリパラメータ定義
 	type queryParamsType struct {
 		Code string
 	}
 	queryParams := queryParamsType{
-		Code: fmt.Sprint(codeOrDate),
+		// Code: fmt.Sprint(codeOrDate),
+		Code: codeOrDate,
 	}
 
 	// ヘッダー定義
@@ -225,7 +222,7 @@ func GetFinancialInfo(codeOrDate string) (financialInfo []model.FinancialInfo, e
 		Authorization string `json:"Authorization"`
 	}
 	headers := headersType{
-		Authorization: idToken,
+		Authorization: IdToken,
 	}
 
 	// レスポンスボディ定義

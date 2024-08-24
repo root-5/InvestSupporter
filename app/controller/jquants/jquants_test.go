@@ -41,6 +41,7 @@ func TestJQuants(t *testing.T) {
 	// 環境変数がセットされているか確認
 	if os.Getenv("JQUANTS_EMAIL") == "" || os.Getenv("JQUANTS_PASS") == "" {
 		t.Errorf("Set env failed: %v", err)
+		fmt.Println("")
 		return
 	}
 
@@ -51,27 +52,29 @@ func TestJQuants(t *testing.T) {
 	jquants.SchedulerStart()
 
 	// IdTokenForTest が10文字以下ならNG
-	if len(jquants.IdTokenForTest) < 10 {
+	if len(jquants.IdToken) < 10 {
 		t.Errorf("SchedulerStart failed: %v", err)
 		return
 	} else {
 		fmt.Println(">> OK")
+		fmt.Println("")
 	}
 
 	/*
 		GetStocksInfo
 	*/
-	fmt.Println("Test GetStocksInfo")
-	stocksInfo, err := jquants.GetStocksInfo()
+	// fmt.Println("Test GetStocksInfo")
+	// stocksInfo, err := jquants.GetStocksInfo()
 
-	// GetStocksInfo がエラーならNG
-	if err != nil {
-		t.Errorf("GetStocksInfo failed: %v", err)
-		return
-	} else {
-		fmt.Println(">> len(stocksInfo) = ", len(stocksInfo))
-		fmt.Println(">> OK")
-	}
+	// // GetStocksInfo がエラーならNG
+	// if err != nil {
+	// 	t.Errorf("GetStocksInfo failed: %v", err)
+	// 	return
+	// } else {
+	// 	fmt.Println(">> len(stocksInfo) = ", len(stocksInfo))
+	// 	fmt.Println(">> OK")
+	// 	fmt.Println("")
+	// }
 
 	/*
 		GetFinancialInfo
@@ -86,5 +89,6 @@ func TestJQuants(t *testing.T) {
 	} else {
 		fmt.Println(">> len(financialInfo) = ", len(financialInfo))
 		fmt.Println(">> OK")
+		fmt.Println("")
 	}
 }

@@ -2,7 +2,6 @@
 package jquants
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -43,6 +42,5 @@ func schedulerExec(jobs Jobs) {
 
 // 定期実行を開始する関数
 func SchedulerStart() {
-	fmt.Println("Exec jquant.schedulerStart")
 	schedulerExec(jobs)
 }

@@ -22,8 +22,7 @@ import (
 var refreshToken string
 
 // IDトークン
-var idToken string
-var IdTokenForTest string
+var IdToken string
 
 // HTTPクライアント
 var httpClient = &http.Client{}
@@ -68,6 +67,10 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 			req.Header.Set(strings.ToLower(headerType.Field(i).Name), fmt.Sprintf("%v", headerVal.Field(i).Interface()))
 		}
 	}
+
+	fmt.Println("")
+	fmt.Println(req)
+	fmt.Println("")
 
 	// リクエスト送信
 	resp, err := httpClient.Do(req)
