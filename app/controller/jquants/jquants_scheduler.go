@@ -2,7 +2,6 @@
 package jquants
 
 import (
-	log "app/controller/log"
 	"fmt"
 	"time"
 )
@@ -27,36 +26,18 @@ var jobs = Jobs{
 }
 
 // 定期実行を行う関数
-func schedulerExec(jobs Jobs) (err error) {
-	errChan := make(chan error, len(jobs))
-
+func schedulerExec(jobs Jobs) {
 	// wg を使った待機は usecase/scheduler/scheduler.go にあるので、ここでは不要
 	for _, job := range jobs {
 
 		if job.ExecuteFlag {
 			go func(job Job) {
-				err = job.Function()
-				if err != nil {
-					log.Error(err)
-					errChan <- err
-					return
-				}
 				time.Sleep(job.Duration)
-				errChan <- nil
 			}(job)
-		} else {
-			errChan <- nil
 		}
 		// Jobs を確実に上から実行するために1秒待機
 		time.Sleep(1 * time.Second)
 	}
-	for range jobs {
-		if err = <-errChan; err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // 定期実行を開始する関数

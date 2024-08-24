@@ -46,12 +46,12 @@ func TestJQuants(t *testing.T) {
 	/*
 		Init
 	*/
-	fmt.Println("Test Init")
+	fmt.Println("Test SchedulerStart")
 	jquants.SchedulerStart()
 
 	// IdTokenForTest が10文字以下ならNG
 	if len(jquants.IdTokenForTest) < 10 {
-		t.Errorf("Init failed: %v", err)
+		t.Errorf("SchedulerStart failed: %v", err)
 		return
 	} else {
 		fmt.Println(">> OK")
