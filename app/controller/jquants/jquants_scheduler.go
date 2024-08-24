@@ -32,6 +32,7 @@ func schedulerExec(jobs Jobs) {
 
 		if job.ExecuteFlag {
 			go func(job Job) {
+				job.Function()
 				time.Sleep(job.Duration)
 			}(job)
 		}

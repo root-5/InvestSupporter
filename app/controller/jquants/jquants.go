@@ -148,7 +148,7 @@ func setIdToken() (err error) {
 		return err
 	}
 
-	fmt.Println(">> ID Token: " + idToken)
+	// fmt.Println(">> ID Token: " + idToken)
 
 	return nil
 }

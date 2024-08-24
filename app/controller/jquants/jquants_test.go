@@ -14,6 +14,7 @@ func TestJQuants(t *testing.T) {
 	fmt.Println("==============================")
 	fmt.Println("Exec jquants.Test")
 	fmt.Println("==============================")
+	fmt.Println("")
 
 	var err error
 
