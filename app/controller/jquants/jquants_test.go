@@ -47,7 +47,7 @@ func TestJQuants(t *testing.T) {
 		Init
 	*/
 	fmt.Println("Test Init")
-	jquants.Init()
+	jquants.SchedulerStart()
 
 	// IdTokenForTest が10文字以下ならNG
 	if len(jquants.IdTokenForTest) < 10 {

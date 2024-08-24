@@ -32,8 +32,6 @@ func schedulerExec(jobs Jobs) (err error) {
 
 	// wg を使った待機は usecase/scheduler/scheduler.go にあるので、ここでは不要
 	for _, job := range jobs {
-		// Jobs を確実に上から実行するために1秒待機
-		time.Sleep(1 * time.Second)
 
 		if job.ExecuteFlag {
 			go func(job Job) {
@@ -49,6 +47,8 @@ func schedulerExec(jobs Jobs) (err error) {
 		} else {
 			errChan <- nil
 		}
+		// Jobs を確実に上から実行するために1秒待機
+		time.Sleep(1 * time.Second)
 	}
 	for range jobs {
 		if err = <-errChan; err != nil {
@@ -60,7 +60,7 @@ func schedulerExec(jobs Jobs) (err error) {
 }
 
 // 定期実行を開始する関数
-func schedulerStart() {
+func SchedulerStart() {
 	fmt.Println("Exec jquant.schedulerStart")
 	schedulerExec(jobs)
 }

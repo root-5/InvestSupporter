@@ -8,17 +8,6 @@ import (
 	"fmt"
 )
 
-// 各コントローラーの初期化関数を呼び出す関数
-func Init() {
-	fmt.Println("Exec Init")
-
-	// DB の初期化
-	postgres.Init()
-
-	// Jquants の初期化
-	jquants.Init()
-}
-
 // Jquants API から上場銘柄一覧を取得し、DB に保存する関数
 func GetAndSaveStocksInfo() (err error) {
 	fmt.Println("Exec GetAndUpdateStocksInfo")

@@ -10,13 +10,6 @@ import (
 )
 
 // ====================================================================================
-// 初期化関数
-// ====================================================================================
-func Init() {
-	schedulerStart()
-}
-
-// ====================================================================================
 // API関数
 // ====================================================================================
 
@@ -81,8 +74,8 @@ func getRefreshToken() (err error) {
 
 /*
 リフレッシュトークンを渡して、ID トークン（期限: 24時間）を取得する関数
-- arg) idToken		ID トークン
-- arg) err			エラー
+- arg) idToken			ID トークン
+- arg) err				エラー
 - return) refreshToken	getRefreshToken 関数で取得したトークン
 */
 func getIdToken(refreshToken string) (err error) {
@@ -211,7 +204,7 @@ func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 
 /*
 企業の財務情報を取得する関数
-- arg) codeOrDate	銘柄コードまたは日付（YYYY-MM-DD）
+- arg) codeOrDate		銘柄コードまたは日付（YYYY-MM-DD）
 - return) financialInfo	企業の財務情報
 - return) err			エラー
 */

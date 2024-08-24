@@ -14,13 +14,6 @@ import (
 var db *sql.DB
 
 /*
-初期化関数
-*/
-func Init() {
-	InitDB()
-}
-
-/*
 DB の初期化をする関数
   - return) err	エラー
 */
