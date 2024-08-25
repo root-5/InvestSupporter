@@ -212,9 +212,19 @@ func GetFinancialInfo(codeOrDate string) (financialInfo []model.FinancialInfo, e
 	// クエリパラメータ定義
 	type queryParamsType struct {
 		Code string
+		Date string
 	}
-	queryParams := queryParamsType{
-		Code: codeOrDate,
+	var queryParams = queryParamsType{}
+
+	// もしcodeOrDateがコードの場合は融合処理を行いデータをまとめる
+	if len(codeOrDate) == 4 || len(codeOrDate) == 5 {
+		queryParams = queryParamsType{
+			Code: codeOrDate,
+		}
+	} else {
+		queryParams = queryParamsType{
+			Date: codeOrDate,
+		}
 	}
 
 	// ヘッダー定義
