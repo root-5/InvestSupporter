@@ -214,7 +214,6 @@ func GetFinancialInfo(codeOrDate string) (financialInfo []model.FinancialInfo, e
 		Code string
 	}
 	queryParams := queryParamsType{
-		// Code: fmt.Sprint(codeOrDate),
 		Code: codeOrDate,
 	}
 
@@ -291,16 +290,19 @@ func GetFinancialInfo(codeOrDate string) (financialInfo []model.FinancialInfo, e
 			} else {
 				// 2回目以降は統合処理を行う、ただし新しいデータがない（「""」）の場合はスキップ
 				m := reflect.ValueOf(state)
+				merged := reflect.ValueOf(&financialInfoMerged).Elem() // ポインタを介して値を設定
+
+				// フィールドごとに統合処理を行う
 				for i := 0; i < m.NumField(); i++ {
 					if m.Field(i).Interface() != "" {
-						reflect.ValueOf(financialInfoMerged).Field(i).Set(m.Field(i))
+						merged.Field(i).Set(m.Field(i))
 					}
 				}
 			}
 		}
 
 		// 統合前の財務情報を初期化しなおして、統合後の財務情報を返却する
-		financialInfo = make([]model.FinancialInfo, 0)
+		financialInfo = make([]model.FinancialInfo, 1)
 		financialInfo[0] = financialInfoMerged
 	}
 
