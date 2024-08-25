@@ -5,6 +5,7 @@ import (
 	log "app/controller/log"
 	model "app/domain/model"
 	"os"
+	"reflect"
 	"time"
 )
 
@@ -275,6 +276,32 @@ func GetFinancialInfo(codeOrDate string) (financialInfo []model.FinancialInfo, e
 			NextYearForecastEarningsPerShare:       convertStringToFloat64(state.NextYearForecastEarningsPerShare),
 			NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock: convertStringToInt(state.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock),
 		})
+	}
+
+	// もしcodeOrDateがコードの場合は融合処理を行いデータをまとめる
+	if len(codeOrDate) == 4 || len(codeOrDate) == 5 {
+		// 統合後の財務情報
+		var financialInfoMerged model.FinancialInfo
+
+		// APIから返却される内容は古いものから順になっているので、配列の最初の要素から順に処理する
+		for _, state := range financialInfo {
+			// 初回は統合後の財務情報にそのまま代入
+			if financialInfoMerged.Code == "" {
+				financialInfoMerged = state
+			} else {
+				// 2回目以降は統合処理を行う、ただし新しいデータがない（「""」）の場合はスキップ
+				m := reflect.ValueOf(state)
+				for i := 0; i < m.NumField(); i++ {
+					if m.Field(i).Interface() != "" {
+						reflect.ValueOf(financialInfoMerged).Field(i).Set(m.Field(i))
+					}
+				}
+			}
+		}
+
+		// 統合前の財務情報を初期化しなおして、統合後の財務情報を返却する
+		financialInfo = make([]model.FinancialInfo, 0)
+		financialInfo[0] = financialInfoMerged
 	}
 
 	return financialInfo, nil

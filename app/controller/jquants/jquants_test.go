@@ -11,9 +11,10 @@ import (
 
 // Test は JQuants API 用のテスト関数
 func TestJQuants(t *testing.T) {
-	fmt.Println("==============================")
-	fmt.Println("Exec jquants.Test")
-	fmt.Println("==============================")
+	fmt.Println("")
+	fmt.Println("============================================================")
+	fmt.Println("TEST JQUANTS")
+	fmt.Println("============================================================")
 	fmt.Println("")
 
 	var err error
@@ -63,18 +64,18 @@ func TestJQuants(t *testing.T) {
 	/*
 		GetStocksInfo
 	*/
-	// fmt.Println("Test GetStocksInfo")
-	// stocksInfo, err := jquants.GetStocksInfo()
+	fmt.Println("Test GetStocksInfo")
+	stocksInfo, err := jquants.GetStocksInfo()
 
-	// // GetStocksInfo がエラーならNG
-	// if err != nil {
-	// 	t.Errorf("GetStocksInfo failed: %v", err)
-	// 	return
-	// } else {
-	// 	fmt.Println(">> len(stocksInfo) = ", len(stocksInfo))
-	// 	fmt.Println(">> OK")
-	// 	fmt.Println("")
-	// }
+	// GetStocksInfo がエラーならNG
+	if err != nil {
+		t.Errorf("GetStocksInfo failed: %v", err)
+		return
+	} else {
+		fmt.Println(">> len(stocksInfo) = ", len(stocksInfo))
+		fmt.Println(">> OK")
+		fmt.Println("")
+	}
 
 	/*
 		GetFinancialInfo

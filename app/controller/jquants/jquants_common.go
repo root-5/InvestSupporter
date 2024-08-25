@@ -68,10 +68,6 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 		}
 	}
 
-	fmt.Println("")
-	fmt.Println(req)
-	fmt.Println("")
-
 	// リクエスト送信
 	resp, err := httpClient.Do(req)
 	if err != nil {
