@@ -7,6 +7,7 @@ import (
 	postgres "app/controller/postgres"
 	model "app/domain/model"
 	"fmt"
+	"time"
 )
 
 /*
@@ -50,6 +51,7 @@ func GetAndSaveStocksInfo() (err error) {
 
 /*
 Jquants API から全ての財務情報を取得し、DB を一度削除したのち、全て保存する関数
+！！！15分程度の実行時間が必要！！！
 - return) err	エラー
 */
 func GetAndSaveFinancialInfoAll() (err error) {
@@ -89,6 +91,48 @@ func GetAndSaveFinancialInfoAll() (err error) {
 	if err != nil {
 		log.Error(err)
 		return err
+	}
+
+	return nil
+}
+
+/*
+Jquants API から昨日と今日に更新された財務情報を取得し、DB を更新する関数
+- return) err	エラー
+*/
+func GetAndUpdateFinancialInfoToday() (err error) {
+	fmt.Println("EXECUTE GetAndUpdateFinancialInfoToday")
+
+	// 昨日と今日の日付を取得
+	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	today := time.Now().Format("2006-01-02")
+
+	// 上場銘柄一覧の財務情報を取得
+	yesterdayFinancials, err := jquants.GetFinancialInfo(yesterday)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	todayFinancials, err := jquants.GetFinancialInfo(today)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// 取得した財務情報を DB に保存
+	for _, financial := range yesterdayFinancials {
+		err = postgres.UpdateFinancialInfo(financial)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
+	for _, financial := range todayFinancials {
+		err = postgres.UpdateFinancialInfo(financial)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 	}
 
 	return nil

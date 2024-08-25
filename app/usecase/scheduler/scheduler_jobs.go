@@ -14,9 +14,9 @@ var jobs = Jobs{
 		ExecuteFlag: true,
 	},
 	{
-		Name: "GetAndSaveFinancialInfoAll",
-		Duration: 30 * 24 * time.Hour,
-		Function: usecase.GetAndSaveFinancialInfoAll,
+		Name: "GetAndUpdateFinancialInfoToday",
+		Duration: 24 * time.Hour,
+		Function: usecase.GetAndUpdateFinancialInfoToday,
 		ExecuteFlag: true,
 	},
 }
