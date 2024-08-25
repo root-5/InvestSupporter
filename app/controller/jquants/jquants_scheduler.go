@@ -29,6 +29,7 @@ func schedulerExec(jobs Jobs) {
 	// wg を使った待機は usecase/scheduler/scheduler.go にあるので、ここでは不要
 	for _, job := range jobs {
 
+		// ExecuteFlag が true の場合のみ実行
 		if job.ExecuteFlag {
 			go func(job Job) {
 				job.Function()

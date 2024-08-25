@@ -9,9 +9,9 @@ import (
 
 // 型定義
 type Job struct {
-	Name string
-	Duration time.Duration
-	Function func() error
+	Name        string
+	Duration    time.Duration
+	Function    func() error
 	ExecuteFlag bool
 }
 type Jobs []Job
@@ -20,9 +20,8 @@ type Jobs []Job
 func schedulerExec(jobs Jobs) {
 	var wg sync.WaitGroup
 	for _, job := range jobs {
-		// Jobs を確実に上から実行するために1秒待機
-		time.Sleep(1 * time.Second)
 
+		// ExecuteFlag が true の場合のみ実行
 		if job.ExecuteFlag {
 			wg.Add(1)
 			go func(job Job) {
@@ -31,12 +30,14 @@ func schedulerExec(jobs Jobs) {
 				time.Sleep(job.Duration)
 			}(job)
 		}
+		// Jobs を確実に上から実行するために1秒待機
+		time.Sleep(1 * time.Second)
 	}
 	wg.Wait()
 }
 
 // 定期実行を開始する関数
 func SchedulerStart() {
-	fmt.Println("Exec SchedulerStart")
+	fmt.Println("EXECUTE SchedulerStart")
 	schedulerExec(jobs)
 }

@@ -3,25 +3,21 @@ package initialize
 
 import (
 	jquants "app/controller/jquants"
-	postgres "app/controller/postgres"
-	scheduler "app/usecase/scheduler"
 	log "app/controller/log"
+	postgres "app/controller/postgres"
 	"fmt"
 )
 
 // 各コントローラーの初期化関数を呼び出す関数
 func Init() {
-	fmt.Println("Exec Init")
-
 	// DB の初期化
-	err :=postgres.InitDB()
+	fmt.Println("DB の初期化")
+	err := postgres.InitDB()
 	if err != nil {
 		log.Error(err)
 	}
 
 	// Jquants の初期化
+	fmt.Println("Jquants の初期化")
 	jquants.SchedulerStart()
-
-	// Scheduler の初期化
-	scheduler.SchedulerStart()
 }

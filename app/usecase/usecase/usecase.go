@@ -14,7 +14,7 @@ Jquants API から上場銘柄一覧を取得し、DB に保存する関数
 - return) err	エラー
 */
 func GetAndSaveStocksInfo() (err error) {
-	fmt.Println("Exec GetAndUpdateStocksInfo")
+	fmt.Println("EXECUTE GetAndUpdateStocksInfo")
 
 	// 上場銘柄一覧を取得
 	stocksNew, err := jquants.GetStocksInfo()
@@ -53,7 +53,7 @@ Jquants API から全ての財務情報を取得し、DB を一度削除した�
 - return) err	エラー
 */
 func GetAndSaveFinancialInfoAll() (err error) {
-	fmt.Println("Exec GetAndSaveFinancialInfoAll")
+	fmt.Println("EXECUTE GetAndSaveFinancialInfoAll")
 
 	// 財務情報テーブルを全て削除
 	err = postgres.DeleteFinancialInfoAll()
