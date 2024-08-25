@@ -17,13 +17,18 @@ func main() {
 	initialize.Init()
 	time.Sleep(3 * time.Second)
 
+	// Scheduler の初期化
+	fmt.Println("Scheduler の初期化")
+	scheduler.SchedulerStart()
+
 	// Reset モードの場合は Reset 関数を実行
 	if isResetMode {
 		initialize.Reset()
 		return
 	}
 
-	// Scheduler の初期化
-	fmt.Println("Scheduler の初期化")
-	scheduler.SchedulerStart()
+	// 起動したままにするため、無限ループ
+	for {
+		time.Sleep(1 * time.Hour)
+	}
 }

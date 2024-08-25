@@ -3,7 +3,6 @@ package scheduler
 
 import (
 	"fmt"
-	"sync"
 	"time"
 )
 
@@ -18,14 +17,11 @@ type Jobs []Job
 
 // 定期実行を行う関数
 func schedulerExec(jobs Jobs) {
-	var wg sync.WaitGroup
 	for _, job := range jobs {
 
 		// ExecuteFlag が true の場合のみ実行
 		if job.ExecuteFlag {
-			wg.Add(1)
 			go func(job Job) {
-				defer wg.Done()
 				job.Function()
 				time.Sleep(job.Duration)
 			}(job)
@@ -33,7 +29,6 @@ func schedulerExec(jobs Jobs) {
 		// Jobs を確実に上から実行するために1秒待機
 		time.Sleep(1 * time.Second)
 	}
-	wg.Wait()
 }
 
 // 定期実行を開始する関数
