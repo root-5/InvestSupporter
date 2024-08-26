@@ -51,3 +51,9 @@ type FinancialInfo struct {
 	NextYearForecastEarningsPerShare                                             float64   `json:"NextYearForecastEarningsPerShare"`                                             // 一株あたり当期純利益予想_翌事業年度期末
 	NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock int       `json:"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock"` // 期末発行済株式数
 }
+
+// 上場銘柄テーブルと財務情報テーブルを結合したデータ
+type FinancialInfoForApi struct {
+	StocksInfo    StocksInfo    `json:"StocksInfo"`    // 上場銘柄一覧
+	FinancialInfo FinancialInfo `json:"FinancialInfo"` // 財務情報
+}

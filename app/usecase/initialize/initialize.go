@@ -2,6 +2,7 @@
 package initialize
 
 import (
+	api "app/controller/api"
 	jquants "app/controller/jquants"
 	log "app/controller/log"
 	postgres "app/controller/postgres"
@@ -21,6 +22,10 @@ func Init() {
 	// Jquants の初期化
 	fmt.Println("Jquants の初期化")
 	jquants.SchedulerStart()
+
+	// api の初期化
+	fmt.Println("API の初期化")
+	api.StartServer()
 }
 
 // コンテナ外部へ永続化されたデータすら無くなった状態からの再構築を行う関数
