@@ -1,8 +1,12 @@
 package main
 
 import (
-	initialize "app/usecase/initialize"
+	api "app/controller/api"
+	"app/controller/jquants"
+	"app/controller/log"
+	"app/controller/postgres"
 	scheduler "app/usecase/scheduler"
+	"app/usecase/usecase"
 	"fmt"
 	"time"
 )
@@ -13,8 +17,16 @@ var isResetMode = false
 func main() {
 	fmt.Println("")
 
-	// 各コントローラーの初期化し、3秒待機
-	initialize.Init()
+	// DB の初期化
+	fmt.Println("DB の初期化")
+	err := postgres.InitDB()
+	if err != nil {
+		log.Error(err)
+	}
+
+	// Jquants の初期化
+	fmt.Println("Jquants の初期化")
+	jquants.SchedulerStart()
 	time.Sleep(3 * time.Second)
 
 	// Scheduler の初期化
@@ -23,12 +35,21 @@ func main() {
 
 	// Reset モードの場合は Reset 関数を実行
 	if isResetMode {
-		initialize.Reset()
+		Reset()
 		return
 	}
 
-	// 起動したままにするため、無限ループ
-	for {
-		time.Sleep(1 * time.Hour)
+	// api の初期化
+	fmt.Println("API の初期化")
+	api.StartServer()
+}
+
+// コンテナ外部へ永続化されたデータすら無くなった状態からの再構築を行う関数
+func Reset() {
+	// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
+	err := usecase.GetAndSaveFinancialInfoAll()
+	if err != nil {
+		log.Error(err)
+		return
 	}
 }
