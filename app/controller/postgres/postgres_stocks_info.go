@@ -18,12 +18,12 @@ func InsertStocksInfo(stocks []model.StocksInfo) (err error) {
 	for _, stock := range stocks {
 		_, err = db.Exec("INSERT INTO stocks_info (code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 			stock.Code,
-			stock.CompanyName,
-			stock.CompanyNameEnglish,
-			stock.Sector17Code,
-			stock.Sector33Code,
-			stock.ScaleCategory,
-			stock.MarketCode,
+			getValueOrNil(stock.CompanyName),
+			getValueOrNil(stock.CompanyNameEnglish),
+			getValueOrNil(stock.Sector17Code),
+			getValueOrNil(stock.Sector33Code),
+			getValueOrNil(stock.ScaleCategory),
+			getValueOrNil(stock.MarketCode),
 		)
 		if err != nil {
 			log.Error(err)
@@ -44,12 +44,12 @@ func UpdateStocksInfo(stocks []model.StocksInfo) (err error) {
 	for _, stock := range stocks {
 		_, err = db.Exec("UPDATE stocks_info SET company_name = $2, company_name_english = $3, sector17_code = $4, sector33_code = $5, scale_category = $6, market_code = $7 WHERE code = $1",
 			stock.Code,
-			stock.CompanyName,
-			stock.CompanyNameEnglish,
-			stock.Sector17Code,
-			stock.Sector33Code,
-			stock.ScaleCategory,
-			stock.MarketCode,
+			getValueOrNil(stock.CompanyName),
+			getValueOrNil(stock.CompanyNameEnglish),
+			getValueOrNil(stock.Sector17Code),
+			getValueOrNil(stock.Sector33Code),
+			getValueOrNil(stock.ScaleCategory),
+			getValueOrNil(stock.MarketCode),
 		)
 		if err != nil {
 			log.Error(err)
@@ -75,11 +75,37 @@ func GetStocksInfo() (stocks []model.StocksInfo, err error) {
 
 	// 取得したデータを格納
 	for rows.Next() {
+		// Scan 用の仮変数の宣言
 		var stock model.StocksInfo
-		err := rows.Scan(&stock.Code, &stock.CompanyName, &stock.CompanyNameEnglish, &stock.Sector17Code, &stock.Sector33Code, &stock.ScaleCategory, &stock.MarketCode)
+		companyName := ""
+		companyNameEnglish := ""
+		sector17Code := 0
+		sector33Code := 0
+		scaleCategory := ""
+		marketCode := 0
+
+		// Scan
+		err := rows.Scan(
+			&stock.Code,
+			&companyName,
+			&companyNameEnglish,
+			&sector17Code,
+			&sector33Code,
+			&scaleCategory,
+			&marketCode,
+		)
 		if err != nil {
 			return nil, err
 		}
+
+		// ポインタとして格納
+		stock.CompanyName = &companyName
+		stock.CompanyNameEnglish = &companyNameEnglish
+		stock.Sector17Code = &sector17Code
+		stock.Sector33Code = &sector33Code
+		stock.ScaleCategory = &scaleCategory
+		stock.MarketCode = &marketCode
+
 		stocks = append(stocks, stock)
 	}
 

@@ -12,7 +12,7 @@ import (
 )
 
 // Reset モード（新環境での再構築）の場合は true にする
-var isResetMode = false
+var isResetMode = true
 
 func main() {
 	fmt.Println("")
@@ -29,15 +29,15 @@ func main() {
 	jquants.SchedulerStart()
 	time.Sleep(3 * time.Second)
 
-	// Scheduler の初期化
-	fmt.Println("Scheduler の初期化")
-	scheduler.SchedulerStart()
-
 	// Reset モードの場合は Reset 関数を実行
 	if isResetMode {
 		Reset()
 		return
 	}
+
+	// Scheduler の初期化
+	fmt.Println("Scheduler の初期化")
+	scheduler.SchedulerStart()
 
 	// api の初期化
 	fmt.Println("API の初期化")
