@@ -4,6 +4,7 @@ package postgres
 import (
 	log "app/controller/log"
 	model "app/domain/model"
+	time "time"
 
 	_ "github.com/lib/pq"
 )
@@ -167,46 +168,114 @@ func UpdateFinancialInfo(financial model.FinancialInfo) (err error) {
   - return) err			エラー
 */
 func GetFinancialInfo(code string) (financial model.FinancialInfo, err error) {
+	// Scan 用の仮変数の宣言
+	discloseDate := time.Time{}
+	discloseTime := time.Time{}
+	netSales := 0
+	operatingProfit := 0
+	ordinaryProfit := 0
+	profit := 0
+	earningsPerShare := 0.0
+	totalAssets := 0
+	equity := 0
+	equityToAssetRatio := 0.0
+	bookValuePerShare := 0.0
+	cashFlowsFromOperatingActivities := 0
+	cashFlowsFromInvestingActivities := 0
+	cashFlowsFromFinancingActivities := 0
+	cashAndEquivalents := 0
+	resultDividendPerShareAnnual := 0.0
+	resultPayoutRatioAnnual := 0.0
+	forecastDividendPerShareAnnual := 0.0
+	forecastPayoutRatioAnnual := 0.0
+	nextYearForecastDividendPerShareAnnual := 0.0
+	nextYearForecastPayoutRatioAnnual := 0.0
+	forecastNetSales := 0
+	forecastOperatingProfit := 0
+	forecastOrdinaryProfit := 0
+	forecastProfit := 0
+	forecastEarningsPerShare := 0.0
+	nextYearForecastNetSales := 0
+	nextYearForecastOperatingProfit := 0
+	nextYearForecastOrdinaryProfit := 0
+	nextYearForecastProfit := 0
+	nextYearForecastEarningsPerShare := 0.0
+	numberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock := 0
+
 	// データの取得
 	err = db.QueryRow("SELECT * FROM financial_info WHERE code = $1", code).Scan(
-		financial.Code,
-		getValueOrNil(financial.DisclosedDate),
-		getValueOrNil(financial.DisclosedTime),
-		getValueOrNil(financial.NetSales),
-		getValueOrNil(financial.OperatingProfit),
-		getValueOrNil(financial.OrdinaryProfit),
-		getValueOrNil(financial.Profit),
-		getValueOrNil(financial.EarningsPerShare),
-		getValueOrNil(financial.TotalAssets),
-		getValueOrNil(financial.Equity),
-		getValueOrNil(financial.EquityToAssetRatio),
-		getValueOrNil(financial.BookValuePerShare),
-		getValueOrNil(financial.CashFlowsFromOperatingActivities),
-		getValueOrNil(financial.CashFlowsFromInvestingActivities),
-		getValueOrNil(financial.CashFlowsFromFinancingActivities),
-		getValueOrNil(financial.CashAndEquivalents),
-		getValueOrNil(financial.ResultDividendPerShareAnnual),
-		getValueOrNil(financial.ResultPayoutRatioAnnual),
-		getValueOrNil(financial.ForecastDividendPerShareAnnual),
-		getValueOrNil(financial.ForecastPayoutRatioAnnual),
-		getValueOrNil(financial.NextYearForecastDividendPerShareAnnual),
-		getValueOrNil(financial.NextYearForecastPayoutRatioAnnual),
-		getValueOrNil(financial.ForecastNetSales),
-		getValueOrNil(financial.ForecastOperatingProfit),
-		getValueOrNil(financial.ForecastOrdinaryProfit),
-		getValueOrNil(financial.ForecastProfit),
-		getValueOrNil(financial.ForecastEarningsPerShare),
-		getValueOrNil(financial.NextYearForecastNetSales),
-		getValueOrNil(financial.NextYearForecastOperatingProfit),
-		getValueOrNil(financial.NextYearForecastOrdinaryProfit),
-		getValueOrNil(financial.NextYearForecastProfit),
-		getValueOrNil(financial.NextYearForecastEarningsPerShare),
-		getValueOrNil(financial.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock),
+		&financial.Code,
+		&discloseDate,
+		&discloseTime,
+		&netSales,
+		&operatingProfit,
+		&ordinaryProfit,
+		&profit,
+		&earningsPerShare,
+		&totalAssets,
+		&equity,
+		&equityToAssetRatio,
+		&bookValuePerShare,
+		&cashFlowsFromOperatingActivities,
+		&cashFlowsFromInvestingActivities,
+		&cashFlowsFromFinancingActivities,
+		&cashAndEquivalents,
+		&resultDividendPerShareAnnual,
+		&resultPayoutRatioAnnual,
+		&forecastDividendPerShareAnnual,
+		&forecastPayoutRatioAnnual,
+		&nextYearForecastDividendPerShareAnnual,
+		&nextYearForecastPayoutRatioAnnual,
+		&forecastNetSales,
+		&forecastOperatingProfit,
+		&forecastOrdinaryProfit,
+		&forecastProfit,
+		&forecastEarningsPerShare,
+		&nextYearForecastNetSales,
+		&nextYearForecastOperatingProfit,
+		&nextYearForecastOrdinaryProfit,
+		&nextYearForecastProfit,
+		&nextYearForecastEarningsPerShare,
+		&numberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
 	)
 	if err != nil {
 		log.Error(err)
 		return model.FinancialInfo{}, err
 	}
+
+	// ポインタを格納
+	financial.DisclosedDate = &discloseDate
+	financial.DisclosedTime = &discloseTime
+	financial.NetSales = &netSales
+	financial.OperatingProfit = &operatingProfit
+	financial.OrdinaryProfit = &ordinaryProfit
+	financial.Profit = &profit
+	financial.EarningsPerShare = &earningsPerShare
+	financial.TotalAssets = &totalAssets
+	financial.Equity = &equity
+	financial.EquityToAssetRatio = &equityToAssetRatio
+	financial.BookValuePerShare = &bookValuePerShare
+	financial.CashFlowsFromOperatingActivities = &cashFlowsFromOperatingActivities
+	financial.CashFlowsFromInvestingActivities = &cashFlowsFromInvestingActivities
+	financial.CashFlowsFromFinancingActivities = &cashFlowsFromFinancingActivities
+	financial.CashAndEquivalents = &cashAndEquivalents
+	financial.ResultDividendPerShareAnnual = &resultDividendPerShareAnnual
+	financial.ResultPayoutRatioAnnual = &resultPayoutRatioAnnual
+	financial.ForecastDividendPerShareAnnual = &forecastDividendPerShareAnnual
+	financial.ForecastPayoutRatioAnnual = &forecastPayoutRatioAnnual
+	financial.NextYearForecastDividendPerShareAnnual = &nextYearForecastDividendPerShareAnnual
+	financial.NextYearForecastPayoutRatioAnnual = &nextYearForecastPayoutRatioAnnual
+	financial.ForecastNetSales = &forecastNetSales
+	financial.ForecastOperatingProfit = &forecastOperatingProfit
+	financial.ForecastOrdinaryProfit = &forecastOrdinaryProfit
+	financial.ForecastProfit = &forecastProfit
+	financial.ForecastEarningsPerShare = &forecastEarningsPerShare
+	financial.NextYearForecastNetSales = &nextYearForecastNetSales
+	financial.NextYearForecastOperatingProfit = &nextYearForecastOperatingProfit
+	financial.NextYearForecastOrdinaryProfit = &nextYearForecastOrdinaryProfit
+	financial.NextYearForecastProfit = &nextYearForecastProfit
+	financial.NextYearForecastEarningsPerShare = &nextYearForecastEarningsPerShare
+	financial.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock = &numberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock
 
 	return financial, nil
 }

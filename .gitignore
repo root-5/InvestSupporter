@@ -6,7 +6,7 @@
 /infra/db/.env
 
 # DB データファイル
-/infra/db/data
+/infra/db/data*
 
 # モックアップファイル
 *mockup.js
