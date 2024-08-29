@@ -3,6 +3,7 @@ package jquants
 import (
 	log "app/controller/log"
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -169,52 +170,49 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 }
 
 /*
-string 型の数値を int 型に変換する関数
+string 型の数値を sql.NullInt64 型に変換する関数
   - return) stringValue		変換する文字列
   - arg) intValue			変換後の整数
 */
-func convertStringToInt(stringValue string) (intValue int) {
+func convertStringToInt64(stringValue string) (intValue sql.NullInt64) {
 	if stringValue == "" {
-		return 0 // デフォルト値を0に設定
-	}
-	// 文字列を整数に変換
-	intValue, err := strconv.Atoi(stringValue)
-	if err != nil {
-		return 0 // 変換に失敗した場合もデフォルト値を0に設定
+		intValue = sql.NullInt64{Int64: 0, Valid: false}
+	} else {
+		// 文字列を整数に変換
+		intOnlyValue, _ := strconv.ParseInt(stringValue, 10, 64)
+		intValue = sql.NullInt64{Int64: intOnlyValue, Valid: true}
 	}
 	return intValue
 }
 
 /*
-string 型の数値を float64 型に変換する関数
+string 型の数値を sql.NullFloat64 型に変換する関数
   - return) stringValue		変換する文字列
   - arg) floatValue			変換後の浮動小数点数
 */
-func convertStringToFloat64(stringValue string) (floatValue float64) {
+func convertStringToFloat64(stringValue string) (floatValue sql.NullFloat64) {
 	if stringValue == "" {
-		return 0 // デフォルト値を0に設定
-	}
-	// 文字列を浮動小数点数に変換
-	floatValue, err := strconv.ParseFloat(stringValue, 64)
-	if err != nil {
-		return 0 // 変換に失敗した場合もデフォルト値を0に設定
+		floatValue = sql.NullFloat64{Float64: 0, Valid: false}
+	} else {
+		// 文字列を浮動小数点数に変換
+		floatOnlyValue, _ := strconv.ParseFloat(stringValue, 64)
+		floatValue = sql.NullFloat64{Float64: floatOnlyValue, Valid: true}
 	}
 	return floatValue
 }
 
 /*
-string 型の数値を time.Time 型に変換する関数
+string 型の数値を sql.NullTime 型に変換する関数
   - return) stringValue		変換する文字列
   - arg) timeValue			変換後の時刻
 */
-func convertStringToTime(stringValue string) (timeValue time.Time) {
+func convertStringToTime(stringValue string) (timeValue sql.NullTime) {
 	if stringValue == "" {
-		return time.Time{} // デフォルト値を0に設定
-	}
-	// 文字列を時刻に変換
-	timeValue, err := time.Parse("2006-01-02", stringValue)
-	if err != nil {
-		return time.Time{} // 変換に失敗した場合もデフォルト値を0に設定
+		timeValue = sql.NullTime{Time: time.Time{}, Valid: false}
+	} else {
+		// 文字列を時刻に変換
+		timeOnlyValue, _ := time.Parse("2006-01-02", stringValue)
+		timeValue = sql.NullTime{Time: timeOnlyValue, Valid: true}
 	}
 	return timeValue
 }
