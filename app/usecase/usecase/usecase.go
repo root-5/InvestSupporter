@@ -7,7 +7,6 @@ import (
 	postgres "app/controller/postgres"
 	model "app/domain/model"
 	"fmt"
-	"reflect"
 	"time"
 )
 
@@ -72,56 +71,26 @@ func GetAndSaveFinancialInfoAll() (err error) {
 		return err
 	}
 
-	// 分割挿入モードを指定する変数
-	isDivisionalInsert := true
+	// 全ての財務情報を格納するスライス
+	var allFinancials []model.FinancialInfo
 
-	if isDivisionalInsert {
-		// 分割挿入モード
-		// 上場銘柄一覧の財務情報を取得
-		for _, stock := range stocks {
-			financials, err := jquants.GetFinancialInfo(stock.Code)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-
-			// 財務情報がない場合はスキップ
-			if financials[0].DisclosedDate == nil {
-				continue
-			}
-
-			// 取得した財務情報を DB に保存
-			for _, financial := range financials {
-				err = postgres.InsertFinancialInfo(financial)
-				if err != nil {
-					log.Error(err)
-					return err
-				}
-			}
-		}
-	} else {
-		// 一括挿入モード
-		// 全ての財務情報を格納するスライス
-		var allFinancials []model.FinancialInfo
-
-		// 上場銘柄一覧の財務情報を取得
-		for _, stock := range stocks {
-			financial, err := jquants.GetFinancialInfo(stock.Code)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-
-			// 取得した財務情報をスライスに追加
-			allFinancials = append(allFinancials, financial...)
-		}
-
-		// 取得した財務情報を DB に保存
-		err = postgres.InsertFinancialInfoAll(allFinancials)
+	// 上場銘柄一覧の財務情報を取得
+	for _, stock := range stocks {
+		financial, err := jquants.GetFinancialInfo(stock.Code)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
+
+		// 取得した財務情報をスライスに追加
+		allFinancials = append(allFinancials, financial...)
+	}
+
+	// 取得した財務情報を DB に保存
+	err = postgres.InsertFinancialInfoAll(allFinancials)
+	if err != nil {
+		log.Error(err)
+		return err
 	}
 
 	return nil
@@ -150,26 +119,8 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 		return err
 	}
 
-	// 取得した財務情報を DB の財務情報と比較し、更新
+	// 取得した財務情報を DB に保存
 	for _, financial := range yesterdayFinancials {
-		// 現在の DB の財務情報を取得
-		financialOld, err := postgres.GetFinancialInfo(financial.Code)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-
-		// 構造体の各項目に更新（nil 以外の項目）がある場合は更新
-		m := reflect.ValueOf(financialOld)
-		merged := reflect.ValueOf(&financial).Elem()
-		for i := 0; i < m.NumField(); i++ {
-			if merged.Field(i).IsNil() {
-				merged.Field(i).Set(m.Field(i))
-			} else {
-				m.Field(i).Set(merged.Field(i))
-			}
-		}
-
 		err = postgres.UpdateFinancialInfo(financial)
 		if err != nil {
 			log.Error(err)
@@ -177,24 +128,6 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 		}
 	}
 	for _, financial := range todayFinancials {
-		// 現在の DB の財務情報を取得
-		financialOld, err := postgres.GetFinancialInfo(financial.Code)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-
-		// 構造体の各項目に更新（nil 以外の項目）がある場合は更新
-		m := reflect.ValueOf(financialOld)
-		merged := reflect.ValueOf(&financial).Elem()
-		for i := 0; i < m.NumField(); i++ {
-			if merged.Field(i).IsNil() {
-				merged.Field(i).Set(m.Field(i))
-			} else {
-				m.Field(i).Set(merged.Field(i))
-			}
-		}
-
 		err = postgres.UpdateFinancialInfo(financial)
 		if err != nil {
 			log.Error(err)

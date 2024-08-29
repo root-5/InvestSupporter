@@ -42,10 +42,6 @@ func main() {
 		}
 	}
 
-	// Scheduler の初期化
-	fmt.Println("Scheduler の初期化")
-	scheduler.SchedulerStart()
-
 	// api の初期化
 	fmt.Println("API の初期化")
 	api.StartServer()
