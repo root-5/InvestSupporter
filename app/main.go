@@ -5,7 +5,7 @@ import (
 	"app/controller/jquants"
 	"app/controller/log"
 	"app/controller/postgres"
-	scheduler "app/usecase/scheduler"
+	"app/usecase/scheduler"
 	"app/usecase/usecase"
 	"fmt"
 	"time"
@@ -41,6 +41,10 @@ func main() {
 			return
 		}
 	}
+
+	// Scheduler の初期化
+	fmt.Println("Scheduler の初期化")
+	scheduler.SchedulerStart()
 
 	// api の初期化
 	fmt.Println("API の初期化")
