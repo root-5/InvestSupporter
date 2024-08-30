@@ -32,7 +32,7 @@ func main() {
 		log.Error(err)
 		return
 	}
-	if len(financials) == 0 {
+	if len(financials) < 1000 {
 		fmt.Println("財務情報が存在しないため、再構築を行います")
 		// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
 		err := usecase.GetAndSaveFinancialInfoAll()
