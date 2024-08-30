@@ -74,23 +74,44 @@ func GetAndSaveFinancialInfoAll() (err error) {
 	// 全ての財務情報を格納するスライス
 	var allFinancials []model.FinancialInfo
 
-	// 上場銘柄一覧の財務情報を取得
-	for _, stock := range stocks {
-		financial, err := jquants.GetFinancialInfo(stock.Code)
+	// 一括挿入か分割挿入かを決める変数
+	isDividedInsert := true
+
+	if isDividedInsert {
+		// 上場銘柄一覧の財務情報を取得
+		for _, stock := range stocks {
+			financial, err := jquants.GetFinancialInfo(stock.Code)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+
+			// 取得した財務情報を DB に保存
+			err = postgres.InsertFinancialInfo(financial[0])
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	} else {
+		// 上場銘柄一覧の財務情報を取得
+		for _, stock := range stocks {
+			financial, err := jquants.GetFinancialInfo(stock.Code)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+
+			// 取得した財務情報をスライスに追加
+			allFinancials = append(allFinancials, financial...)
+		}
+
+		// 取得した財務情報を DB に保存
+		err = postgres.InsertFinancialInfoAll(allFinancials)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-
-		// 取得した財務情報をスライスに追加
-		allFinancials = append(allFinancials, financial...)
-	}
-
-	// 取得した財務情報を DB に保存
-	err = postgres.InsertFinancialInfoAll(allFinancials)
-	if err != nil {
-		log.Error(err)
-		return err
 	}
 
 	return nil
