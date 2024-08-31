@@ -91,3 +91,18 @@ func GetStocksInfo() (stocks []model.StocksInfo, err error) {
 
 	return stocks, nil
 }
+
+/*
+財務情報テーブルを DELETE する関数
+  - return) err		エラー
+*/
+func DeleteStocksInfo() (err error) {
+	// 財務情報テーブルを DELETE
+	_, err = db.Exec("DELETE FROM stocks_info")
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}

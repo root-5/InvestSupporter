@@ -79,4 +79,4 @@ Godoc を採用しているので、 Docker Compose でコンテナを起動し�
 # アイデア
 
 - 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要。
-- postgres.InsertFinancialInfoAll を for 文で回すのは非効率。一度に複数のデータを挿入する方法を検討する
+- postgres.InsertFinancialInfoAll, postgres.InsertStocksInfo を for 文で回すのは非効率。一度に複数のデータを挿入する方法を検討する

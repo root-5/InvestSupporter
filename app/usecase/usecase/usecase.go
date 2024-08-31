@@ -31,14 +31,33 @@ func GetAndSaveStocksInfo() (err error) {
 		return err
 	}
 
-	// DB から取得した上場銘柄一覧が空の場合は INSERT 空でない場合は UPDATE
-	if len(stocksOld) == 0 {
+	// API と DB の上場銘柄の数が不一致なら、削除した上で INSERT して終了
+	if len(stocksOld) != len(stocksNew) {
+		// 上場銘柄一覧を削除
+		err = postgres.DeleteStocksInfo()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		// 上場銘柄一覧を保存
 		err = postgres.InsertStocksInfo(stocksNew)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-	} else {
+		return nil
+	}
+
+	// API と DB の上場銘柄データが不一致なら、UPDATE して終了
+	var isSame bool
+	for i := range stocksOld {
+		if stocksOld[i] != stocksNew[i] {
+			isSame = false
+			break
+		}
+	}
+	if !isSame {
+		// 上場銘柄一覧を更新
 		err = postgres.UpdateStocksInfo(stocksNew)
 		if err != nil {
 			log.Error(err)
@@ -147,12 +166,43 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 			log.Error(err)
 			return err
 		}
+		// 影響を受けた行数を確認
+		rowsAffected, err := postgres.RowsAffected()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+
+		// 影響を受けた行数が0の場合はINSERTを行う
+		if rowsAffected == 0 {
+			err = postgres.InsertFinancialInfo(financial)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+
 	}
 	for _, financial := range todayFinancials {
 		err = postgres.UpdateFinancialInfo(financial)
 		if err != nil {
 			log.Error(err)
 			return err
+		}
+		// 影響を受けた行数を確認
+		rowsAffected, err := postgres.RowsAffected()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+
+		// 影響を受けた行数が0の場合はINSERTを行う
+		if rowsAffected == 0 {
+			err = postgres.InsertFinancialInfo(financial)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
 		}
 	}
 
