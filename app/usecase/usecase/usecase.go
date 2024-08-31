@@ -33,34 +33,44 @@ func GetAndSaveStocksInfo() (err error) {
 		return err
 	}
 
-	// API と DB の上場銘柄の数が不一致なら、削除した上で INSERT して終了
+	// API と DB の上場銘柄の数が不一致なら、不足分を特定してその分だけ INSERT
 	if len(stocksOld) != len(stocksNew) {
-		// 上場銘柄一覧を削除
-		err = postgres.DeleteStocksInfo()
+		// API と DB の上場銘柄の差分を特定
+		var diffStocks []model.StocksInfo
+		for _, stockNew := range stocksNew {
+			isSame := false
+			for _, stockOld := range stocksOld {
+				if stockNew.Code == stockOld.Code {
+					isSame = true
+					break
+				}
+			}
+			if !isSame {
+				diffStocks = append(diffStocks, stockNew)
+			}
+		}
+
+		// 上場銘柄一覧を追加
+		err = postgres.InsertStocksInfo(diffStocks)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		// 上場銘柄一覧を保存
-		err = postgres.InsertStocksInfo(stocksNew)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		return nil
 	}
 
-	// API と DB の上場銘柄データが不一致なら、UPDATE して終了
+	// API と DB の上場銘柄データが不一致なら、不足分を特定してその分だけ UPDATE
+	var diffStocks []model.StocksInfo
 	var isSame bool
 	for i := range stocksOld {
 		if stocksOld[i] != stocksNew[i] {
+			diffStocks = append(diffStocks, stocksNew[i])
 			isSame = false
 			break
 		}
 	}
 	if !isSame {
 		// 上場銘柄一覧を更新
-		err = postgres.UpdateStocksInfo(stocksNew)
+		err = postgres.UpdateStocksInfo(diffStocks)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -255,12 +265,23 @@ func CheckData() (err error) {
   - return) エラー
 */
 func RebuildData() (err error) {
+	// 財務情報を全て削除
+	err = postgres.DeleteFinancialInfoAll()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	// 3秒待機
+	time.Sleep(3 * time.Second)
+
 	// 上場銘柄を全て削除
 	err = postgres.DeleteStocksInfo()
 	if err != nil {
 		log.Error(err)
 		return err
 	}
+	// 3秒待機
+	time.Sleep(3 * time.Second)
 
 	// 上場銘柄を全て取得し、DB に保存
 	err = GetAndSaveStocksInfo()
@@ -268,13 +289,8 @@ func RebuildData() (err error) {
 		log.Error(err)
 		return err
 	}
-
-	// 財務情報を全て削除
-	err = postgres.DeleteFinancialInfoAll()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+	// 3秒待機
+	time.Sleep(3 * time.Second)
 
 	// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
 	err = GetAndSaveFinancialInfoAll()
