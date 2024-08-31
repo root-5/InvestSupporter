@@ -34,3 +34,16 @@ func InitDB() (err error) {
 
 	return nil
 }
+
+/*
+直近操作のあった行の数を取得する関数
+  - return) rows	操作のあった行の数
+  - return) err		エラー
+*/
+func RowsAffected() (rows int64, err error) {
+	result, err := db.Exec("SELECT ROW_COUNT()")
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
