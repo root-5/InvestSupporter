@@ -75,6 +75,9 @@ Godoc を採用しているので、 Docker Compose でコンテナを起動し�
 2. フリープランのままプロジェクトを作成
 3. 左メニュー「SQL Editor」を押下、 infra/db/docker-entrypoint-initdb.d/initial.sql をコピー、実行してテーブルを作成
 4. 左メニュー「Project Settings」＞「Database」を押下、Connection parameters の値を .env に設定
+5. 設定した .env を使って、ローカル環境から Supabase に接続できるか確認、問題なし
+6. ローカル app コンテナ + Supabase Postgres 構成のまま一連の動作を確認、上場銘柄テーブル、財務情報テーブルのデータ取得ができることを確認
+   1. ちなみに全削除〜挿入までの時間は、上場銘柄テーブルで 2 分程度、財務情報テーブルで 15 分程度
 
 # アイデア
 
