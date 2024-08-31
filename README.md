@@ -11,25 +11,28 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 1. `go mod init InvestSuppoter`
 2. Docker + Air で開発環境を構築
-    1. .air.toml はコンテナ内で `air init` で作成
-    2. compose.yaml, app.local.dockerfile は参考リンクなどをもとに作成
+   1. .air.toml はコンテナ内で `air init` で作成
+   2. compose.yaml, app.local.dockerfile は参考リンクなどをもとに作成
 
 ### コマンド
 
 **基本用途**
 
--   `docker compose up -d` : 全てのコンテナを立ち上げる
--   `docker compose down` : 全てのコンテナを停止する
--   `docker compose exec app sh` : app コンテナに入る
--   `docker compose logs app -f` : app コンテナのログを表示する
--   `docker compose rm -fsv app` : app コンテナを削除する
--   `docker compose up -d app` : app コンテナを再起動する
--   `docker compose exec db sh` : db コンテナに入る
-    -   `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
+- `docker compose up -d` : 全てのコンテナを立ち上げる
+- `docker compose down` : 全てのコンテナを停止する
+- `docker compose exec app sh` : app コンテナに入る
+- `docker compose logs app -f` : app コンテナのログを表示する
+- `docker compose rm -fsv app` : app コンテナを削除する
+- `docker compose up -d app` : app コンテナを再起動する
+- `docker compose exec db sh` : db コンテナに入る
+
+  - `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
+
+- `curl http://127.0.0.1:8080/financial` : 財務データ取得の確認
 
 **作業用**
 
--   `go mod tidy` : go.mod に記載されているパッケージを整理する（.go ファイルで使われていないパッケージの削除）
+- `go mod tidy` : go.mod に記載されているパッケージを整理する（.go ファイルで使われていないパッケージの削除）
 
 ## ドキュメント
 
@@ -39,9 +42,9 @@ Godoc を採用しているので、 Docker Compose でコンテナを起動し�
 
 ## 利用ツール
 
--   [GitHub](https://github.com/root-5/InvestSupporter)
--   Docker
--   TablePlus
+- [GitHub](https://github.com/root-5/InvestSupporter)
+- Docker
+- TablePlus
 
 ## 参考リンク集
 
@@ -55,9 +58,9 @@ Godoc を採用しているので、 Docker Compose でコンテナを起動し�
 
 ## 開発開始時の状態
 
--   Go は今回が初めて
--   フレームワークなしでの開発も初めて
--   アーキテクチャを強く意識した開発も初めて
+- Go は今回が初めて
+- フレームワークなしでの開発も初めて
+- アーキテクチャを強く意識した開発も初めて
 
 ## 開発の流れ
 
@@ -66,8 +69,14 @@ Godoc を採用しているので、 Docker Compose でコンテナを起動し�
 3. 最初はとにかく書いてはリファクタリングを繰り返した
 4. ある程度の構成ができたら、テスト駆動開発に移行したい
 
+# Supabase
+
+1. GitHub アカウント（root-5）でログイン
+2. フリープランのままプロジェクトを作成
+3. 左メニュー「SQL Editor」を押下、 infra/db/docker-entrypoint-initdb.d/initial.sql をコピー、実行してテーブルを作成
+4. 左メニュー「Project Settings」＞「Database」を押下、Connection parameters の値を .env に設定
 
 # アイデア
 
 - 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要。
-- postgres.InsertFinancialInfoAll をfor文で回すのは非効率。一度に複数のデータを挿入する方法を検討する
+- postgres.InsertFinancialInfoAll を for 文で回すのは非効率。一度に複数のデータを挿入する方法を検討する
