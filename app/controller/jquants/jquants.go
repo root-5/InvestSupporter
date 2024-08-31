@@ -215,16 +215,19 @@ func GetFinancialInfo(codeOrDate string) (financials []model.FinancialInfo, err 
 		Date string
 	}
 	var queryParams = queryParamsType{}
+	var isCodeMode bool
 
-	// もしcodeOrDateがコードの場合は融合処理を行いデータをまとめる
+	// codeOrDate が銘柄コードか日付かでクエリパラメータを変更
 	if len(codeOrDate) == 4 || len(codeOrDate) == 5 {
 		queryParams = queryParamsType{
 			Code: codeOrDate,
 		}
+		isCodeMode = true
 	} else {
 		queryParams = queryParamsType{
 			Date: codeOrDate,
 		}
+		isCodeMode = false
 	}
 
 	// ヘッダー定義
@@ -304,7 +307,7 @@ func GetFinancialInfo(codeOrDate string) (financials []model.FinancialInfo, err 
 	}
 
 	// もしcodeOrDateがコードの場合は融合処理を行いデータをまとめる
-	if len(codeOrDate) == 4 || len(codeOrDate) == 5 {
+	if isCodeMode {
 		// 統合後の財務情報
 		var financialsMerged model.FinancialInfo
 
@@ -357,6 +360,28 @@ func GetFinancialInfo(codeOrDate string) (financials []model.FinancialInfo, err 
 		// 統合前の財務情報を初期化しなおして、統合後の財務情報を返却する
 		financials = make([]model.FinancialInfo, 1)
 		financials[0] = financialsMerged
+	}
+
+	// もしcodeOrDateが日付の場合は各コードごとに GetFinancialInfo を呼び出してデータをまとめる
+	if !isCodeMode {
+		// 統合後の財務情報
+		var financialsMerged []model.FinancialInfo
+
+		// 取得した財務情報を展開
+		for _, financial := range financials {
+			// コードを元に財務情報を取得
+			financialInfo, err := GetFinancialInfo(financial.Code)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+
+			// 取得した財務情報を統合
+			financialsMerged = append(financialsMerged, financialInfo[0])
+		}
+
+		// 統合後の財務情報を返却
+		financials = financialsMerged
 	}
 
 	return financials, nil

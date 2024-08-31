@@ -5,6 +5,8 @@ import (
 	jquants "app/controller/jquants"
 	"fmt"
 	"os"
+	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -51,8 +53,6 @@ func TestJQuants(t *testing.T) {
 	*/
 	fmt.Println("Test SchedulerStart")
 	jquants.SchedulerStart()
-
-	// IdTokenForTest が10文字以下ならNG
 	if len(jquants.IdToken) < 10 {
 		t.Errorf("SchedulerStart failed: %v", err)
 		return
@@ -66,8 +66,6 @@ func TestJQuants(t *testing.T) {
 	*/
 	fmt.Println("Test GetStocksInfo")
 	stocksInfo, err := jquants.GetStocksInfo()
-
-	// GetStocksInfo がエラーならNG
 	if err != nil {
 		t.Errorf("GetStocksInfo failed: %v", err)
 		return
@@ -80,14 +78,42 @@ func TestJQuants(t *testing.T) {
 	/*
 		GetFinancialInfo
 	*/
-	fmt.Println("Test GetFinancialInfo")
+	fmt.Println("Test GetFinancialInfo (7203)")
 	financialInfo, err := jquants.GetFinancialInfo("7203")
-
-	// GetFinancialInfo がエラーならNG
 	if err != nil {
 		t.Errorf("GetFinancialInfo failed: %v", err)
 		return
 	} else {
+		// financialInfo[0] の構造体に含まれる sql.Null~ 型の変数のうち、Valid が false のものを表示
+		pattern, _ := regexp.Compile("sql.Null.*")
+		m := reflect.ValueOf(financialInfo[0])
+		for i := 0; i < m.NumField(); i++ {
+			if pattern.MatchString(reflect.TypeOf(m.Field(i).Interface()).String()) {
+				if !reflect.ValueOf(m.Field(i).Interface()).FieldByName("Valid").Bool() {
+					fmt.Println(">> ", m.Type().Field(i).Name, " = ", m.Field(i).Interface())
+				}
+			}
+		}
+		fmt.Println(">> OK")
+		fmt.Println("")
+	}
+
+	fmt.Println("Test GetFinancialInfo (2024-8-30)")
+	financialInfo, err = jquants.GetFinancialInfo("2024-08-30")
+	if err != nil {
+		t.Errorf("GetFinancialInfo failed: %v", err)
+		return
+	} else {
+		// financialInfo[0] の構造体に含まれる sql.Null~ 型の変数のうち、Valid が false のものを表示
+		pattern, _ := regexp.Compile("sql.Null.*")
+		m := reflect.ValueOf(financialInfo[0])
+		for i := 0; i < m.NumField(); i++ {
+			if pattern.MatchString(reflect.TypeOf(m.Field(i).Interface()).String()) {
+				if !reflect.ValueOf(m.Field(i).Interface()).FieldByName("Valid").Bool() {
+					fmt.Println(">> ", m.Type().Field(i).Name, " = ", m.Field(i).Interface())
+				}
+			}
+		}
 		fmt.Println(">> len(financialInfo) = ", len(financialInfo))
 		fmt.Println(">> OK")
 		fmt.Println("")

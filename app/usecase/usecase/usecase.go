@@ -17,14 +17,14 @@ Jquants API から上場銘柄一覧を取得し、DB に保存する関数
 func GetAndSaveStocksInfo() (err error) {
 	fmt.Println("EXECUTE GetAndUpdateStocksInfo")
 
-	// 上場銘柄一覧を取得
+	// 上場銘柄一覧を API から取得
 	stocksNew, err := jquants.GetStocksInfo()
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	// 上場銘柄一覧を取得する
+	// 上場銘柄一覧を DB から取得
 	stocksOld, err := postgres.GetStocksInfo()
 	if err != nil {
 		log.Error(err)
