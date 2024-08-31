@@ -12,6 +12,8 @@ import (
 
 /*
 Jquants API から上場銘柄一覧を取得し、DB に保存する関数
+API と DB の上場銘柄一覧の長さが不一致なら、テーブルを削除した上で INSERT する
+API と DB の上場銘柄一覧のデータが不一致なら、テーブルを UPDATE する
 - return) err	エラー
 */
 func GetAndSaveStocksInfo() (err error) {
@@ -204,6 +206,81 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 				return err
 			}
 		}
+	}
+
+	return nil
+}
+
+/*
+DB のデータを確認し、データがない場合はデータを取得し、保存する関数
+  - return) エラー
+*/
+func CheckData() (err error) {
+	// 上場銘柄を取得し、長さを確認し、0 の場合は再構築を行う
+	stocks, err := postgres.GetStocksInfo()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if len(stocks) == 0 {
+		fmt.Println("上場銘柄が存在しないため、再構築を行います")
+		// 上場銘柄を全て取得し、DB に保存
+		err := GetAndSaveStocksInfo()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
+
+	// 財務情報を取得し、長さを確認し、0 の場合は再構築を行う
+	financials, err := postgres.GetFinancialInfoAll()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if len(financials) == 0 {
+		fmt.Println("財務情報が存在しないため、再構築を行います")
+		// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
+		err = GetAndSaveFinancialInfoAll()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
+	return nil
+}
+
+/*
+全データを削除し、再構築する関数
+  - return) エラー
+*/
+func RebuildData() (err error) {
+	// 上場銘柄を全て削除
+	err = postgres.DeleteStocksInfo()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// 上場銘柄を全て取得し、DB に保存
+	err = GetAndSaveStocksInfo()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// 財務情報を全て削除
+	err = postgres.DeleteFinancialInfoAll()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
+	err = GetAndSaveFinancialInfoAll()
+	if err != nil {
+		log.Error(err)
+		return err
 	}
 
 	return nil

@@ -4,6 +4,7 @@ package api
 import (
 	log "app/controller/log"
 	postgres "app/controller/postgres"
+	"app/usecase/usecase"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -57,6 +58,16 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		// レスポンスを返す
 		sendResponse(w, data)
+
+	// 上場銘柄一覧を取得
+	case "/rebuild_data":
+		// 全データを削除し、再取得
+		err := usecase.RebuildData()
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 	default:
 		fmt.Fprintf(w, "Not found")
