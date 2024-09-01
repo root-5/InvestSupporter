@@ -2,8 +2,8 @@
 package postgres
 
 import (
-	log "app/controller/log"
-	model "app/domain/model"
+	"app/controller/log"
+	"app/domain/model"
 
 	_ "github.com/lib/pq"
 )
@@ -15,29 +15,29 @@ import (
 */
 func InsertStocksInfo(stocks []model.StocksInfo) (err error) {
 	// Prepare を利用して SQL 文を実行
-    stmt, err := db.Prepare("INSERT INTO stocks_info (code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code) VALUES ($1, $2, $3, $4, $5, $6, $7)")
-    if err != nil {
-        log.Error(err)
-        return err
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare("INSERT INTO stocks_info (code, company_name, company_name_english, sector17_code, sector33_code, scale_category, market_code) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	defer stmt.Close()
 
-    // 上場銘柄テーブルに INSERT
-    for _, stock := range stocks {
-        _, err = stmt.Exec(
-            stock.Code,
-            stock.CompanyName,
-            stock.CompanyNameEnglish,
-            stock.Sector17Code,
-            stock.Sector33Code,
-            stock.ScaleCategory,
-            stock.MarketCode,
-        )
-        if err != nil {
-            log.Error(err)
-            return err
-        }
-    }
+	// 上場銘柄テーブルに INSERT
+	for _, stock := range stocks {
+		_, err = stmt.Exec(
+			stock.Code,
+			stock.CompanyName,
+			stock.CompanyNameEnglish,
+			stock.Sector17Code,
+			stock.Sector33Code,
+			stock.ScaleCategory,
+			stock.MarketCode,
+		)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
 
 	return nil
 }
@@ -49,29 +49,29 @@ func InsertStocksInfo(stocks []model.StocksInfo) (err error) {
 */
 func UpdateStocksInfo(stocks []model.StocksInfo) (err error) {
 	// Prepare を利用して SQL 文を実行
-    stmt, err := db.Prepare("UPDATE stocks_info SET company_name = $2, company_name_english = $3, sector17_code = $4, sector33_code = $5, scale_category = $6, market_code = $7 WHERE code = $1")
-    if err != nil {
-        log.Error(err)
-        return err
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare("UPDATE stocks_info SET company_name = $2, company_name_english = $3, sector17_code = $4, sector33_code = $5, scale_category = $6, market_code = $7 WHERE code = $1")
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	defer stmt.Close()
 
-    // 上場銘柄テーブルを UPDATE
-    for _, stock := range stocks {
-        _, err = stmt.Exec(
-            stock.Code,
-            stock.CompanyName,
-            stock.CompanyNameEnglish,
-            stock.Sector17Code,
-            stock.Sector33Code,
-            stock.ScaleCategory,
-            stock.MarketCode,
-        )
-        if err != nil {
-            log.Error(err)
-            return err
-        }
-    }
+	// 上場銘柄テーブルを UPDATE
+	for _, stock := range stocks {
+		_, err = stmt.Exec(
+			stock.Code,
+			stock.CompanyName,
+			stock.CompanyNameEnglish,
+			stock.Sector17Code,
+			stock.Sector33Code,
+			stock.ScaleCategory,
+			stock.MarketCode,
+		)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
 
 	return nil
 }

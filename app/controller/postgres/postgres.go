@@ -2,7 +2,7 @@
 package postgres
 
 import (
-	log "app/controller/log"
+	"app/controller/log"
 	"database/sql"
 	"os"
 

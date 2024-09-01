@@ -2,10 +2,10 @@
 package usecase
 
 import (
-	jquants "app/controller/jquants"
-	log "app/controller/log"
-	postgres "app/controller/postgres"
-	model "app/domain/model"
+	"app/controller/jquants"
+	"app/controller/log"
+	"app/controller/postgres"
+	"app/domain/model"
 	"fmt"
 	"time"
 )

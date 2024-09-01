@@ -2,8 +2,8 @@
 package jquants
 
 import (
-	log "app/controller/log"
-	model "app/domain/model"
+	"app/controller/log"
+	"app/domain/model"
 	"os"
 	"reflect"
 	"time"

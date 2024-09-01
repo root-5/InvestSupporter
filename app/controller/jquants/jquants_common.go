@@ -1,7 +1,7 @@
 package jquants
 
 import (
-	log "app/controller/log"
+	"app/controller/log"
 	"bytes"
 	"database/sql"
 	"encoding/json"

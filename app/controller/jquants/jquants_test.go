@@ -2,7 +2,7 @@
 package jquants_test
 
 import (
-	jquants "app/controller/jquants"
+	"app/controller/jquants"
 	"fmt"
 	"os"
 	"reflect"

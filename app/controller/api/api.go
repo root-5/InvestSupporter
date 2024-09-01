@@ -2,8 +2,8 @@
 package api
 
 import (
-	log "app/controller/log"
-	postgres "app/controller/postgres"
+	"app/controller/log"
+	"app/controller/postgres"
 	"app/usecase/usecase"
 	"encoding/json"
 	"fmt"
