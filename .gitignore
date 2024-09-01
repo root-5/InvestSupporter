@@ -8,5 +8,11 @@
 # DB データファイル
 /infra/db/data*
 
+# 秘密鍵
+/infra/InvestSupporter.pem
+
 # モックアップファイル
 *mockup.js
+
+# 本番環境設定メモ
+README.prod.md
