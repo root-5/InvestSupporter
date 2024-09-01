@@ -9,7 +9,7 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 ### 構築手順
 
-1. `go mod init InvestSuppoter`
+1. `go mod init InvestSupporter`
 2. Docker + Air で開発環境を構築
    1. .air.toml はコンテナ内で `air init` で作成
    2. compose.yaml, app.local.dockerfile は参考リンクなどをもとに作成
