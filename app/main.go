@@ -1,7 +1,7 @@
 package main
 
 import (
-	api "app/controller/api"
+	"app/controller/api"
 	"app/controller/jquants"
 	"app/controller/log"
 	"app/controller/postgres"

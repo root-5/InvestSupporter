@@ -18,13 +18,13 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 **基本用途**
 
-- `docker compose up -d` : 全てのコンテナを立ち上げる
-- `docker compose down` : 全てのコンテナを停止する
-- `docker compose exec app sh` : app コンテナに入る
-- `docker compose logs app -f` : app コンテナのログを表示する
-- `docker compose rm -fsv app` : app コンテナを削除する
-- `docker compose up -d app` : app コンテナを再起動する
-- `docker compose exec db sh` : db コンテナに入る
+- `docker-compose up -d` : 全てのコンテナを立ち上げる
+- `docker-compose down` : 全てのコンテナを停止する
+- `docker-compose exec app sh` : app コンテナに入る
+- `docker-compose logs app -f` : app コンテナのログを表示する
+- `docker-compose rm -fsv app` : app コンテナを削除する
+- `docker-compose up -d app` : app コンテナを再起動する
+- `docker-compose exec db sh` : db コンテナに入る
 
   - `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
 
@@ -71,5 +71,7 @@ Godoc を採用しているので、 Docker Compose でコンテナを起動し�
 
 # アイデア
 
-- 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要。
-- postgres.InsertFinancialInfoAll, postgres.InsertStocksInfo を for 文で回すのは非効率。一度に複数のデータを挿入する方法を検討する
+- API 返却をスプレッドシートの IMPORTDATA 関数（1時間に1回実行）ら呼び出せる形式に
+- distoress を使う本番用 compose.yaml を作成
+- EC2 インスタンスの起動時に docker-compose が自動で走るように設定
+- 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要
