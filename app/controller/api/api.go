@@ -44,33 +44,44 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	// テスト用
 	case "/":
-		fmt.Fprintf(w, "Hello, world")
+		type explainStruct struct {
+			Topic string `json:"topic"`
+			Detail string `json:"detail"`
+		}
+		data := []explainStruct{
+			{Topic: "Hello", Detail: "world"},
+			{Topic: "/", Detail: "APIの説明"},
+			{Topic: "/financials", Detail: "全ての上場銘柄-財務情報を取得"},
+			{Topic: "/financial/{code}", Detail: "コード(5桁)を指定して上場銘柄-財務情報を取得"},
+		}
+		sendResponse(w, data)
 
-	// 上場銘柄一覧を取得
-	case "/financial":
+	// 全ての上場銘柄-財務情報を取得
+	case "/financials":
 		// postges から財務情報を取得
-		data, err := postgres.GetFinancialInfoForApi("52530")
+		data, err := postgres.GetFinancialsInfoForApi()
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		sendResponse(w, data)
 
-		// data を []interface{} に変換する
-		var interfaceSlice []interface{} = make([]interface{}, len(data))
-		for i, d := range data {
-			interfaceSlice[i] = d
+	// コードを指定して上場銘柄-財務情報を取得
+	case "/financial/{code}":
+		// コードを取得
+		code := r.URL.Query().Get("code")
+		// postges から財務情報を取得
+		data, err := postgres.GetFinancialInfoForApi(code)
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-
-		dataJson := convertToCsv(interfaceSlice)
-		// dataJson := convertToJson(interfaceSlice)
-
-		// レスポンスを返す
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(dataJson))
+		sendResponse(w, data)
 
 	// 上場銘柄一覧を取得
-	case "/rebuild_data":
+	case "/admin/rebuild_data":
 		// 全データを削除し、再取得
 		err := usecase.RebuildData()
 		if err != nil {
@@ -123,15 +134,16 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 // レスポンスの処理関数
 // ====================================================================================
 // 構造体をjson形式の文字列に変換してレスポンスを返す関数
-// func sendResponse(w http.ResponseWriter, v interface{}) {
-// 	// レスポンスをJSONに変換
-// 	res, err := json.Marshal(v)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
+func sendResponse(w http.ResponseWriter, data interface{}) {
+		// CSV形式の文字列に変換
+		csvString, err := structToCSV(data)
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-// 	// レスポンスを返す
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.Write(res)
-// }
+		// レスポンスを返す
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(csvString))
+}

@@ -52,7 +52,7 @@ type FinancialInfo struct {
 	NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock sql.NullInt64   `json:"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock"` // 期末発行済株式数
 }
 
-// 上場銘柄テーブルと財務情報テーブルを結合したデータ
+// 上場銘柄-財務情報（API用）
 type FinancialInfoForApi struct {
 	Code                                                                         string          `json:"Code"`                                                                         // 銘柄コード
 	CompanyName                                                                  string          `json:"CompanyName"`                                                                  // 会社名

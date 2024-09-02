@@ -2,152 +2,100 @@
 package api
 
 import (
+	"bytes"
+	"database/sql"
+	"encoding/csv"
 	"fmt"
 	"reflect"
 	"time"
 )
 
 /*
-sql.Null~型などを持つ構造体を受け取り、csv形式の文字列に変換して返す関数
-  - arg) sql.Null~型などを持つ構造体
-  - return) vsc形式の文字列
-*/
-func convertToCsv(rows []interface{}) (csvString string) {
-
-	for _, row := range rows {
-		// row の要素を一つずつ処理
-		reflectValue := reflect.ValueOf(row)
-		for i := 0; i < reflectValue.NumField(); i++ {
-
-			// フィールドの値を取得
-			fieldValue := reflectValue.Field(i).Interface()
-			// フィールドの型を取得
-			fieldType := reflectValue.Field(i).Type().String()
-
-			// フィールドの値を追加
-			switch fieldType {
-			case "string":
-				csvString += fmt.Sprintf("%s", fieldValue)
-			case "int64":
-				csvString += fmt.Sprintf("%v", fieldValue)
-			case "float64":
-				csvString += fmt.Sprintf("%v", fieldValue)
-			case "bool":
-				csvString += fmt.Sprintf("%v", fieldValue)
-			case "time.Time":
-				csvString += fmt.Sprintf("%s", fieldValue)
-			case "sql.NullInt64":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					csvString += fmt.Sprintf("%v", reflectValue.Field(i).FieldByName("Int64").Int())
-				} else {
-					csvString += "NULL"
-				}
-			case "sql.NullFloat64":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					csvString += fmt.Sprintf("%v", reflectValue.Field(i).FieldByName("Float64").Float())
-				} else {
-					csvString += "NULL"
-				}
-			case "sql.NullString":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					csvString += reflectValue.Field(i).FieldByName("String").String()
-				} else {
-					csvString += "NULL"
-				}
-			case "sql.NullTime":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					timeValue := reflectValue.Field(i).FieldByName("Time").Interface().(time.Time)
-					csvString += timeValue.Format("2006-01-02")
-				} else {
-					csvString += "NULL"
-				}
-			}
-			csvString += ","
-		}
-
-		// 最後のカンマを削除
-		csvString = csvString[:len(csvString)-1]
-		csvString += "\n"
-	}
-
-	return csvString
-}
-
-/*
 sql.Null~型などを持つ構造体を受け取り、json形式の文字列に変換して返す関数
   - arg) sql.Null~型などを持つ構造体
   - return) json形式の文字列
 */
-func convertToJson(rows []interface{}) (jsonString string) {
+func structToCSV(data interface{}) (string, error) {
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
 
-	jsonString = "["
-
-	for _, row := range rows {
-		// row の要素を一つずつ処理
-		jsonString += "{"
-
-		// row の要素を一つずつ処理
-		reflectValue := reflect.ValueOf(row)
-		for i := 0; i < reflectValue.NumField(); i++ {
-
-			// フィールド名を取得
-			fieldName := reflectValue.Type().Field(i).Name
-			// フィールドの値を取得
-			fieldValue := reflectValue.Field(i).Interface()
-			// フィールドの型を取得
-			fieldType := reflectValue.Field(i).Type().String()
-
-			// フィールド名を追加
-			jsonString += fmt.Sprintf("%q:", fieldName)
-
-			// フィールドの値を追加
-			switch fieldType {
-			case "string":
-				jsonString += fmt.Sprintf("%q", fieldValue)
-			case "int64":
-				jsonString += fmt.Sprintf("%v", fieldValue)
-			case "float64":
-				jsonString += fmt.Sprintf("%v", fieldValue)
-			case "bool":
-				jsonString += fmt.Sprintf("%v", fieldValue)
-			case "time.Time":
-				jsonString += fmt.Sprintf("%q", fieldValue)
-			case "sql.NullInt64":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					jsonString += fmt.Sprintf("%v", reflectValue.Field(i).FieldByName("Int64").Int())
-				} else {
-					jsonString += "NULL"
-				}
-			case "sql.NullFloat64":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					jsonString += fmt.Sprintf("%v", reflectValue.Field(i).FieldByName("Float64").Float())
-				} else {
-					jsonString += "NULL"
-				}
-			case "sql.NullString":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					jsonString += fmt.Sprintf("%q", reflectValue.Field(i).FieldByName("String").String())
-				} else {
-					jsonString += "NULL"
-				}
-			case "sql.NullTime":
-				if reflectValue.Field(i).FieldByName("Valid").Bool() {
-					timeValue := reflectValue.Field(i).FieldByName("Time").Interface().(time.Time)
-					jsonString += timeValue.Format("2006-01-02")
-				} else {
-					jsonString += "NULL"
-				}
-			}
-			jsonString += ","
-		}
-
-		// 最後のカンマを削除
-		jsonString = jsonString[:len(jsonString)-1]
-		jsonString += "},\n"
+	v := reflect.ValueOf(data)
+	if v.Kind() != reflect.Slice {
+		return "", fmt.Errorf("expected a slice, but got %s", v.Kind())
 	}
 
-	// 最後のカンマを削除
-	jsonString = jsonString[:len(jsonString)-2] + "]"
+	if v.Len() == 0 {
+		return "", fmt.Errorf("slice is empty")
+	}
 
-	return jsonString
+	// スライスの最初の要素の型を取得
+	elemType := v.Index(0).Type()
+
+	// ヘッダー行を作成
+	var headers []string
+	for i := 0; i < elemType.NumField(); i++ {
+		headers = append(headers, elemType.Field(i).Tag.Get("json"))
+	}
+	if err := writer.Write(headers); err != nil {
+		return "", err
+	}
+
+	// データ行を作成
+	for i := 0; i < v.Len(); i++ {
+		elem := v.Index(i)
+		var record []string
+		for j := 0; j < elem.NumField(); j++ {
+			field := elem.Field(j)
+			switch field.Kind() {
+			case reflect.String:
+				record = append(record, field.String())
+			case reflect.Int64:
+				record = append(record, fmt.Sprintf("%d", field.Int()))
+			case reflect.Float64:
+				record = append(record, fmt.Sprintf("%f", field.Float()))
+			case reflect.Struct:
+				switch field.Interface().(type) {
+				case sql.NullInt64:
+					if field.FieldByName("Valid").Bool() {
+						record = append(record, fmt.Sprintf("%d", field.FieldByName("Int64").Int()))
+					} else {
+						record = append(record, "")
+					}
+				case sql.NullFloat64:
+					if field.FieldByName("Valid").Bool() {
+						record = append(record, fmt.Sprintf("%f", field.FieldByName("Float64").Float()))
+					} else {
+						record = append(record, "")
+					}
+				case sql.NullString:
+					if field.FieldByName("Valid").Bool() {
+						record = append(record, field.FieldByName("String").String())
+					} else {
+						record = append(record, "")
+					}
+				case sql.NullTime:
+					if field.FieldByName("Valid").Bool() {
+						timeValue := field.FieldByName("Time").Interface().(time.Time)
+						record = append(record, timeValue.Format(time.RFC3339))
+					} else {
+						record = append(record, "")
+					}
+				default:
+					return "", fmt.Errorf("unsupported struct field type: %s", field.Type())
+				}
+			default:
+				return "", fmt.Errorf("unsupported field type: %s", field.Kind())
+			}
+		}
+		if err := writer.Write(record); err != nil {
+			return "", err
+		}
+	}
+
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
