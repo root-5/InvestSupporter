@@ -5,7 +5,6 @@ import (
 	"app/controller/log"
 	"app/controller/postgres"
 	"app/usecase/usecase"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -50,14 +49,25 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	// 上場銘柄一覧を取得
 	case "/financial":
 		// postges から財務情報を取得
-		data, err := postgres.GetFinancialInfoForApi()
+		data, err := postgres.GetFinancialInfoForApi("52530")
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		// data を []interface{} に変換する
+		var interfaceSlice []interface{} = make([]interface{}, len(data))
+		for i, d := range data {
+			interfaceSlice[i] = d
+		}
+
+		dataJson := convertToCsv(interfaceSlice)
+		// dataJson := convertToJson(interfaceSlice)
+
 		// レスポンスを返す
-		sendResponse(w, data)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(dataJson))
 
 	// 上場銘柄一覧を取得
 	case "/rebuild_data":
@@ -112,16 +122,16 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 // ====================================================================================
 // レスポンスの処理関数
 // ====================================================================================
-// レスポンスを返す関数
-func sendResponse(w http.ResponseWriter, v interface{}) {
-	// レスポンスをJSONに変換
-	res, err := json.Marshal(v)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+// 構造体をjson形式の文字列に変換してレスポンスを返す関数
+// func sendResponse(w http.ResponseWriter, v interface{}) {
+// 	// レスポンスをJSONに変換
+// 	res, err := json.Marshal(v)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
 
-	// レスポンスを返す
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
-}
+// 	// レスポンスを返す
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.Write(res)
+// }
