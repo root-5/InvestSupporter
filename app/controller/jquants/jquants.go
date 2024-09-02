@@ -187,11 +187,11 @@ func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 	for _, stock := range resBody.Info {
 		stocksList = append(stocksList, model.StocksInfo{
 			Code:               stock.Code,
-			CompanyName:        stock.CompanyName,
-			CompanyNameEnglish: stock.CompanyNameEnglish,
+			CompanyName:        convertStringToString(stock.CompanyName),
+			CompanyNameEnglish: convertStringToString(stock.CompanyNameEnglish),
 			Sector17Code:       convertStringToInt64(stock.Sector17Code),
 			Sector33Code:       convertStringToInt64(stock.Sector33Code),
-			ScaleCategory:      stock.ScaleCategory,
+			ScaleCategory:      convertStringToString(stock.ScaleCategory),
 			MarketCode:         convertStringToInt64(stock.MarketCode),
 		})
 	}

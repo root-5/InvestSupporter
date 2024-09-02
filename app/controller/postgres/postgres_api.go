@@ -18,10 +18,10 @@ func GetFinancialInfoForApi(code string) (financialsInfoForApi []model.Financial
 			stocks.code,
 			stocks.company_name,
 			stocks.company_name_english,
-			stocks.sector17_code,
-			stocks.sector33_code,
+			sector17.sector17_name,
+			sector33.sector33_name,
 			stocks.scale_category,
-			stocks.market_code,
+			market.market_name,
 			financial.disclosed_date,
 			financial.net_sales,
 			financial.operating_profit,
@@ -55,12 +55,26 @@ func GetFinancialInfoForApi(code string) (financialsInfoForApi []model.Financial
 			financial.number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock
 		FROM
 			stocks_info stocks
-		INNER JOIN
+		LEFT JOIN
 			financial_info financial
 		ON
 			stocks.code = financial.code
+		LEFT JOIN
+			sector17_info sector17
+		ON
+			stocks.sector17_code = sector17.sector17_code
+		LEFT JOIN
+			sector33_info sector33
+		ON
+			stocks.sector33_code = sector33.sector33_code
+		LEFT JOIN
+			market_info market
+		ON
+			stocks.market_code = market.market_code
 		WHERE
 			stocks.code = $1
+			AND sector33.sector33_name != 'その他'
+		ORDER BY stocks.code
 	`, code)
 	if err != nil {
 		log.Error(err)
@@ -74,10 +88,10 @@ func GetFinancialInfoForApi(code string) (financialsInfoForApi []model.Financial
 			&financialInfoForApi.Code,
 			&financialInfoForApi.CompanyName,
 			&financialInfoForApi.CompanyNameEnglish,
-			&financialInfoForApi.Sector17Code,
-			&financialInfoForApi.Sector33Code,
+			&financialInfoForApi.Sector17Name,
+			&financialInfoForApi.Sector33Name,
 			&financialInfoForApi.ScaleCategory,
-			&financialInfoForApi.MarketCode,
+			&financialInfoForApi.MarketName,
 			&financialInfoForApi.DisclosedDate,
 			&financialInfoForApi.NetSales,
 			&financialInfoForApi.OperatingProfit,
@@ -131,10 +145,10 @@ func GetFinancialsInfoForApi() (financialsInfoForApi []model.FinancialInfoForApi
 			stocks.code,
 			stocks.company_name,
 			stocks.company_name_english,
-			stocks.sector17_code,
-			stocks.sector33_code,
+			sector17.sector17_name,
+			sector33.sector33_name,
 			stocks.scale_category,
-			stocks.market_code,
+			market.market_name,
 			financial.disclosed_date,
 			financial.net_sales,
 			financial.operating_profit,
@@ -168,10 +182,25 @@ func GetFinancialsInfoForApi() (financialsInfoForApi []model.FinancialInfoForApi
 			financial.number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock
 		FROM
 			stocks_info stocks
-		INNER JOIN
+		LEFT JOIN
 			financial_info financial
 		ON
 			stocks.code = financial.code
+		LEFT JOIN
+			sector17_info sector17
+		ON
+			stocks.sector17_code = sector17.sector17_code
+		LEFT JOIN
+			sector33_info sector33
+		ON
+			stocks.sector33_code = sector33.sector33_code
+		LEFT JOIN
+			market_info market
+		ON
+			stocks.market_code = market.market_code
+		WHERE
+			sector33.sector33_name != 'その他'
+		ORDER BY stocks.code
 	`)
 	if err != nil {
 		log.Error(err)
@@ -185,10 +214,10 @@ func GetFinancialsInfoForApi() (financialsInfoForApi []model.FinancialInfoForApi
 			&financialInfoForApi.Code,
 			&financialInfoForApi.CompanyName,
 			&financialInfoForApi.CompanyNameEnglish,
-			&financialInfoForApi.Sector17Code,
-			&financialInfoForApi.Sector33Code,
+			&financialInfoForApi.Sector17Name,
+			&financialInfoForApi.Sector33Name,
 			&financialInfoForApi.ScaleCategory,
-			&financialInfoForApi.MarketCode,
+			&financialInfoForApi.MarketName,
 			&financialInfoForApi.DisclosedDate,
 			&financialInfoForApi.NetSales,
 			&financialInfoForApi.OperatingProfit,

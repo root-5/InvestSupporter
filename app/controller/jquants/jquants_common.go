@@ -170,6 +170,20 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 }
 
 /*
+string 型の数値を sql.NullString 型に変換する関数
+  - return) stringValue		変換する文字列
+  - arg) stringValue		変換後の文字列
+*/
+func convertStringToString(stringValue string) (stringOrNilValue sql.NullString) {
+	if stringValue == "" {
+		stringOrNilValue = sql.NullString{String: "", Valid: false}
+	} else {
+		stringOrNilValue = sql.NullString{String: stringValue, Valid: true}
+	}
+	return stringOrNilValue
+}
+
+/*
 string 型の数値を sql.NullInt64 型に変換する関数
   - return) stringValue		変換する文字列
   - arg) intValue			変換後の整数

@@ -57,6 +57,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	case "/financial":
 		// コードを取得
 		code := r.URL.Query().Get("code")
+		// コードが指定されていない場合はエラー
+		if code == "" {
+			http.Error(w, "code is required", http.StatusBadRequest)
+			return
+		}
 		// コードが4桁の場合は5桁に変換
 		if len(code) == 4 {
 			code = code + "0"
@@ -142,7 +147,7 @@ func sendCsvResponse(w http.ResponseWriter, data interface{}) {
 	csvString, err := structToCSV(data)
 	if err != nil {
 		log.Error(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "no data", http.StatusInternalServerError)
 		return
 	}
 
