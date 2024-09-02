@@ -42,20 +42,6 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	// リクエストパスによって処理を分岐
 	switch path {
 
-	// テスト用
-	case "/":
-		type explainStruct struct {
-			Topic string `json:"topic"`
-			Detail string `json:"detail"`
-		}
-		data := []explainStruct{
-			{Topic: "Hello", Detail: "world"},
-			{Topic: "/", Detail: "APIの説明"},
-			{Topic: "/financials", Detail: "全ての上場銘柄-財務情報を取得"},
-			{Topic: "/financial/{code}", Detail: "コード(5桁)を指定して上場銘柄-財務情報を取得"},
-		}
-		sendResponse(w, data)
-
 	// 全ての上場銘柄-財務情報を取得
 	case "/financials":
 		// postges から財務情報を取得
@@ -65,12 +51,16 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		sendResponse(w, data)
+		sendCsvResponse(w, data)
 
 	// コードを指定して上場銘柄-財務情報を取得
-	case "/financial/{code}":
+	case "/financial":
 		// コードを取得
 		code := r.URL.Query().Get("code")
+		// コードが4桁の場合は5桁に変換
+		if len(code) == 4 {
+			code = code + "0"
+		}
 		// postges から財務情報を取得
 		data, err := postgres.GetFinancialInfoForApi(code)
 		if err != nil {
@@ -78,7 +68,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		sendResponse(w, data)
+		sendCsvResponse(w, data)
 
 	// 上場銘柄一覧を取得
 	case "/admin/rebuild_data":
@@ -89,6 +79,19 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+	// テスト用
+	case "/":
+		type explainStruct struct {
+			Path  string `json:"path"`
+			Explain string `json:"explain"`
+		}
+		data := []explainStruct{
+			{Path: "/", Explain: "APIの説明"},
+			{Path: "/financials", Explain: "全ての上場銘柄-財務情報を取得"},
+			{Path: "/financial?code={{銘柄コード}}", Explain: "コード(5桁)を指定して上場銘柄-財務情報を取得"},
+		}
+		sendCsvResponse(w, data)
 
 	default:
 		fmt.Fprintf(w, "Not found")
@@ -134,16 +137,16 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 // レスポンスの処理関数
 // ====================================================================================
 // 構造体をjson形式の文字列に変換してレスポンスを返す関数
-func sendResponse(w http.ResponseWriter, data interface{}) {
-		// CSV形式の文字列に変換
-		csvString, err := structToCSV(data)
-		if err != nil {
-			log.Error(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+func sendCsvResponse(w http.ResponseWriter, data interface{}) {
+	// CSV形式の文字列に変換
+	csvString, err := structToCSV(data)
+	if err != nil {
+		log.Error(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		// レスポンスを返す
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(csvString))
+	// レスポンスを返す
+	// w.Header().Set("Content-Type", "application/csv") // これをオンするとダウンロードされる
+	w.Write([]byte(csvString))
 }
