@@ -18,7 +18,8 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 **基本用途**
 
-- `docker-compose up -d` : 全てのコンテナを立ち上げる
+- `docker-compose -f="compose.local.yaml" up -d"` : （ローカル）全てのコンテナを立ち上げる
+- `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
 - `docker-compose down` : 全てのコンテナを停止する
 - `docker-compose exec app sh` : app コンテナに入る
 - `docker-compose logs app -f` : app コンテナのログを表示する
@@ -36,9 +37,9 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 ## ドキュメント
 
-[Godoc](http://localhost:8080/)
+[Godoc](http://localhost:8081/)
 
-Godoc を採用しているので、 Docker Compose でコンテナを起動していれば、上記のリンクからドキュメントを確認できる。ただし、記載されている関数や変数は大文字から始まるもの（プライベートでないもの）のみが表示される。
+Godoc を採用しているので、ローカル環境なら上記のリンクからドキュメントを確認できる。ただし、記載されている関数や変数は大文字から始まるもの（プライベートでないもの）のみが表示される。
 
 ## 利用ツール
 
@@ -75,3 +76,4 @@ Godoc を採用しているので、 Docker Compose でコンテナを起動し�
 - distoress を使う本番用 compose.yaml を作成
 - EC2 インスタンスの起動時に docker-compose が自動で走るように設定
 - 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要
+- GoDoc が使えなくなっている

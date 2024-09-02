@@ -4,8 +4,6 @@ package postgres
 import (
 	"app/controller/log"
 	"app/domain/model"
-
-	_ "github.com/lib/pq"
 )
 
 /*

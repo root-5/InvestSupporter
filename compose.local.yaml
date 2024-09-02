@@ -1,12 +1,15 @@
 services:
-    app:
+    app-local:
         build:
-            dockerfile: ./infra/app/app.dockerfile
+            dockerfile: ./infra/app/app.local.dockerfile
         tty: true  # コンテナを起動したままにする
         env_file:
             - ./infra/app/.env
+        volumes:
+            - ./app:/app
         ports:
-            - 80:8080
+            - 8080:8080  # API
+            - 8081:8081  # GoDoc
         networks:
             - backend
         depends_on:
