@@ -173,13 +173,13 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 
 	// 取得した財務情報を DB に保存
 	for _, financial := range yesterdayFinancials {
-		err = postgres.UpdateFinancialInfo(financial)
+		result, err := postgres.UpdateFinancialInfo(financial)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
 		// 影響を受けた行数を確認
-		rowsAffected, err := postgres.RowsAffected()
+		rowsAffected, err := postgres.RowsAffected(result)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -193,16 +193,15 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 				return err
 			}
 		}
-
 	}
 	for _, financial := range todayFinancials {
-		err = postgres.UpdateFinancialInfo(financial)
+		result, err := postgres.UpdateFinancialInfo(financial)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
 		// 影響を受けた行数を確認
-		rowsAffected, err := postgres.RowsAffected()
+		rowsAffected, err := postgres.RowsAffected(result)
 		if err != nil {
 			log.Error(err)
 			return err

@@ -4,6 +4,7 @@ package postgres
 import (
 	"app/controller/log"
 	"app/domain/model"
+	"database/sql"
 )
 
 /*
@@ -119,19 +120,20 @@ func InsertFinancialInfoAll(financial []model.FinancialInfo) (err error) {
 /*
 財務情報テーブルを UPDATE する関数
   - arg) financial	財務情報
+  - return) result	更新結果
   - return) err		エラー
 */
-func UpdateFinancialInfo(financial model.FinancialInfo) (err error) {
+func UpdateFinancialInfo(financial model.FinancialInfo) (result sql.Result, err error) {
 	// Prepare を利用して SQL 文を実行
 	stmt, err := db.Prepare("UPDATE financial_info SET disclosed_date = $2, disclosed_time = $3, net_sales = $4, operating_profit = $5, ordinary_profit = $6, profit = $7, earnings_per_share = $8, total_assets = $9, equity = $10, equity_to_asset_ratio = $11, book_value_per_share = $12, cash_flows_from_operating_activities = $13, cash_flows_from_investing_activities = $14, cash_flows_from_financing_activities = $15, cash_and_equivalents = $16, result_dividend_per_share_annual = $17, result_payout_ratio_annual = $18, forecast_dividend_per_share_annual = $19, forecast_payout_ratio_annual = $20, next_year_forecast_dividend_per_share_annual = $21, next_year_forecast_payout_ratio_annual = $22, forecast_net_sales = $23, forecast_operating_profit = $24, forecast_ordinary_profit = $25, forecast_profit = $26, forecast_earnings_per_share = $27, next_year_forecast_net_sales = $28, next_year_forecast_operating_profit = $29, next_year_forecast_ordinary_profit = $30, next_year_forecast_profit = $31, next_year_forecast_earnings_per_share = $32, number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock = $33 WHERE code = $1")
 	if err != nil {
 		log.Error(err)
-		return err
+		return nil, err
 	}
 	defer stmt.Close()
 
 	// 財務情報テーブルを UPDATE
-	_, err = stmt.Exec(
+	result, err = stmt.Exec(
 		financial.Code,
 		financial.DisclosedDate,
 		financial.DisclosedTime,
@@ -168,10 +170,10 @@ func UpdateFinancialInfo(financial model.FinancialInfo) (err error) {
 	)
 	if err != nil {
 		log.Error(err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 /*
