@@ -1,6 +1,7 @@
 services:
     app:
         build:
+            context: .
             dockerfile: ./infra/app/app.dockerfile
         tty: true  # コンテナを起動したままにする
         env_file:

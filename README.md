@@ -18,7 +18,7 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 **基本用途**
 
-- `docker-compose -f="compose.local.yaml" up -d"` : （ローカル）全てのコンテナを立ち上げる
+- `docker-compose -f="compose.local.yaml" up -d` : （ローカル）全てのコンテナを立ち上げる
 - `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
 - `docker-compose down` : 全てのコンテナを停止する
 - `docker-compose exec app sh` : app コンテナに入る
