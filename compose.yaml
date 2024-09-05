@@ -7,7 +7,7 @@ services:
         env_file:
             - ./infra/app/.env
         ports:
-            - 80:8080
+            - 7203:8080
         networks:
             - backend
         depends_on:
