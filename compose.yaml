@@ -12,6 +12,7 @@ services:
             - backend
         depends_on:
             - db
+        restart: always
     db:
         image: postgres:alpine
         env_file:
@@ -23,6 +24,7 @@ services:
             - 5432:5432
         networks:
             - backend
+        restart: always
 
 networks:
     backend:
