@@ -17,7 +17,7 @@ API と DB の上場銘柄一覧のデータが不一致なら、テーブルを
 - return) err	エラー
 */
 func GetAndSaveStocksInfo() (err error) {
-	fmt.Println("EXECUTE GetAndUpdateStocksInfo")
+	// fmt.Println("EXECUTE GetAndUpdateStocksInfo")
 
 	// 上場銘柄一覧を API から取得
 	stocksNew, err := jquants.GetStocksInfo()
@@ -86,7 +86,7 @@ Jquants API から全ての財務情報を取得し、DB を一度削除した�
 - return) err	エラー
 */
 func GetAndSaveFinancialInfoAll() (err error) {
-	fmt.Println("EXECUTE GetAndSaveFinancialInfoAll")
+	// fmt.Println("EXECUTE GetAndSaveFinancialInfoAll")
 
 	// 財務情報テーブルを全て削除
 	err = postgres.DeleteFinancialInfoAll()
@@ -153,7 +153,7 @@ Jquants API から昨日と今日に更新された財務情報を取得し、DB
 - return) err	エラー
 */
 func GetAndUpdateFinancialInfoToday() (err error) {
-	fmt.Println("EXECUTE GetAndUpdateFinancialInfoToday")
+	// fmt.Println("EXECUTE GetAndUpdateFinancialInfoToday")
 
 	// 昨日と今日の日付を取得
 	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
@@ -190,8 +190,8 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 			if rowsAffected == 0 {
 				err = postgres.InsertFinancialInfo(financial)
 				if err != nil {
-					fmt.Println(financial)
-					log.Error(err)
+					// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
+					// log.Error(err)
 					return err
 				}
 			}
@@ -215,8 +215,8 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 			if rowsAffected == 0 {
 				err = postgres.InsertFinancialInfo(financial)
 				if err != nil {
-					fmt.Println(financial)
-					log.Error(err)
+					// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
+					// log.Error(err)
 					return err
 				}
 			}

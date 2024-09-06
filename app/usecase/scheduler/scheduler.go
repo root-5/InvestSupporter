@@ -2,7 +2,6 @@
 package scheduler
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -33,6 +32,6 @@ func schedulerExec(jobs Jobs) {
 
 // 定期実行を開始する関数
 func SchedulerStart() {
-	fmt.Println("EXECUTE SchedulerStart")
+	// fmt.Println("EXECUTE SchedulerStart")
 	schedulerExec(jobs)
 }
