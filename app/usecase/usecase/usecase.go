@@ -172,47 +172,53 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 	}
 
 	// 取得した財務情報を DB に保存
-	for _, financial := range yesterdayFinancials {
-		result, err := postgres.UpdateFinancialInfo(financial)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		// 影響を受けた行数を確認
-		rowsAffected, err := postgres.RowsAffected(result)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-
-		// 影響を受けた行数が0の場合はINSERTを行う
-		if rowsAffected == 0 {
-			err = postgres.InsertFinancialInfo(financial)
+	if len(yesterdayFinancials) != 0 {
+		for _, financial := range yesterdayFinancials {
+			result, err := postgres.UpdateFinancialInfo(financial)
 			if err != nil {
 				log.Error(err)
 				return err
 			}
-		}
-	}
-	for _, financial := range todayFinancials {
-		result, err := postgres.UpdateFinancialInfo(financial)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		// 影響を受けた行数を確認
-		rowsAffected, err := postgres.RowsAffected(result)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-
-		// 影響を受けた行数が0の場合はINSERTを行う
-		if rowsAffected == 0 {
-			err = postgres.InsertFinancialInfo(financial)
+			// 影響を受けた行数を確認
+			rowsAffected, err := postgres.RowsAffected(result)
 			if err != nil {
 				log.Error(err)
 				return err
+			}
+
+			// 影響を受けた行数が0の場合はINSERTを行う
+			if rowsAffected == 0 {
+				err = postgres.InsertFinancialInfo(financial)
+				if err != nil {
+					fmt.Println(financial)
+					log.Error(err)
+					return err
+				}
+			}
+		}
+	}
+	if len(todayFinancials) != 0 {
+		for _, financial := range todayFinancials {
+			result, err := postgres.UpdateFinancialInfo(financial)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+			// 影響を受けた行数を確認
+			rowsAffected, err := postgres.RowsAffected(result)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+
+			// 影響を受けた行数が0の場合はINSERTを行う
+			if rowsAffected == 0 {
+				err = postgres.InsertFinancialInfo(financial)
+				if err != nil {
+					fmt.Println(financial)
+					log.Error(err)
+					return err
+				}
 			}
 		}
 	}
