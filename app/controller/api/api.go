@@ -88,13 +88,16 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	// テスト用
 	case "/":
 		type explainStruct struct {
-			Path  string `json:"path"`
-			Explain string `json:"explain"`
+			Path  string `json:"このWEBサービスはアクセスするURLパスによって以下の機能を提供します"`
+			Explain string `json:""`
 		}
 		data := []explainStruct{
-			{Path: "/", Explain: "APIの説明"},
-			{Path: "/financials", Explain: "全ての上場銘柄-財務情報を取得"},
-			{Path: "/financial?code={{銘柄コード}}", Explain: "コード(5桁)を指定して上場銘柄-財務情報を取得"},
+			{Path: "GoogleスプレッドシートのIMPORTDATA関数の引数に以下のURLパスを指定してください", Explain: ""},
+			{Path: "", Explain: ""},
+			{Path: "URLパス", Explain: "使い方概要"},
+			{Path: "/", Explain: "使い方概要"},
+			{Path: "/financials", Explain: "財務情報（全上場銘柄）"},
+			{Path: "/financial?code={{銘柄コード}}", Explain: "財務情報（単一） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定"},
 		}
 		sendCsvResponse(w, data)
 
