@@ -2,6 +2,7 @@
 package api
 
 import (
+	"app/controller/jquants"
 	"app/controller/log"
 	"app/controller/postgres"
 	"app/usecase/usecase"
@@ -75,6 +76,28 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		sendCsvResponse(w, data)
 
+	// 株価情報を取得
+	case "/price":
+		// コードまたは日付を取得
+		codeOrDate := r.URL.Query().Get("codeOrDate")
+		// コードまたは日付が指定されていない場合はエラー
+		if codeOrDate == "" {
+			http.Error(w, "codeOrDate is required", http.StatusBadRequest)
+			return
+		}
+		// コードが4桁の場合は5桁に変換
+		if len(codeOrDate) == 4 {
+			codeOrDate = codeOrDate + "0"
+		}
+		// jquants から株価情報を取得
+		data, err := jquants.GetPriceInfo(codeOrDate)
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		sendCsvResponse(w, data)
+
 	// 上場銘柄一覧を取得
 	case "/admin/rebuild_data":
 		// 全データを削除し、再取得
@@ -88,7 +111,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	// テスト用
 	case "/":
 		type explainStruct struct {
-			Path  string `json:"このWEBサービスはアクセスするURLパスによって以下の機能を提供します"`
+			Path    string `json:"このWEBサービスはアクセスするURLパスによって以下の機能を提供します"`
 			Explain string `json:""`
 		}
 		data := []explainStruct{

@@ -94,3 +94,49 @@ type jquantsFinancialInfo struct {
 	NextYearForecastEarningsPerShare                                             string `json:"NextYearForecastEarningsPerShare"`                                             // 一株あたり当期純利益_予想_翌事業年度期末
 	NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock string `json:"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock"` // 期末発行済株式数
 }
+
+// 株価四本値
+type jquantsPriceInfo struct {
+	Date                      string  `json: "Date"`                      // 日付
+	Code                      string  `json: "Code"`                      // 銘柄コード
+	// Open                      string  `json: "Open"`                      // 始値（調整前）
+	// High                      string  `json: "High"`                      // 高値（調整前）
+	// Low                       string  `json: "Low"`                       // 安値（調整前）
+	// Close                     string  `json: "Close"`                     // 終値（調整前）
+	// UpperLimit                string  `json: "UpperLimit"`                // 日通ストップ高を記録したか、否かを表すフラグ
+	// LowerLimit                string  `json: "LowerLimit"`                // 日通ストップ安を記録したか、否かを表すフラグ
+	// Volume                    string  `json: "Volume"`                    // 取引高（調整前）
+	// TurnoverValue             string  `json: "TurnoverValue"`             // 取引代金
+	// AdjustmentFactor          string  `json: "AdjustmentFactor"`          // 調整係数
+	// AdjustmentOpen            string  `json: "AdjustmentOpen"`            // 調整済み始値
+	// AdjustmentHigh            string  `json: "AdjustmentHigh"`            // 調整済み高値
+	// AdjustmentLow             string  `json: "AdjustmentLow"`             // 調整済み安値
+	AdjustmentClose           float64 `json: "AdjustmentClose"`           // 調整済み終値
+	AdjustmentVolume          float64 `json: "AdjustmentVolume"`          // 調整済み取引高
+	// MorningOpen               string  `json: "MorningOpen"`               // 前場始値
+	// MorningHigh               string  `json: "MorningHigh"`               // 前場高値
+	// MorningLow                string  `json: "MorningLow"`                // 前場安値
+	// MorningClose              string  `json: "MorningClose"`              // 前場終値
+	// MorningUpperLimit         string  `json: "MorningUpperLimit"`         // 前場ストップ高を記録したか、否かを表すフラグ
+	// MorningLowerLimit         string  `json: "MorningLowerLimit"`         // 前場ストップ安を記録したか、否かを表すフラグ
+	// MorningVolume             string  `json: "MorningVolume"`             // 前場売買高
+	// MorningTurnoverValue      string  `json: "MorningTurnoverValue"`      // 前場取引代金
+	// MorningAdjustmentOpen     string  `json: "MorningAdjustmentOpen"`     // 調整済み前場始値
+	// MorningAdjustmentHigh     string  `json: "MorningAdjustmentHigh"`     // 調整済み前場高値
+	// MorningAdjustmentLow      string  `json: "MorningAdjustmentLow"`      // 調整済み前場安値
+	// MorningAdjustmentClose    string  `json: "MorningAdjustmentClose"`    // 調整済み前場終値
+	// MorningAdjustmentVolume   string  `json: "MorningAdjustmentVolume"`   // 調整済み前場売買高
+	// AfternoonOpen             string  `json: "AfternoonOpen"`             // 後場始値
+	// AfternoonHigh             string  `json: "AfternoonHigh"`             // 後場高値
+	// AfternoonLow              string  `json: "AfternoonLow"`              // 後場安値
+	// AfternoonClose            string  `json: "AfternoonClose"`            // 後場終値
+	// AfternoonUpperLimit       string  `json: "AfternoonUpperLimit"`       // 後場ストップ高を記録したか、否かを表すフラグ
+	// AfternoonLowerLimit       string  `json: "AfternoonLowerLimit"`       // 後場ストップ安を記録したか、否かを表すフラグ
+	// AfternoonVolume           string  `json: "AfternoonVolume"`           // 後場売買高
+	// AfternoonTurnoverValue    string  `json: "AfternoonTurnoverValue"`    // 後場取引代金
+	// AfternoonAdjustmentOpen   string  `json: "AfternoonAdjustmentOpen"`   // 調整済み後場始値
+	// AfternoonAdjustmentHigh   string  `json: "AfternoonAdjustmentHigh"`   // 調整済み後場高値
+	// AfternoonAdjustmentLow    string  `json: "AfternoonAdjustmentLow"`    // 調整済み後場安値
+	// AfternoonAdjustmentClose  string  `json: "AfternoonAdjustmentClose"`  // 調整済み後場終値
+	// AfternoonAdjustmentVolume string  `json: "AfternoonAdjustmentVolume"` // 調整済み後場売買高
+}

@@ -386,3 +386,67 @@ func GetFinancialInfo(codeOrDate string) (financials []model.FinancialInfo, err 
 
 	return financials, nil
 }
+
+/*
+株価を取得する関数
+- arg) codeOrDate		銘柄コードまたは日付（YYYY-MM-DD）
+- return) prices	株価情報
+- return) err			エラー
+*/
+func GetPriceInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
+	// リクエスト先URL
+	url := "https://api.jquants.com/v1/prices/daily_quotes"
+
+	// クエリパラメータ定義
+	type queryParamsType struct {
+		Code string
+		Date string
+	}
+	var queryParams = queryParamsType{}
+	// var isCodeMode bool
+
+	// codeOrDate が銘柄コードか日付かでクエリパラメータを変更
+	if len(codeOrDate) == 4 || len(codeOrDate) == 5 {
+		queryParams = queryParamsType{
+			Code: codeOrDate,
+		}
+		// isCodeMode = true
+	} else {
+		queryParams = queryParamsType{
+			Date: codeOrDate,
+		}
+		// isCodeMode = false
+	}
+
+	// ヘッダー定義
+	type headersType struct {
+		Authorization string `json:"Authorization"`
+	}
+	headers := headersType{
+		Authorization: IdToken,
+	}
+
+	// レスポンスボディ定義
+	type resBodyStruct struct {
+		Daily_quotes []jquantsPriceInfo `json:"daily_quotes"`
+	}
+	var resBody resBodyStruct
+
+	// GETリクエスト
+	err = get(url, queryParams, headers, &resBody)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	for _, price := range resBody.Daily_quotes {
+		// 型変換（jquantsPriceInfo 型の配列から model.StockPrice 型の配列に変換）
+		prices = append(prices, model.PriceInfo{
+			Date:             price.Date,
+			Code:             price.Code,
+			AdjustmentClose:  price.AdjustmentClose,
+		})
+	}
+
+	return prices, nil
+}

@@ -111,3 +111,10 @@ type FinancialInfoForApi struct {
 	NextYearForecastEarningsPerShare                                             sql.NullFloat64 `json:"一株あたり当期純利益予想_翌事業年度期末"` // 一株あたり当期純利益予想_翌事業年度期末
 	NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock sql.NullInt64   `json:"期末発行済株式数"`             // 期末発行済株式数
 }
+
+// 株価四本値情報
+type PriceInfo struct {
+	Date            string  `json:"Date"`            // 日付
+	Code            string  `json:"Code"`            // 銘柄コード
+	AdjustmentClose float64 `json:"AdjustmentClose"` // 調整後終値
+}
