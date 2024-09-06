@@ -34,11 +34,11 @@ var httpClient = &http.Client{}
 
 /*
 GETリクエストを行い、レスポンスボディを取得する関数
-  - return) url			リクエスト先URL文字列
-  - return) queryParam	クエリパラメータ構造体
-  - return) headers		ヘッダー構造体
-  - return) resBody		レスポンスボディ構造体のポインタ
-  - arg) err			エラー
+  - arg) url		リクエスト先URL文字列
+  - arg) queryParam	クエリパラメータ構造体
+  - arg) headers	ヘッダー構造体
+  - arg) resBody	レスポンスボディ構造体のポインタ
+  - return) err		エラー
 */
 func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err error) {
 	// クエリパラメータをreqURLに追加
@@ -101,11 +101,11 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 
 /*
 POSTリクエストを行い、レスポンスボディを取得する関数
-  - return) url			リクエスト先URL文字列
-  - return) queryParam	クエリパラメータ構造体
-  - return) reqBody		リクエストボディ構造体
-  - return) resBody		レスポンスボディ構造体のポインタ
-  - arg) err			エラー
+  - arg) url		リクエスト先URL文字列
+  - arg) queryParam	クエリパラメータ構造体
+  - arg) reqBody	リクエストボディ構造体
+  - arg) resBody	レスポンスボディ構造体のポインタ
+  - return) err		エラー
 */
 func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err error) {
 	// クエリパラメータをreqURLに追加
@@ -171,8 +171,8 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 
 /*
 string 型の数値を sql.NullString 型に変換する関数
-  - return) stringValue		変換する文字列
-  - arg) stringValue		変換後の文字列
+  - arg) stringValue	変換する文字列
+  - return) stringValue	変換後の文字列
 */
 func convertStringToString(stringValue string) (stringOrNilValue sql.NullString) {
 	if stringValue == "" {
@@ -185,8 +185,8 @@ func convertStringToString(stringValue string) (stringOrNilValue sql.NullString)
 
 /*
 string 型の数値を sql.NullInt64 型に変換する関数
-  - return) stringValue		変換する文字列
-  - arg) intValue			変換後の整数
+  - arg) stringValue	変換する文字列
+  - return) intValue	変換後の整数
 */
 func convertStringToInt64(stringValue string) (intValue sql.NullInt64) {
 	if stringValue == "" {
@@ -201,8 +201,8 @@ func convertStringToInt64(stringValue string) (intValue sql.NullInt64) {
 
 /*
 string 型の数値を sql.NullFloat64 型に変換する関数
-  - return) stringValue		変換する文字列
-  - arg) floatValue			変換後の浮動小数点数
+  - arg) stringValue	変換する文字列
+  - return) floatValue	変換後の浮動小数点数
 */
 func convertStringToFloat64(stringValue string) (floatValue sql.NullFloat64) {
 	if stringValue == "" {
@@ -217,8 +217,8 @@ func convertStringToFloat64(stringValue string) (floatValue sql.NullFloat64) {
 
 /*
 string 型の数値を sql.NullTime 型に変換する関数
-  - return) stringValue		変換する文字列
-  - arg) timeValue			変換後の時刻
+  - arg) stringValue	変換する文字列
+  - return) timeValue	変換後の時刻
 */
 func convertStringToTime(stringValue string) (timeValue sql.NullTime) {
 	if stringValue == "" {
@@ -229,4 +229,18 @@ func convertStringToTime(stringValue string) (timeValue sql.NullTime) {
 		timeValue = sql.NullTime{Time: timeOnlyValue, Valid: true}
 	}
 	return timeValue
+}
+
+/*
+any 型の数値を sql.NullFloat64 型に変換する関数
+  - arg) anyValue		変換する値（"Null"という string か float64）
+  - return) floatValue	変換後の浮動小数点数
+*/
+func convertAnyToFloat64(anyValue any) (floatValue sql.NullFloat64) {
+	if anyValue == "Null" || anyValue == "" || anyValue == nil {
+		floatValue = sql.NullFloat64{Float64: 0, Valid: false}
+	} else {
+		floatValue = sql.NullFloat64{Float64: anyValue.(float64), Valid: true}
+	}
+	return floatValue
 }

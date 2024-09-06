@@ -114,7 +114,11 @@ type FinancialInfoForApi struct {
 
 // 株価四本値情報
 type PriceInfo struct {
-	Date            string  `json:"Date"`            // 日付
-	Code            string  `json:"Code"`            // 銘柄コード
-	AdjustmentClose float64 `json:"AdjustmentClose"` // 調整後終値
+	Date              string          `json:"Date"`              // 日付
+	Code              string          `json:"Code"`              // 銘柄コード
+	AdjustmentOpen    sql.NullFloat64 `json:"AdujustmentOpen"`   // 調整後始値
+	AdjustmentHigh    sql.NullFloat64 `json:"AdjustmentHigh"`    // 調整後高値
+	AdjustmentLow     sql.NullFloat64 `json:"AdjustmentLow"`     // 調整後安値
+	AdjustmentClose   sql.NullFloat64 `json:"AdjustmentClose"`   // 調整後終値
+	AdjustmentVolume  sql.NullFloat64 `json:"AdujustmentVolume"` // 調整後出来高
 }

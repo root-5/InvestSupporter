@@ -70,20 +70,21 @@ CREATE TABLE financial_info (
 
 -- 6. 株価情報テーブル (price_info)
 CREATE TABLE price_info (
-    code CHAR(5) PRIMARY KEY,
     ymd DATE,
+    code CHAR(5),
     adjustment_open DECIMAL(10,2),
     adjustment_high DECIMAL(10,2),
     adjustment_low DECIMAL(10,2),
     adjustment_close DECIMAL(10,2),
     adjustment_volume DECIMAL(20,0),
+    PRIMARY KEY (code, ymd),
     FOREIGN KEY (code) REFERENCES stocks_info(code)
 );
 
 -- インデックスの作成
 CREATE INDEX idx_code_stocks_info ON stocks_info (code);
 CREATE INDEX idx_code_financial_info ON financial_info (code);
-CREATE INDEX idx_code_price_info ON price_info (code);
+CREATE INDEX idx_code_price_info ON price_info (ymd, code);
 
 -- データの挿入
 -- 17 業種情報テーブル

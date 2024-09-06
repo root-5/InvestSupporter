@@ -108,11 +108,11 @@ type jquantsPriceInfo struct {
 	// Volume                    string  `json: "Volume"`                    // 取引高（調整前）
 	// TurnoverValue             string  `json: "TurnoverValue"`             // 取引代金
 	// AdjustmentFactor          string  `json: "AdjustmentFactor"`          // 調整係数
-	// AdjustmentOpen            string  `json: "AdjustmentOpen"`            // 調整済み始値
-	// AdjustmentHigh            string  `json: "AdjustmentHigh"`            // 調整済み高値
-	// AdjustmentLow             string  `json: "AdjustmentLow"`             // 調整済み安値
-	AdjustmentClose           float64 `json: "AdjustmentClose"`           // 調整済み終値
-	AdjustmentVolume          float64 `json: "AdjustmentVolume"`          // 調整済み取引高
+	AdjustmentOpen            any     `json: "AdjustmentOpen"`            // 調整済み始値（売買がない場合に Null になるため any）
+	AdjustmentHigh            any     `json: "AdjustmentHigh"`            // 調整済み高値（売買がない場合に Null になるため any）
+	AdjustmentLow             any     `json: "AdjustmentLow"`             // 調整済み安値（売買がない場合に Null になるため any）
+	AdjustmentClose           any     `json: "AdjustmentClose"`           // 調整済み終値（売買がない場合に Null になるため any）
+	AdjustmentVolume          any     `json: "AdjustmentVolume"`          // 調整済み取引高（売買がない場合に Null になるため any）
 	// MorningOpen               string  `json: "MorningOpen"`               // 前場始値
 	// MorningHigh               string  `json: "MorningHigh"`               // 前場高値
 	// MorningLow                string  `json: "MorningLow"`                // 前場安値

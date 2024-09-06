@@ -444,7 +444,11 @@ func GetPriceInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
 		prices = append(prices, model.PriceInfo{
 			Date:             price.Date,
 			Code:             price.Code,
-			AdjustmentClose:  price.AdjustmentClose,
+			AdjustmentOpen:   convertAnyToFloat64(price.AdjustmentOpen),
+			AdjustmentHigh:   convertAnyToFloat64(price.AdjustmentHigh),
+			AdjustmentLow:    convertAnyToFloat64(price.AdjustmentLow),
+			AdjustmentClose:  convertAnyToFloat64(price.AdjustmentClose),
+			AdjustmentVolume: convertAnyToFloat64(price.AdjustmentVolume),
 		})
 	}
 

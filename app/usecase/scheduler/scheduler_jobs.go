@@ -19,4 +19,10 @@ var jobs = Jobs{
 		Function:    usecase.GetAndUpdateFinancialInfoToday,
 		ExecuteFlag: true,
 	},
+	{
+		Name:        "GetAndUpdatePriceInfoToday",
+		Duration:    24 * time.Hour,
+		Function:    usecase.GetAndUpdatePriceInfoToday,
+		ExecuteFlag: true,
+	},
 }

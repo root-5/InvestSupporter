@@ -2,7 +2,6 @@
 package api
 
 import (
-	"app/controller/jquants"
 	"app/controller/log"
 	"app/controller/postgres"
 	"app/usecase/usecase"
@@ -78,19 +77,25 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 株価情報を取得
 	case "/price":
-		// コードまたは日付を取得
-		codeOrDate := r.URL.Query().Get("codeOrDate")
-		// コードまたは日付が指定されていない場合はエラー
-		if codeOrDate == "" {
-			http.Error(w, "codeOrDate is required", http.StatusBadRequest)
+		// コードと日付を取得
+		code := r.URL.Query().Get("code")
+		date := r.URL.Query().Get("date")
+		// コードと日付が指定されていない場合はエラー
+		if code == "" && date == "" {
+			http.Error(w, "code is required", http.StatusBadRequest)
 			return
 		}
 		// コードが4桁の場合は5桁に変換
-		if len(codeOrDate) == 4 {
-			codeOrDate = codeOrDate + "0"
+		if len(code) == 4 {
+			code = code + "0"
 		}
-		// jquants から株価情報を取得
-		data, err := jquants.GetPriceInfo(codeOrDate)
+		// 日付が YYYY-MM-DD の形式でない場合はエラー
+		if len(date) != 10 {
+			http.Error(w, "date format is invalid", http.StatusBadRequest)
+			return
+		}
+		// DB から株価情報を取得
+		data, err := postgres.GetPricesInfo(code, date)
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

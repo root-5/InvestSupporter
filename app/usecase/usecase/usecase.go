@@ -227,6 +227,111 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 }
 
 /*
+Jquants API からすべての株価情報を取得し、DB を一度削除したのち、全て保存する関数
+- return) err	エラー
+*/
+func GetAndSavePriceInfoAll() (err error) {
+	// fmt.Println("EXECUTE GetAndSavePriceInfoAll")
+
+	// 株価情報テーブルを全て削除
+	err = postgres.DeletePriceInfoAll()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// 上場銘柄一覧を取得
+	stocks, err := postgres.GetStocksInfo()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// 全ての株価情報を格納するスライス
+	var prices []model.PriceInfo
+
+	// 株価情報を取得
+	for _, stock := range stocks {
+		price, err := jquants.GetPriceInfo(stock.Code)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		// 取得した株価情報をスライスに追加
+		prices = append(prices, price...)
+	}
+
+	// 取得した株価情報を DB に保存
+	err = postgres.InsertPricesInfo(prices)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+/*
+Jquants API から昨日と今日に更新された株価情報を取得し、DB を更新する関数
+- return) err	エラー
+*/
+func GetAndUpdatePriceInfoToday() (err error) {
+	// fmt.Println("EXECUTE GetAndUpdatePriceInfoToday")
+
+	// 昨日と今日の日付を取得
+	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	today := time.Now().Format("2006-01-02")
+
+	// DB から昨日と今日の株価情報を取得
+	yesterdayPrices, err := postgres.GetPricesInfo("", yesterday)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	todayPrices, err := postgres.GetPricesInfo("", today)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// 昨日の株価情報がない場合は取得して保存
+	if len(yesterdayPrices) == 0 {
+		// 昨日の株価情報を取得
+		yesterdayPrices, err = jquants.GetPriceInfo(yesterday)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		// 取得した株価情報を DB に保存
+		if len(yesterdayPrices) != 0 {
+			err = postgres.InsertPricesInfo(yesterdayPrices)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	}
+
+	// 今日の株価情報がない場合は取得して保存
+	if len(todayPrices) == 0 {
+		todayPrices, err = jquants.GetPriceInfo(today)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		if len(todayPrices) != 0 {
+			err = postgres.InsertPricesInfo(todayPrices)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+/*
 DB のデータを確認し、データがない場合はデータを取得し、保存する関数
   - return) エラー
 */
@@ -297,8 +402,17 @@ func RebuildData() (err error) {
 	// 3秒待機
 	time.Sleep(3 * time.Second)
 
-	// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
+	// 財務情報を全て削除し、取得しなおして DB に保存（15分程度の実行時間が必要）
 	err = GetAndSaveFinancialInfoAll()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	// 3秒待機
+	time.Sleep(3 * time.Second)
+
+	// 株価情報を全て削除し、取得しなおして DB に保存
+	err = GetAndSavePriceInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err
