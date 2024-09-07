@@ -26,6 +26,7 @@ services:
         volumes:
             - ./infra/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
             - ./infra/db/data:/var/lib/postgresql/data
+            - ./infra/db/backup:/var/lib/postgresql/backup
         ports:
             - 5432:5432
         networks:
