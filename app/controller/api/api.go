@@ -79,23 +79,23 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	case "/price":
 		// コードと日付を取得
 		code := r.URL.Query().Get("code")
-		date := r.URL.Query().Get("date")
+		ymd := r.URL.Query().Get("ymd")
 		// コードと日付が指定されていない場合はエラー
-		if code == "" && date == "" {
-			http.Error(w, "code is required", http.StatusBadRequest)
+		if code == "" && ymd == "" {
+			http.Error(w, "code or ymd is required", http.StatusBadRequest)
+			return
+		}
+		// 日付が YYYY-MM-DD の形式でない場合はエラー
+		if code == "" && len(ymd) != 10 {
+			http.Error(w, "ymd format is invalid", http.StatusBadRequest)
 			return
 		}
 		// コードが4桁の場合は5桁に変換
 		if len(code) == 4 {
 			code = code + "0"
 		}
-		// 日付が YYYY-MM-DD の形式でない場合はエラー
-		if len(date) != 10 {
-			http.Error(w, "date format is invalid", http.StatusBadRequest)
-			return
-		}
 		// DB から株価情報を取得
-		data, err := postgres.GetPricesInfo(code, date)
+		data, err := postgres.GetPricesInfo(code, ymd)
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

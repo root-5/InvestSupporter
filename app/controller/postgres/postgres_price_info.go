@@ -5,7 +5,6 @@ import (
 	"app/controller/log"
 	"app/domain/model"
 	"database/sql"
-	"fmt"
 )
 
 /*
@@ -78,34 +77,35 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 
 /*
 株価テーブルをすべて取得する関数
-  - arg) codeOrDate	銘柄コードまたは日付
+  - arg) ymd		日付
+  - arg) code		コード
   - return) prices	株価一覧
   - return) err		エラー
 */
-func GetPricesInfo(code string, date string) (prices []model.PriceInfo, err error) {
-	// code と date の値によって SQL 文を変更
+func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error) {
+	// code と ymd の値によって SQL 文を変更
 	var rows *sql.Rows
 
-	if code == "" && date == "" {
+	if code == "" && ymd == "" {
 		rows, err = db.Query("SELECT * FROM price_info")
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
-	} else if code != "" && date == "" {
+	} else if code != "" && ymd == "" {
 		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1", code)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
-	} else if code == "" && date != "" {
-		rows, err = db.Query("SELECT * FROM price_info WHERE ymd = $1", date)
+	} else if code == "" && ymd != "" {
+		rows, err = db.Query("SELECT * FROM price_info WHERE ymd = $1", ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else {
-		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1 AND ymd = $2", code, date)
+		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1 AND ymd = $2", code, ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err
