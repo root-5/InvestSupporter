@@ -16,11 +16,11 @@ API と DB の上場銘柄一覧の長さが不一致なら、テーブルを削
 API と DB の上場銘柄一覧のデータが不一致なら、テーブルを UPDATE する
 - return) err	エラー
 */
-func GetAndSaveStocksInfo() (err error) {
-	// fmt.Println("EXECUTE GetAndUpdateStocksInfo")
+func UpdateStocksInfo() (err error) {
+	// fmt.Println("EXECUTE UpdateStocksInfo")
 
 	// 上場銘柄一覧を API から取得
-	stocksNew, err := jquants.GetStocksInfo()
+	stocksNew, err := jquants.FetchStocksInfo()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -85,8 +85,8 @@ Jquants API から全ての財務情報を取得し、DB を一度削除した�
 ！！！15分程度の実行時間が必要！！！
 - return) err	エラー
 */
-func GetAndSaveFinancialInfoAll() (err error) {
-	// fmt.Println("EXECUTE GetAndSaveFinancialInfoAll")
+func FetchAndSaveFinancialInfoAll() (err error) {
+	// fmt.Println("EXECUTE FetchAndSaveFinancialInfoAll")
 
 	// 財務情報テーブルを全て削除
 	err = postgres.DeleteFinancialInfoAll()
@@ -111,7 +111,7 @@ func GetAndSaveFinancialInfoAll() (err error) {
 	if isDividedInsert {
 		// 上場銘柄一覧の財務情報を取得
 		for _, stock := range stocks {
-			financial, err := jquants.GetFinancialInfo(stock.Code)
+			financial, err := jquants.FetchFinancailsInfo(stock.Code)
 			if err != nil {
 				log.Error(err)
 				return err
@@ -127,7 +127,7 @@ func GetAndSaveFinancialInfoAll() (err error) {
 	} else {
 		// 上場銘柄一覧の財務情報を取得
 		for _, stock := range stocks {
-			financial, err := jquants.GetFinancialInfo(stock.Code)
+			financial, err := jquants.FetchFinancailsInfo(stock.Code)
 			if err != nil {
 				log.Error(err)
 				return err
@@ -152,20 +152,20 @@ func GetAndSaveFinancialInfoAll() (err error) {
 Jquants API から昨日と今日に更新された財務情報を取得し、DB を更新する関数
 - return) err	エラー
 */
-func GetAndUpdateFinancialInfoToday() (err error) {
-	// fmt.Println("EXECUTE GetAndUpdateFinancialInfoToday")
+func UpdateTodayFinancialsInfo() (err error) {
+	// fmt.Println("EXECUTE UpdateTodayFinancialsInfo")
 
 	// 昨日と今日の日付を取得
 	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 	today := time.Now().Format("2006-01-02")
 
 	// 上場銘柄一覧の財務情報を取得
-	yesterdayFinancials, err := jquants.GetFinancialInfo(yesterday)
+	yesterdayFinancials, err := jquants.FetchFinancailsInfo(yesterday)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	todayFinancials, err := jquants.GetFinancialInfo(today)
+	todayFinancials, err := jquants.FetchFinancailsInfo(today)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -231,8 +231,8 @@ Jquants API からすべての株価情報を取得し、DB を一度削除し�
 ！！！一時間半程度の実行時間が必要！！！
 - return) err	エラー
 */
-func GetAndSavePriceInfoAll() (err error) {
-	// fmt.Println("EXECUTE GetAndSavePriceInfoAll")
+func FetchAndSavePriceInfoAll() (err error) {
+	// fmt.Println("EXECUTE FetchAndSavePriceInfoAll")
 
 	// 株価情報テーブルを全て削除
 	err = postgres.DeletePriceInfoAll()
@@ -253,7 +253,7 @@ func GetAndSavePriceInfoAll() (err error) {
 
 	for _, stock := range stocks {
 		// 株価情報を取得
-		prices, err = jquants.GetPriceInfo(stock.Code)
+		prices, err = jquants.FetchPricesInfo(stock.Code)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -266,7 +266,6 @@ func GetAndSavePriceInfoAll() (err error) {
 		}
 	}
 
-
 	return nil
 }
 
@@ -274,8 +273,8 @@ func GetAndSavePriceInfoAll() (err error) {
 Jquants API から昨日と今日に更新された株価情報を取得し、DB を更新する関数
 - return) err	エラー
 */
-func GetAndUpdatePriceInfoToday() (err error) {
-	// fmt.Println("EXECUTE GetAndUpdatePriceInfoToday")
+func UpdateTodayPricesInfo() (err error) {
+	// fmt.Println("EXECUTE UpdateTodayPricesInfo")
 
 	// 昨日と今日の日付を取得
 	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
@@ -296,7 +295,7 @@ func GetAndUpdatePriceInfoToday() (err error) {
 	// 昨日の株価情報がない場合は取得して保存
 	if len(yesterdayPricesFromDb) == 0 {
 		// 昨日の株価情報を取得
-		yesterdayPrices, err := jquants.GetPriceInfo(yesterday)
+		yesterdayPrices, err := jquants.FetchPricesInfo(yesterday)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -313,7 +312,7 @@ func GetAndUpdatePriceInfoToday() (err error) {
 
 	// 今日の株価情報がない場合は取得して保存
 	if len(todayPricesFromDb) == 0 {
-		todayPrices, err := jquants.GetPriceInfo(today)
+		todayPrices, err := jquants.FetchPricesInfo(today)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -345,7 +344,7 @@ func CheckData() (err error) {
 	if len(stocks) == 0 {
 		fmt.Println("上場銘柄が存在しないため、再構築を行います")
 		// 上場銘柄を全て取得し、DB に保存
-		err := GetAndSaveStocksInfo()
+		err := UpdateStocksInfo()
 		if err != nil {
 			log.Error(err)
 			return err
@@ -361,7 +360,7 @@ func CheckData() (err error) {
 	if len(financials) == 0 {
 		fmt.Println("財務情報が存在しないため、再構築を行います")
 		// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
-		err = GetAndSaveFinancialInfoAll()
+		err = FetchAndSaveFinancialInfoAll()
 		if err != nil {
 			log.Error(err)
 			return err
@@ -377,7 +376,7 @@ func CheckData() (err error) {
 	if len(prices) == 0 {
 		fmt.Println("株価情報が存在しないため、再構築を行います")
 		// 株価情報を全て取得し、DB に保存
-		err = GetAndSavePriceInfoAll()
+		err = FetchAndSavePriceInfoAll()
 		if err != nil {
 			log.Error(err)
 			return err
@@ -411,7 +410,7 @@ func RebuildData() (err error) {
 	time.Sleep(3 * time.Second)
 
 	// 上場銘柄を全て取得し、DB に保存
-	err = GetAndSaveStocksInfo()
+	err = UpdateStocksInfo()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -420,7 +419,7 @@ func RebuildData() (err error) {
 	time.Sleep(3 * time.Second)
 
 	// 財務情報を全て削除し、取得しなおして DB に保存（15分程度の実行時間が必要）
-	err = GetAndSaveFinancialInfoAll()
+	err = FetchAndSaveFinancialInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -429,7 +428,7 @@ func RebuildData() (err error) {
 	time.Sleep(3 * time.Second)
 
 	// 株価情報を全て削除し、取得しなおして DB に保存
-	err = GetAndSavePriceInfoAll()
+	err = FetchAndSavePriceInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err

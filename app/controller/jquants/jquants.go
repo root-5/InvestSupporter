@@ -18,7 +18,7 @@ JQuants に登録したメールアドレスとパスワードを入力して、
 - arg) refreshToken	リフレッシュトークン
 - arg) err			エラー
 */
-func getRefreshToken() (err error) {
+func fetchRefreshToken() (err error) {
 	// 環境変数からメールアドレスとパスワードを取得
 	email := os.Getenv("JQUANTS_EMAIL")
 	pass := os.Getenv("JQUANTS_PASS")
@@ -78,7 +78,7 @@ func getRefreshToken() (err error) {
 - arg) err				エラー
 - return) refreshToken	getRefreshToken 関数で取得したトークン
 */
-func getIdToken(refreshToken string) (err error) {
+func fetchIdToken(refreshToken string) (err error) {
 	// 環境変数から ID トークンと前回取得時刻を取得
 	IdToken = os.Getenv("JQUANTS_ID_TOKEN")
 	idTokenTime, _ := time.Parse(time.RFC3339, os.Getenv("JQUANTS_ID_TOKEN_TIME"))
@@ -132,14 +132,14 @@ func getIdToken(refreshToken string) (err error) {
 */
 func setIdToken() (err error) {
 	// リフレッシュトークンを取得
-	err = getRefreshToken()
+	err = fetchRefreshToken()
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
 	// ID トークンを取得
-	err = getIdToken(refreshToken)
+	err = fetchIdToken(refreshToken)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -154,7 +154,7 @@ func setIdToken() (err error) {
 上場銘柄一覧を取得する関数
 - arg) stocksList	上場銘柄情報の配列
 */
-func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
+func FetchStocksInfo() (stocksList []model.StocksInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/listed/info"
 
@@ -205,7 +205,7 @@ func GetStocksInfo() (stocksList []model.StocksInfo, err error) {
 - return) financials	企業の財務情報
 - return) err			エラー
 */
-func GetFinancialInfo(codeOrDate string) (financials []model.FinancialInfo, err error) {
+func FetchFinancailsInfo(codeOrDate string) (financials []model.FinancialInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/fins/statements"
 
@@ -370,7 +370,7 @@ func GetFinancialInfo(codeOrDate string) (financials []model.FinancialInfo, err 
 		// 取得した財務情報を展開
 		for _, financial := range financials {
 			// コードを元に財務情報を取得
-			financialInfo, err := GetFinancialInfo(financial.Code)
+			financialInfo, err := FetchFinancailsInfo(financial.Code)
 			if err != nil {
 				log.Error(err)
 				return nil, err
@@ -393,7 +393,7 @@ func GetFinancialInfo(codeOrDate string) (financials []model.FinancialInfo, err 
 - return) prices	株価情報
 - return) err			エラー
 */
-func GetPriceInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
+func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/prices/daily_quotes"
 

@@ -65,7 +65,7 @@ func TestJQuants(t *testing.T) {
 		GetStocksInfo
 	*/
 	fmt.Println("Test GetStocksInfo")
-	stocksInfo, err := jquants.GetStocksInfo()
+	stocksInfo, err := jquants.FetchStocksInfo()
 	if err != nil {
 		t.Errorf("GetStocksInfo failed: %v", err)
 		return
@@ -79,7 +79,7 @@ func TestJQuants(t *testing.T) {
 		GetFinancialInfo
 	*/
 	fmt.Println("Test GetFinancialInfo (7203)")
-	financialInfo, err := jquants.GetFinancialInfo("7203")
+	financialInfo, err := jquants.FetchFinancailsInfo("7203")
 	if err != nil {
 		t.Errorf("GetFinancialInfo failed: %v", err)
 		return
@@ -99,7 +99,7 @@ func TestJQuants(t *testing.T) {
 	}
 
 	fmt.Println("Test GetFinancialInfo (2024-8-30)")
-	financialInfo, err = jquants.GetFinancialInfo("2024-08-30")
+	financialInfo, err = jquants.FetchFinancailsInfo("2024-08-30")
 	if err != nil {
 		t.Errorf("GetFinancialInfo failed: %v", err)
 		return

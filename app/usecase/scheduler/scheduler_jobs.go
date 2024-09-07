@@ -8,21 +8,21 @@ import (
 // 定期実行する関数とその設定をまとめた構造体
 var jobs = Jobs{
 	{
-		Name:        "GetAndSaveStocksInfo",
+		Name:        "FetchAndSaveStocksInfo",
 		Duration:    30 * 24 * time.Hour,
-		Function:    usecase.GetAndSaveStocksInfo,
+		Function:    usecase.UpdateStocksInfo,
 		ExecuteFlag: true,
 	},
 	{
-		Name:        "GetAndUpdateFinancialInfoToday",
+		Name:        "FetchAndUpdateFinancialInfoToday",
 		Duration:    24 * time.Hour,
-		Function:    usecase.GetAndUpdateFinancialInfoToday,
+		Function:    usecase.UpdateTodayFinancialsInfo,
 		ExecuteFlag: true,
 	},
 	{
-		Name:        "GetAndUpdatePriceInfoToday",
+		Name:        "FetchAndUpdatePriceInfoToday",
 		Duration:    24 * time.Hour,
-		Function:    usecase.GetAndUpdatePriceInfoToday,
+		Function:    usecase.UpdateTodayPricesInfo,
 		ExecuteFlag: true,
 	},
 }
