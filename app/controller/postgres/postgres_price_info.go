@@ -87,19 +87,19 @@ func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error
 	var rows *sql.Rows
 
 	if code == "" && ymd == "" {
-		rows, err = db.Query("SELECT * FROM price_info")
+		rows, err = db.Query("SELECT * FROM price_info ORDER BY code ASC, ymd DESC")
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else if code != "" && ymd == "" {
-		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1", code)
+		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1 ORDER BY ymd DESC", code)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else if code == "" && ymd != "" {
-		rows, err = db.Query("SELECT * FROM price_info WHERE ymd = $1", ymd)
+		rows, err = db.Query("SELECT * FROM price_info WHERE ymd = $1 ORDER BY code ASC", ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err
