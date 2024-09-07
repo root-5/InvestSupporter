@@ -19,6 +19,7 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 **基本用途**
 
 - `docker-compose -f="compose.local.yaml" up -d` : （ローカル）全てのコンテナを立ち上げる
+- `docker-compose -f="compose.local.yaml" down` : 全てのコンテナを停止する
 - `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
 - `docker-compose down` : 全てのコンテナを停止する
 - `docker-compose exec app sh` : app コンテナに入る
@@ -39,10 +40,16 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 1. `docker-compose exec db pg_dump -Fc -h 127.0.0.1 -p 5432 -U user -d financial_data > infra/db/backup/financial_data.dump`
 
-**環境完全リセット**
+**ローカル環境完全リセット**
 
-- `docker-compose down -v` : 全てのコンテナを停止し、ボリュームも削除する
-- `docker system prune --volumes` : イメージ、コンテナ、ボリュームを全て削除する
+```bash
+docker-compose -f="compose.local.yaml" down -v && \
+docker system prune -a && \
+sudo rm -rf infra/db/data/
+```
+
+- `docker-compose -f="compose.local.yaml" down -v` : 全てのコンテナを停止し、ボリュームも削除する
+- `docker system prune -a` : イメージ、コンテナ、ネットワークを全て削除する
 - `sudo rm -rf infra/db/data/` : DB のデータを削除する
 
 ## ドキュメント
