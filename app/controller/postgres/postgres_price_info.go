@@ -87,7 +87,11 @@ func GetPricesInfo(code string, date string) (prices []model.PriceInfo, err erro
 	var rows *sql.Rows
 
 	if code == "" && date == "" {
-		return nil, fmt.Errorf("code or date is required")
+		rows, err = db.Query("SELECT * FROM price_info")
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
 	} else if code != "" && date == "" {
 		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1", code)
 		if err != nil {
@@ -121,15 +125,10 @@ func GetPricesInfo(code string, date string) (prices []model.PriceInfo, err erro
 			&price.AdjustmentVolume,
 		)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		prices = append(prices, price)
-	}
-
-	// エラーチェック
-	if err = rows.Err(); err != nil {
-		log.Error(err)
-		return nil, err
 	}
 
 	return prices, nil

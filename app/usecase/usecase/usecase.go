@@ -283,21 +283,21 @@ func GetAndUpdatePriceInfoToday() (err error) {
 	today := time.Now().Format("2006-01-02")
 
 	// DB から昨日と今日の株価情報を取得
-	yesterdayPrices, err := postgres.GetPricesInfo("", yesterday)
+	yesterdayPricesFromDb, err := postgres.GetPricesInfo("", yesterday)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	todayPrices, err := postgres.GetPricesInfo("", today)
+	todayPricesFromDb, err := postgres.GetPricesInfo("", today)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
 	// 昨日の株価情報がない場合は取得して保存
-	if len(yesterdayPrices) == 0 {
+	if len(yesterdayPricesFromDb) == 0 {
 		// 昨日の株価情報を取得
-		yesterdayPrices, err = jquants.GetPriceInfo(yesterday)
+		yesterdayPrices, err := jquants.GetPriceInfo(yesterday)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -313,12 +313,13 @@ func GetAndUpdatePriceInfoToday() (err error) {
 	}
 
 	// 今日の株価情報がない場合は取得して保存
-	if len(todayPrices) == 0 {
-		todayPrices, err = jquants.GetPriceInfo(today)
+	if len(todayPricesFromDb) == 0 {
+		todayPrices, err := jquants.GetPriceInfo(today)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
+		// 取得した株価情報を DB に保存
 		if len(todayPrices) != 0 {
 			err = postgres.InsertPricesInfo(todayPrices)
 			if err != nil {
@@ -367,6 +368,23 @@ func CheckData() (err error) {
 			return err
 		}
 	}
+
+	// 株価情報を取得し、長さを確認し、0 の場合は再構築を行う
+	prices, err := postgres.GetPricesInfo("", "")
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if len(prices) == 0 {
+		fmt.Println("株価情報が存在しないため、再構築を行います")
+		// 株価情報を全て取得し、DB に保存
+		err = GetAndSavePriceInfoAll()
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
+
 	return nil
 }
 
