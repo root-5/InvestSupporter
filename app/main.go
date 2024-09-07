@@ -20,6 +20,7 @@ func main() {
 	if err != nil {
 		log.Error(err)
 	}
+	time.Sleep(3 * time.Second)
 
 	// Jquants の初期化
 	fmt.Println("Jquants の初期化")
