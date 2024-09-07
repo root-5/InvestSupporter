@@ -42,25 +42,20 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	// リクエストパスによって処理を分岐
 	switch path {
 
-	// 全ての上場銘柄-財務情報を取得
-	case "/financials":
-		// postges から財務情報を取得
-		data, err := postgres.GetFinancialsInfoForApi()
-		if err != nil {
-			log.Error(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		sendCsvResponse(w, data)
-
-	// コードを指定して上場銘柄-財務情報を取得
+	// 財務情報を取得
 	case "/financial":
 		// コードを取得
 		code := r.URL.Query().Get("code")
-		// コードが指定されていない場合はエラー
+		// コードが指定されていない場合は全データを取得
 		if code == "" {
-			http.Error(w, "code is required", http.StatusBadRequest)
-			return
+			data, err := postgres.GetFinancialsInfoForApi()
+			if err != nil {
+				log.Error(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			sendCsvResponse(w, data)
+			break
 		}
 		// コードが4桁の場合は5桁に変換
 		if len(code) == 4 {
@@ -113,20 +108,66 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-	// テスト用
+	// 説明用 html
+	case "/howto":
+		// index.html を返す
+		http.ServeFile(w, r, "controller/api/index.html")
+
+	// 説明用
 	case "/":
 		type explainStruct struct {
-			Path    string `json:"このWEBサービスはアクセスするURLパスによって以下の機能を提供します"`
+			Path    string `json:"GoogleスプレッドシートのIMPORTDATA関数の引数に以下のURLパスを指定してください"`
+			Sample  string `json:""`
 			Explain string `json:""`
 		}
 		data := []explainStruct{
-			{Path: "GoogleスプレッドシートのIMPORTDATA関数の引数に以下のURLパスを指定してください", Explain: ""},
-			{Path: "", Explain: ""},
-			{Path: "URLパス", Explain: "使い方概要"},
-			{Path: "/", Explain: "使い方概要"},
-			{Path: "/financials", Explain: "財務情報（全上場銘柄）"},
-			{Path: "/financial?code={{銘柄コード}}", Explain: "財務情報（単一） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定"},
+			{
+				Path:    "",
+				Sample:  "",
+				Explain: "",
+			},
+			{
+				Path:    "URLパス",
+				Sample:  "例",
+				Explain: "取得できるデータ",
+			},
+			{
+				Path:    "/",
+				Sample:  "",
+				Explain: "使い方説明",
+			},
+			{
+				Path:    "/howto",
+				Sample:  "",
+				Explain: "使い方説明（WEBブラウザ）Chromeなどをつかってアクセスしてください",
+			},
+			{
+				Path:    "/financial",
+				Sample:  "/financial",
+				Explain: "財務情報（全上場銘柄）",
+			},
+			{
+				Path:    "/financial?code={{銘柄コード}}",
+				Sample:  "/financial?code=7203",
+				Explain: "財務情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
+			},
+			{
+				Path:    "/price?code={{銘柄コード}}",
+				Sample:  "/price?code=7203",
+				Explain: "株価情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
+			},
+			{
+				Path:    "/price?ymd={{日付}}",
+				Sample:  "/price?ymd=2024-09-02",
+				Explain: "株価情報（日付指定） - {{日付}}は取得したい日付をYYYY-MM-DDで指定",
+			},
+			{
+				Path:    "/price?code={{銘柄コード}}&ymd={{日付}}",
+				Sample:  "/price?code=7203&ymd=2024-09-02",
+				Explain: "株価情報（銘柄コード・日付指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
+			},
 		}
+
 		sendCsvResponse(w, data)
 
 	default:

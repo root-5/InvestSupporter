@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to use</title>
+</head>
+
+<body>
+    <h2>使い方</h2>
+    <p>GoogleスプレッドシートのIMPORTDATA関数の引数に以下のURLパスを指定してください。</p>
+    <br>
+    <table>
+        <thead>
+            <tr>
+                <th>URLパス</th>
+                <th>例</th>
+                <th>取得できるデータ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>/</td>
+                <td><a href="/">/</a></td>
+                <td>使い方説明</td>
+            </tr>
+            <tr>
+                <td>/howto</td>
+                <td><a href="/howto">/howto</a></td>
+                <td>使い方説明（WEBブラウザ）Chromeなどをつかってアクセスしてください</td>
+            </tr>
+            <tr>
+                <td>/financial</td>
+                <td><a href="/financial">/financial</a></td>
+                <td>財務情報（全上場銘柄）</td>
+            </tr>
+            <tr>
+                <td>/financial</td>
+                <td><a href="/financial">/financial</a></td>
+                <td>財務情報（全上場銘柄）</td>
+            </tr>
+            <tr>
+                <td>/financial?code={{銘柄コード}}</td>
+                <td><a href="/financial?code=7203">/financial?code=7203</a></td>
+                <td>財務情報（銘柄コード指定）<br>- {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定</td>
+            </tr>
+            <tr>
+                <td>/price?code={{銘柄コード}}</td>
+                <td><a href="/price?code=7203">/price?code=7203</a></td>
+                <td>株価情報（銘柄コード指定）<br>- {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定</td>
+            </tr>
+            <tr>
+                <td>/price?ymd={{日付}}</td>
+                <td><a href="/price?ymd=2024-09-02">/price?ymd=2024-09-02</a></td>
+                <td>株価情報（日付指定）<br>- {{日付}}はYYYY-MM-DDの形式で指定</td>
+            </tr>
+            <tr>
+                <td>/price?code={{銘柄コード}}&ymd={{日付}}</td>
+                <td><a href="/price?code=7203&ymd=2024-09-02">/price?code=7203&ymd=2024-09-02</a></td>
+                <td>株価情報（銘柄コード・日付指定）<br>- {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定<br>- {{日付}}はYYYY-MM-DDの形式で指定</td>
+            </tr>
+        </tbody>
+    </table>
+    <style>
+        p,
+        a,
+        th,
+        td {
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</body>
+</html>
