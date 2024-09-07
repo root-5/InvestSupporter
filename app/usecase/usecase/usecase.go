@@ -228,6 +228,7 @@ func GetAndUpdateFinancialInfoToday() (err error) {
 
 /*
 Jquants API からすべての株価情報を取得し、DB を一度削除したのち、全て保存する関数
+！！！一時間半程度の実行時間が必要！！！
 - return) err	エラー
 */
 func GetAndSavePriceInfoAll() (err error) {
@@ -247,26 +248,24 @@ func GetAndSavePriceInfoAll() (err error) {
 		return err
 	}
 
-	// 全ての株価情報を格納するスライス
+	// 株価情報を格納するスライス
 	var prices []model.PriceInfo
 
-	// 株価情報を取得
 	for _, stock := range stocks {
-		price, err := jquants.GetPriceInfo(stock.Code)
+		// 株価情報を取得
+		prices, err = jquants.GetPriceInfo(stock.Code)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		// 取得した株価情報をスライスに追加
-		prices = append(prices, price...)
+		// 取得した株価情報を DB に保存
+		err = postgres.InsertPricesInfo(prices)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 	}
 
-	// 取得した株価情報を DB に保存
-	err = postgres.InsertPricesInfo(prices)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
 
 	return nil
 }
