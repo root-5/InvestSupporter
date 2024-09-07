@@ -6,6 +6,8 @@ services:
         tty: true  # コンテナを起動したままにする
         env_file:
             - ./infra/app/.env
+        environment:
+            - TZ=Asia/Tokyo
         volumes:
             - ./app:/app
         ports:
@@ -19,6 +21,8 @@ services:
         image: postgres:alpine
         env_file:
             - ./infra/db/.env
+        environment:
+            - TZ=Asia/Tokyo
         volumes:
             - ./infra/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
             - ./infra/db/data:/var/lib/postgresql/data
