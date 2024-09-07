@@ -35,11 +35,15 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 - `go mod tidy` : go.mod に記載されているパッケージを整理する（.go ファイルで使われていないパッケージの削除）
 
+**データベースバックアップ**
+
+1. `docker-compose exec db pg_dump -Fc -h 127.0.0.1 -p 5432 -U user -d financial_data > infra/db/backup/financial_data.dump`
+
 **環境完全リセット**
+
 - `docker-compose down -v` : 全てのコンテナを停止し、ボリュームも削除する
 - `docker system prune --volumes` : イメージ、コンテナ、ボリュームを全て削除する
 - `sudo rm -rf infra/db/data/` : DB のデータを削除する
-- 
 
 ## ドキュメント
 

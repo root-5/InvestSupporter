@@ -16,7 +16,9 @@ services:
             - db
         restart: always
     db:
-        image: postgres:alpine
+        build:
+            context: .
+            dockerfile: ./infra/db/db.dockerfile
         env_file:
             - ./infra/db/.env
         environment:
