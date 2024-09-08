@@ -5,10 +5,6 @@
 /infra/app/.env
 /infra/db/.env
 
-# DB データファイル
-/infra/db/data*
-/infra/db/backup*
-
 # 秘密鍵
 /infra/InvestSupporter.pem
 
