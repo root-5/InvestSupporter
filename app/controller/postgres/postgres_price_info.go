@@ -87,13 +87,13 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error) {
 	// ほかのクエリと比較して処理が重いのでタイムアウトを設定
 	// ローカルは問題ないが、本番環境ではデフォルトだとタイムアウトが発生する
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	
 	// code と ymd の値によって SQL 文を変更
 	var rows *sql.Rows
 	if code == "" && ymd == "" {
-		rows, err = db.QueryContext(ctx, "SELECT * FROM price_info ORDER BY code ASC, ymd DESC")
+		rows, err = db.QueryContext(ctx, "SELECT * FROM price_info")
 		if err != nil {
 			log.Error(err)
 			return nil, err
