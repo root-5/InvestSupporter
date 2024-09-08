@@ -4,9 +4,8 @@ package postgres
 import (
 	"app/controller/log"
 	"app/domain/model"
-	"context"
 	"database/sql"
-	"time"
+	"fmt"
 )
 
 /*
@@ -85,33 +84,36 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
   - return) err		エラー
 */
 func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error) {
-	// ほかのクエリと比較して処理が重いのでタイムアウトを設定
-	// ローカルは問題ないが、本番環境ではデフォルトだとタイムアウトが発生する
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	
+
 	// code と ymd の値によって SQL 文を変更
 	var rows *sql.Rows
 	if code == "" && ymd == "" {
-		rows, err = db.QueryContext(ctx, "SELECT * FROM price_info")
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
+		return nil, fmt.Errorf("code and ymd are empty")
+		// ほかのクエリと比較して処理が重いのでタイムアウトを設定
+		// ローカルは問題ないが、本番環境ではデフォルトだとタイムアウトが発生する
+		// >> 最終的にどうにもならなかった、別の手段を考える
+		// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		// defer cancel()
+
+		// rows, err = db.QueryContext(ctx, "SELECT * FROM price_info")
+		// if err != nil {
+		// 	log.Error(err)
+		// 	return nil, err
+		// }
 	} else if code != "" && ymd == "" {
-		rows, err = db.QueryContext(ctx, "SELECT * FROM price_info WHERE code = $1 ORDER BY ymd DESC", code)
+		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1 ORDER BY ymd DESC", code)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else if code == "" && ymd != "" {
-		rows, err = db.QueryContext(ctx, "SELECT * FROM price_info WHERE ymd = $1 ORDER BY code ASC", ymd)
+		rows, err = db.Query("SELECT * FROM price_info WHERE ymd = $1 ORDER BY code ASC", ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else {
-		rows, err = db.QueryContext(ctx, "SELECT * FROM price_info WHERE code = $1 AND ymd = $2", code, ymd)
+		rows, err = db.Query("SELECT * FROM price_info WHERE code = $1 AND ymd = $2", code, ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err

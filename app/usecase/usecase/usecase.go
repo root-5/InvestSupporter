@@ -368,7 +368,7 @@ func CheckData() (err error) {
 	}
 
 	// 株価情報を取得し、長さを確認し、0 の場合は再構築を行う
-	prices, err := postgres.GetPricesInfo("", "")
+	prices, err := postgres.GetPricesInfo("72030", "")
 	if err != nil {
 		log.Error(err)
 		return err
