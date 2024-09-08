@@ -21,5 +21,8 @@ WORKDIR /root/
 # ビルドしたバイナリをコピー
 COPY --from=builder /app/main .
 
+# index.html をコピー
+COPY --from=builder /app/controller/api/index.html ./controller/api/index.html
+
 # アプリケーションの起動コマンド実行
 CMD ["./main"]
