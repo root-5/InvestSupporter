@@ -7,15 +7,14 @@ import (
 	"app/controller/postgres"
 	"app/usecase/scheduler"
 	"app/usecase/usecase"
-	"fmt"
 	"time"
 )
 
 func main() {
-	fmt.Println("")
+	log.Info("")
 
 	// DB の初期化
-	fmt.Println("DB の初期化")
+	log.Info("DB の初期化")
 	err := postgres.InitDB()
 	if err != nil {
 		log.Error(err)
@@ -23,7 +22,7 @@ func main() {
 	time.Sleep(3 * time.Second)
 
 	// Jquants の初期化
-	fmt.Println("Jquants の初期化")
+	log.Info("Jquants の初期化")
 	jquants.SchedulerStart()
 	time.Sleep(3 * time.Second)
 
@@ -35,10 +34,10 @@ func main() {
 	}
 
 	// Scheduler の初期化
-	fmt.Println("Scheduler の初期化")
+	log.Info("Scheduler の初期化")
 	scheduler.SchedulerStart()
 
 	// api の初期化
-	fmt.Println("API の初期化")
+	log.Info("API の初期化")
 	api.StartServer()
 }

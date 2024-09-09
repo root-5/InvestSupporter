@@ -4,22 +4,27 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
-func Error(err error) {
-	fmt.Println("")
-	fmt.Println("========================= Error ============================")
+func Info(msg string) {
+	fmt.Printf("\x1b[34m%s\x1b[0m	%s\n", time.Now().Format("2006-01-02 15:04:05"), msg)
+}
 
+func Error(err error) {
 	pc, file, line, ok := runtime.Caller(1)
 	if ok {
-		// エラーが発生したファイルパス、行数、関数名を表示
-		fmt.Printf("ファイル名/ %s\n", filepath.Base(file))
-		fmt.Printf("行数/ %d\n", line)
-		fmt.Printf("関数名/ %s\n", runtime.FuncForPC(pc).Name())
+		fmt.Printf(`
+======================== Error ============================
+%s	%s/%d %s
+			%v
+============================================================
+`,
+			time.Now().Format("2006-01-02 15:04:05"),
+			filepath.Base(file),
+			line,
+			runtime.FuncForPC(pc).Name(),
+			err,
+		)
 	}
-
-	// エラーメッセージを表示
-	fmt.Printf("エラーメッセージ/ %v\n", err)
-	fmt.Println("============================================================")
-	fmt.Println("")
 }
