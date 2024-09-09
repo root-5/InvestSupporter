@@ -9,7 +9,7 @@ import (
 var jobs = Jobs{
 	{
 		Name:        "FetchAndSaveStocksInfo",
-		Duration:    30 * 24 * time.Hour,
+		Duration:    24 * time.Hour,
 		Function:    usecase.UpdateStocksInfo,
 		ExecuteFlag: true,
 	},
@@ -21,7 +21,7 @@ var jobs = Jobs{
 	},
 	{
 		Name:        "FetchAndUpdatePriceInfoToday",
-		Duration:    24 * time.Hour,
+		Duration:    1 * time.Hour,
 		Function:    usecase.UpdateTodayPricesInfo,
 		ExecuteFlag: true,
 	},

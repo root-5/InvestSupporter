@@ -2,6 +2,7 @@
 package scheduler
 
 import (
+	"app/controller/log"
 	"time"
 )
 
@@ -21,8 +22,11 @@ func schedulerExec(jobs Jobs) {
 		// ExecuteFlag が true の場合のみ実行
 		if job.ExecuteFlag {
 			go func(job Job) {
-				job.Function()
-				time.Sleep(job.Duration)
+				for {
+					log.Info("定期実行: " + job.Name)
+					job.Function()
+					time.Sleep(job.Duration)
+				}
 			}(job)
 		}
 		// Jobs を確実に上から実行するために1秒待機
