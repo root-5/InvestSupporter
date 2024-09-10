@@ -96,7 +96,6 @@ type FinancialInfoForApi struct {
 	ResultDividendPerShareAnnual                                                 sql.NullFloat64 `json:"一株あたり配当実績合計"`          // 一株あたり配当実績合計
 	ResultPayoutRatioAnnual                                                      sql.NullFloat64 `json:"配当性向"`                 // 配当性向
 	ForecastDividendPerShareAnnual                                               sql.NullFloat64 `json:"一株あたり配当予想合計"`          // 一株あたり配当予想合計
-	ForecastPayoutRatioAnnual                                                    sql.NullFloat64 `json:"予想配当性向"`               // 予想配当性向
 	NextYearForecastDividendPerShareAnnual                                       sql.NullFloat64 `json:"一株あたり配当予想翌事業年度合計"`     // 一株あたり配当予想翌事業年度合計
 	NextYearForecastPayoutRatioAnnual                                            sql.NullFloat64 `json:"翌事業年度予想配当性向"`          // 翌事業年度予想配当性向
 	ForecastNetSales                                                             sql.NullInt64   `json:"売上高予想_期末"`             // 売上高予想_期末
