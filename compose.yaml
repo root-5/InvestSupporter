@@ -32,6 +32,20 @@ services:
         networks:
             - backend
         restart: always
+    observer:
+        build:
+            context: .
+            dockerfile: ./infra/observer/observer.dockerfile
+        tty: true
+        env_file:
+            - ./infra/observer/.env
+        environment:
+            - TZ=Asia/Tokyo
+        volumes:
+            - ./infra/observer/log:/log
+        networks:
+            - backend
+        restart: always
 
 networks:
     backend:
