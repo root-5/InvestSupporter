@@ -38,7 +38,7 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 **データベースバックアップ**
 
-1. `docker-compose exec db pg_dump -Fc -h 127.0.0.1 -p 5432 -U user -d financial_data > infra/db/backup/financial_data.dump`
+1. `docker-compose exec db bash /var/lib/postgresql/backup/backup.sh`
 
 **ローカル環境完全リセット**
 
