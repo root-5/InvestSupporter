@@ -73,7 +73,15 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		log.Error(err)
-		return err
+		fmt.Println("30秒待機後に再リクエストします")
+
+		// 30秒待機したのち再リクエスト
+		time.Sleep(30 * time.Second)
+		resp, err = httpClient.Do(req)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 	}
 	defer resp.Body.Close()
 
@@ -142,8 +150,15 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 	// リクエスト送信
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		log.Error(err)
-		return err
+		fmt.Println("30秒待機後に再リクエストします")
+
+		// 30秒待機したのち再リクエスト
+		time.Sleep(30 * time.Second)
+		resp, err = httpClient.Do(req)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 	}
 	defer resp.Body.Close()
 
