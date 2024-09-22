@@ -29,3 +29,8 @@ fi
 echo ""
 echo "バックアップファイルを復元します"
 pg_restore --clean -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB} ${file_path}/${backup_file}
+if [ $? -ne 0 ]; then
+  echo "バックアップファイルの復元に失敗しました"
+  exit 1
+fi
+echo "バックアップファイルの復元が完了しました"

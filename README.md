@@ -22,6 +22,7 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 - `docker-compose -f="compose.local.yaml" down` : 全てのコンテナを停止する
 - `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
 - `docker-compose down` : 全てのコンテナを停止する
+- `docker-compose down app`: app コンテナだけ停止する
 - `docker-compose exec app sh` : app コンテナに入る
 - `docker-compose logs app -f` : app コンテナのログを表示する
 - `docker-compose rm -fsv app` : app コンテナを削除する
@@ -36,9 +37,10 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 
 - `go mod tidy` : go.mod に記載されているパッケージを整理する（.go ファイルで使われていないパッケージの削除）
 
-**データベースバックアップ**
+**DBバックアップとレストア**
 
 1. `docker-compose exec db bash /var/lib/postgresql/backup/backup.sh`
+2. `docker-compose exec db bash /var/lib/postgresql/backup/restore.sh`
 
 **ローカル環境完全リセット**
 
@@ -87,6 +89,7 @@ Godoc を採用しているので、ローカル環境なら上記のリンク�
 3. 最初はとにかく書いてはリファクタリングを繰り返した
 4. ある程度の構成ができたら、テスト駆動開発に移行したい
 5. どんな環境でも `git clone` と env ファイルの設定したうえで `docker-compose up -d` だけで動くようにしたい
+6. jquantsAPIからのデータを一次データとして、完全な形でデータベースにローカル保存することも考えたが、これはあまりにもDBが重たくなってしまい移行やコピーなどがしづらくなったり、APIが使える限りAPIを一次データとみなせるたりするので断念した
 
 # アイデア
 
@@ -95,5 +98,3 @@ Godoc を採用しているので、ローカル環境なら上記のリンク�
 - 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要
 - GoDoc が使えなくなっている
 - structToCsv はほとんど AI 任せなので後で再確認
-- GetPricesInfo() の全件ソート済み出力をできるようにする
-- ETFを入れる

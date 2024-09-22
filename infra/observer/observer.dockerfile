@@ -2,7 +2,7 @@ FROM alpine
 
 RUN mkdir /observer
 
-COPY ./infra/observer/observer.sh /observer/observer.sh
+COPY infra/observer/observer.sh .
 
 RUN apk add --no-cache curl
 
