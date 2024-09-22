@@ -9,62 +9,12 @@ import (
 
 /*
 財務情報テーブルに INSERT する関数
-  - return) financial	財務情報
+  - return) statements	財務情報
   - return) err			エラー
 */
-func InsertFinancialInfo(financial model.FinancialInfo) (err error) {
-	// 財務情報テーブルに INSERT
-	_, err = db.Exec("INSERT INTO financial_info (code, disclosed_date, disclosed_time, net_sales, operating_profit, ordinary_profit, profit, earnings_per_share, total_assets, equity, equity_to_asset_ratio, book_value_per_share, cash_flows_from_operating_activities, cash_flows_from_investing_activities, cash_flows_from_financing_activities, cash_and_equivalents, result_dividend_per_share_annual, result_payout_ratio_annual, forecast_dividend_per_share_annual, forecast_payout_ratio_annual, next_year_forecast_dividend_per_share_annual, next_year_forecast_payout_ratio_annual, forecast_net_sales, forecast_operating_profit, forecast_ordinary_profit, forecast_profit, forecast_earnings_per_share, next_year_forecast_net_sales, next_year_forecast_operating_profit, next_year_forecast_ordinary_profit, next_year_forecast_profit, next_year_forecast_earnings_per_share, number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)",
-		financial.Code,
-		financial.DisclosedDate,
-		financial.DisclosedTime,
-		financial.NetSales,
-		financial.OperatingProfit,
-		financial.OrdinaryProfit,
-		financial.Profit,
-		financial.EarningsPerShare,
-		financial.TotalAssets,
-		financial.Equity,
-		financial.EquityToAssetRatio,
-		financial.BookValuePerShare,
-		financial.CashFlowsFromOperatingActivities,
-		financial.CashFlowsFromInvestingActivities,
-		financial.CashFlowsFromFinancingActivities,
-		financial.CashAndEquivalents,
-		financial.ResultDividendPerShareAnnual,
-		financial.ResultPayoutRatioAnnual,
-		financial.ForecastDividendPerShareAnnual,
-		financial.ForecastPayoutRatioAnnual,
-		financial.NextYearForecastDividendPerShareAnnual,
-		financial.NextYearForecastPayoutRatioAnnual,
-		financial.ForecastNetSales,
-		financial.ForecastOperatingProfit,
-		financial.ForecastOrdinaryProfit,
-		financial.ForecastProfit,
-		financial.ForecastEarningsPerShare,
-		financial.NextYearForecastNetSales,
-		financial.NextYearForecastOperatingProfit,
-		financial.NextYearForecastOrdinaryProfit,
-		financial.NextYearForecastProfit,
-		financial.NextYearForecastEarningsPerShare,
-		financial.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
-	)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	return nil
-}
-
-/*
-財務情報テーブルにまとめて INSERT する関数
-  - return) financial	財務情報
-  - return) err			エラー
-*/
-func InsertFinancialInfoAll(financial []model.FinancialInfo) (err error) {
+func InsertStatementsInfo(statements []model.StatementInfo) (err error) {
 	// Prepare を利用して SQL 文を実行
-	stmt, err := db.Prepare("INSERT INTO financial_info (code, disclosed_date, disclosed_time, net_sales, operating_profit, ordinary_profit, profit, earnings_per_share, total_assets, equity, equity_to_asset_ratio, book_value_per_share, cash_flows_from_operating_activities, cash_flows_from_investing_activities, cash_flows_from_financing_activities, cash_and_equivalents, result_dividend_per_share_annual, result_payout_ratio_annual, forecast_dividend_per_share_annual, forecast_payout_ratio_annual, next_year_forecast_dividend_per_share_annual, next_year_forecast_payout_ratio_annual, forecast_net_sales, forecast_operating_profit, forecast_ordinary_profit, forecast_profit, forecast_earnings_per_share, next_year_forecast_net_sales, next_year_forecast_operating_profit, next_year_forecast_ordinary_profit, next_year_forecast_profit, next_year_forecast_earnings_per_share, number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)")
+	stmt, err := db.Prepare("INSERT INTO statements_info (disclosure_number, code, disclosed_date, type_of_document, net_sales, operating_profit, ordinary_profit, profit, earnings_per_share, total_assets, equity, equity_to_asset_ratio, book_value_per_share, cash_flows_from_operating_activities, cash_flows_from_investing_activities, cash_flows_from_financing_activities, cash_and_equivalents, result_dividend_per_share_annual, result_payout_ratio_annual, forecast_dividend_per_share_annual, forecast_payout_ratio_annual, next_year_forecast_dividend_per_share_annual, next_year_forecast_payout_ratio_annual, forecast_net_sales, forecast_operating_profit, forecast_ordinary_profit, forecast_profit, forecast_earnings_per_share, next_year_forecast_net_sales, next_year_forecast_operating_profit, next_year_forecast_ordinary_profit, next_year_forecast_profit, next_year_forecast_earnings_per_share, number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)")
 	if err != nil {
 		log.Error(err)
 		return err
@@ -72,41 +22,42 @@ func InsertFinancialInfoAll(financial []model.FinancialInfo) (err error) {
 	defer stmt.Close()
 
 	// 財務情報テーブルに INSERT
-	for _, state := range financial {
+	for _, statement := range statements {
 		_, err = stmt.Exec(
-			state.Code,
-			state.DisclosedDate,
-			state.DisclosedTime,
-			state.NetSales,
-			state.OperatingProfit,
-			state.OrdinaryProfit,
-			state.Profit,
-			state.EarningsPerShare,
-			state.TotalAssets,
-			state.Equity,
-			state.EquityToAssetRatio,
-			state.BookValuePerShare,
-			state.CashFlowsFromOperatingActivities,
-			state.CashFlowsFromInvestingActivities,
-			state.CashFlowsFromFinancingActivities,
-			state.CashAndEquivalents,
-			state.ResultDividendPerShareAnnual,
-			state.ResultPayoutRatioAnnual,
-			state.ForecastDividendPerShareAnnual,
-			state.ForecastPayoutRatioAnnual,
-			state.NextYearForecastDividendPerShareAnnual,
-			state.NextYearForecastPayoutRatioAnnual,
-			state.ForecastNetSales,
-			state.ForecastOperatingProfit,
-			state.ForecastOrdinaryProfit,
-			state.ForecastProfit,
-			state.ForecastEarningsPerShare,
-			state.NextYearForecastNetSales,
-			state.NextYearForecastOperatingProfit,
-			state.NextYearForecastOrdinaryProfit,
-			state.NextYearForecastProfit,
-			state.NextYearForecastEarningsPerShare,
-			state.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
+			statement.DisclosureNumber,
+			statement.Code,
+			statement.DisclosedDate,
+			statement.TypeOfDocument,
+			statement.NetSales,
+			statement.OperatingProfit,
+			statement.OrdinaryProfit,
+			statement.Profit,
+			statement.EarningsPerShare,
+			statement.TotalAssets,
+			statement.Equity,
+			statement.EquityToAssetRatio,
+			statement.BookValuePerShare,
+			statement.CashFlowsFromOperatingActivities,
+			statement.CashFlowsFromInvestingActivities,
+			statement.CashFlowsFromFinancingActivities,
+			statement.CashAndEquivalents,
+			statement.ResultDividendPerShareAnnual,
+			statement.ResultPayoutRatioAnnual,
+			statement.ForecastDividendPerShareAnnual,
+			statement.ForecastPayoutRatioAnnual,
+			statement.NextYearForecastDividendPerShareAnnual,
+			statement.NextYearForecastPayoutRatioAnnual,
+			statement.ForecastNetSales,
+			statement.ForecastOperatingProfit,
+			statement.ForecastOrdinaryProfit,
+			statement.ForecastProfit,
+			statement.ForecastEarningsPerShare,
+			statement.NextYearForecastNetSales,
+			statement.NextYearForecastOperatingProfit,
+			statement.NextYearForecastOrdinaryProfit,
+			statement.NextYearForecastProfit,
+			statement.NextYearForecastEarningsPerShare,
+			statement.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
 		)
 	}
 	if err != nil {
@@ -119,13 +70,13 @@ func InsertFinancialInfoAll(financial []model.FinancialInfo) (err error) {
 
 /*
 財務情報テーブルを UPDATE する関数
-  - arg) financial	財務情報
+  - arg) statement	財務情報
   - return) result	更新結果
   - return) err		エラー
 */
-func UpdateFinancialInfo(financial model.FinancialInfo) (result sql.Result, err error) {
+func UpdateStatementsInfo(statements []model.StatementInfo) (result sql.Result, err error) {
 	// Prepare を利用して SQL 文を実行
-	stmt, err := db.Prepare("UPDATE financial_info SET disclosed_date = $2, disclosed_time = $3, net_sales = $4, operating_profit = $5, ordinary_profit = $6, profit = $7, earnings_per_share = $8, total_assets = $9, equity = $10, equity_to_asset_ratio = $11, book_value_per_share = $12, cash_flows_from_operating_activities = $13, cash_flows_from_investing_activities = $14, cash_flows_from_financing_activities = $15, cash_and_equivalents = $16, result_dividend_per_share_annual = $17, result_payout_ratio_annual = $18, forecast_dividend_per_share_annual = $19, forecast_payout_ratio_annual = $20, next_year_forecast_dividend_per_share_annual = $21, next_year_forecast_payout_ratio_annual = $22, forecast_net_sales = $23, forecast_operating_profit = $24, forecast_ordinary_profit = $25, forecast_profit = $26, forecast_earnings_per_share = $27, next_year_forecast_net_sales = $28, next_year_forecast_operating_profit = $29, next_year_forecast_ordinary_profit = $30, next_year_forecast_profit = $31, next_year_forecast_earnings_per_share = $32, number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock = $33 WHERE code = $1")
+	stmt, err := db.Prepare("UPDATE statements_info SET disclosure_number = $2 , disclosed_date = $3 , type_of_document = $4 , net_sales = $5 , operating_profit = $6 , ordinary_profit = $7 , profit = $8 , earnings_per_share = $9 , total_assets = $10 , equity = $11 , equity_to_asset_ratio = $12 , book_value_per_share = $13 , cash_flows_from_operating_activities = $14 , cash_flows_from_investing_activities = $15 , cash_flows_from_financing_activities = $16 , cash_and_equivalents = $17 , result_dividend_per_share_annual = $18 , result_payout_ratio_annual = $19 , forecast_dividend_per_share_annual = $20 , forecast_payout_ratio_annual = $21 , next_year_forecast_dividend_per_share_annual = $22 , next_year_forecast_payout_ratio_annual = $23 , forecast_net_sales = $24 , forecast_operating_profit = $25 , forecast_ordinary_profit = $26 , forecast_profit = $27 , forecast_earnings_per_share = $28 , next_year_forecast_net_sales = $29 , next_year_forecast_operating_profit = $30 , next_year_forecast_ordinary_profit = $31 , next_year_forecast_profit = $32 , next_year_forecast_earnings_per_share = $33 , number_of_issued_and_outstanding_shares_at_the_end_of_fiscal_year_including_treasury_stock = $34  WHERE code = $1")
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -133,108 +84,123 @@ func UpdateFinancialInfo(financial model.FinancialInfo) (result sql.Result, err 
 	defer stmt.Close()
 
 	// 財務情報テーブルを UPDATE
-	result, err = stmt.Exec(
-		financial.Code,
-		financial.DisclosedDate,
-		financial.DisclosedTime,
-		financial.NetSales,
-		financial.OperatingProfit,
-		financial.OrdinaryProfit,
-		financial.Profit,
-		financial.EarningsPerShare,
-		financial.TotalAssets,
-		financial.Equity,
-		financial.EquityToAssetRatio,
-		financial.BookValuePerShare,
-		financial.CashFlowsFromOperatingActivities,
-		financial.CashFlowsFromInvestingActivities,
-		financial.CashFlowsFromFinancingActivities,
-		financial.CashAndEquivalents,
-		financial.ResultDividendPerShareAnnual,
-		financial.ResultPayoutRatioAnnual,
-		financial.ForecastDividendPerShareAnnual,
-		financial.ForecastPayoutRatioAnnual,
-		financial.NextYearForecastDividendPerShareAnnual,
-		financial.NextYearForecastPayoutRatioAnnual,
-		financial.ForecastNetSales,
-		financial.ForecastOperatingProfit,
-		financial.ForecastOrdinaryProfit,
-		financial.ForecastProfit,
-		financial.ForecastEarningsPerShare,
-		financial.NextYearForecastNetSales,
-		financial.NextYearForecastOperatingProfit,
-		financial.NextYearForecastOrdinaryProfit,
-		financial.NextYearForecastProfit,
-		financial.NextYearForecastEarningsPerShare,
-		financial.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
-	)
-	if err != nil {
-		log.Error(err)
-		return nil, err
+	for _, statement := range statements {
+		result, err = stmt.Exec(
+			statement.DisclosureNumber,
+			statement.Code,
+			statement.DisclosedDate,
+			statement.TypeOfDocument,
+			statement.NetSales,
+			statement.OperatingProfit,
+			statement.OrdinaryProfit,
+			statement.Profit,
+			statement.EarningsPerShare,
+			statement.TotalAssets,
+			statement.Equity,
+			statement.EquityToAssetRatio,
+			statement.BookValuePerShare,
+			statement.CashFlowsFromOperatingActivities,
+			statement.CashFlowsFromInvestingActivities,
+			statement.CashFlowsFromFinancingActivities,
+			statement.CashAndEquivalents,
+			statement.ResultDividendPerShareAnnual,
+			statement.ResultPayoutRatioAnnual,
+			statement.ForecastDividendPerShareAnnual,
+			statement.ForecastPayoutRatioAnnual,
+			statement.NextYearForecastDividendPerShareAnnual,
+			statement.NextYearForecastPayoutRatioAnnual,
+			statement.ForecastNetSales,
+			statement.ForecastOperatingProfit,
+			statement.ForecastOrdinaryProfit,
+			statement.ForecastProfit,
+			statement.ForecastEarningsPerShare,
+			statement.NextYearForecastNetSales,
+			statement.NextYearForecastOperatingProfit,
+			statement.NextYearForecastOrdinaryProfit,
+			statement.NextYearForecastProfit,
+			statement.NextYearForecastEarningsPerShare,
+			statement.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
+		)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
 	}
 
 	return result, nil
 }
 
 /*
-財務情報テーブルを取得する関数
+銘柄コードを指定して、財務情報テーブルを取得する関数
   - arg) code			銘柄コード
-  - return) financial	財務情報
+  - return) statement	財務情報
   - return) err			エラー
 */
-func GetFinancialInfo(code string) (financial model.FinancialInfo, err error) {
+func GetStatementsInfo(code string) (statements []model.StatementInfo, err error) {
 	// データの取得
-	err = db.QueryRow("SELECT * FROM financial_info WHERE code = $1", code).Scan(
-		&financial.Code,
-		&financial.DisclosedDate,
-		&financial.DisclosedTime,
-		&financial.NetSales,
-		&financial.OperatingProfit,
-		&financial.OrdinaryProfit,
-		&financial.Profit,
-		&financial.EarningsPerShare,
-		&financial.TotalAssets,
-		&financial.Equity,
-		&financial.EquityToAssetRatio,
-		&financial.BookValuePerShare,
-		&financial.CashFlowsFromOperatingActivities,
-		&financial.CashFlowsFromInvestingActivities,
-		&financial.CashFlowsFromFinancingActivities,
-		&financial.CashAndEquivalents,
-		&financial.ResultDividendPerShareAnnual,
-		&financial.ResultPayoutRatioAnnual,
-		&financial.ForecastDividendPerShareAnnual,
-		&financial.ForecastPayoutRatioAnnual,
-		&financial.NextYearForecastDividendPerShareAnnual,
-		&financial.NextYearForecastPayoutRatioAnnual,
-		&financial.ForecastNetSales,
-		&financial.ForecastOperatingProfit,
-		&financial.ForecastOrdinaryProfit,
-		&financial.ForecastProfit,
-		&financial.ForecastEarningsPerShare,
-		&financial.NextYearForecastNetSales,
-		&financial.NextYearForecastOperatingProfit,
-		&financial.NextYearForecastOrdinaryProfit,
-		&financial.NextYearForecastProfit,
-		&financial.NextYearForecastEarningsPerShare,
-		&financial.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
-	)
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT * FROM statements_info WHERE code = $1", code)
 	if err != nil {
 		log.Error(err)
-		return model.FinancialInfo{}, err
+		return []model.StatementInfo{}, err
 	}
 
-	return financial, nil
+	// 取得したデータを格納
+	for rows.Next() {
+		var statement model.StatementInfo
+		err := rows.Scan(
+			&statement.DisclosureNumber,
+			&statement.Code,
+			&statement.DisclosedDate,
+			&statement.TypeOfDocument,
+			&statement.NetSales,
+			&statement.OperatingProfit,
+			&statement.OrdinaryProfit,
+			&statement.Profit,
+			&statement.EarningsPerShare,
+			&statement.TotalAssets,
+			&statement.Equity,
+			&statement.EquityToAssetRatio,
+			&statement.BookValuePerShare,
+			&statement.CashFlowsFromOperatingActivities,
+			&statement.CashFlowsFromInvestingActivities,
+			&statement.CashFlowsFromFinancingActivities,
+			&statement.CashAndEquivalents,
+			&statement.ResultDividendPerShareAnnual,
+			&statement.ResultPayoutRatioAnnual,
+			&statement.ForecastDividendPerShareAnnual,
+			&statement.ForecastPayoutRatioAnnual,
+			&statement.NextYearForecastDividendPerShareAnnual,
+			&statement.NextYearForecastPayoutRatioAnnual,
+			&statement.ForecastNetSales,
+			&statement.ForecastOperatingProfit,
+			&statement.ForecastOrdinaryProfit,
+			&statement.ForecastProfit,
+			&statement.ForecastEarningsPerShare,
+			&statement.NextYearForecastNetSales,
+			&statement.NextYearForecastOperatingProfit,
+			&statement.NextYearForecastOrdinaryProfit,
+			&statement.NextYearForecastProfit,
+			&statement.NextYearForecastEarningsPerShare,
+			&statement.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
+		)
+		if err != nil {
+			return nil, err
+		}
+		statements = append(statements, statement)
+	}
+
+	return statements, nil
 }
 
 /*
-財務情報テーブルを取得する関数
-  - return) financial	財務情報
+最新の財務情報テーブルを取得する関数
+  - return) statements	財務情報
   - return) err			エラー
 */
-func GetFinancialInfoAll() (financial []model.FinancialInfo, err error) {
+func GetStatementInfoAll() (statements []model.StatementInfo, err error) {
 	// データの取得
-	rows, err := db.Query("SELECT * FROM financial_info")
+	rows, err := db.Query("SELECT t1.* FROM statements_info t1 INNER JOIN (SELECT code,MAX(disclosure_number) FROM statements_info WHERE type_of_document LIKE '%%FinancialStatements%%' GROUP BY code ORDER BY code) t2 ON t1.code = t2.code AND t1.disclosure_number = t2.max")
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -242,46 +208,47 @@ func GetFinancialInfoAll() (financial []model.FinancialInfo, err error) {
 
 	// 取得したデータを格納
 	for rows.Next() {
-		var state model.FinancialInfo
+		var statement model.StatementInfo
 		err := rows.Scan(
-			&state.Code,
-			&state.DisclosedDate,
-			&state.DisclosedTime,
-			&state.NetSales,
-			&state.OperatingProfit,
-			&state.OrdinaryProfit,
-			&state.Profit,
-			&state.EarningsPerShare,
-			&state.TotalAssets,
-			&state.Equity,
-			&state.EquityToAssetRatio,
-			&state.BookValuePerShare,
-			&state.CashFlowsFromOperatingActivities,
-			&state.CashFlowsFromInvestingActivities,
-			&state.CashFlowsFromFinancingActivities,
-			&state.CashAndEquivalents,
-			&state.ResultDividendPerShareAnnual,
-			&state.ResultPayoutRatioAnnual,
-			&state.ForecastDividendPerShareAnnual,
-			&state.ForecastPayoutRatioAnnual,
-			&state.NextYearForecastDividendPerShareAnnual,
-			&state.NextYearForecastPayoutRatioAnnual,
-			&state.ForecastNetSales,
-			&state.ForecastOperatingProfit,
-			&state.ForecastOrdinaryProfit,
-			&state.ForecastProfit,
-			&state.ForecastEarningsPerShare,
-			&state.NextYearForecastNetSales,
-			&state.NextYearForecastOperatingProfit,
-			&state.NextYearForecastOrdinaryProfit,
-			&state.NextYearForecastProfit,
-			&state.NextYearForecastEarningsPerShare,
-			&state.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
+			&statement.DisclosureNumber,
+			&statement.Code,
+			&statement.DisclosedDate,
+			&statement.TypeOfDocument,
+			&statement.NetSales,
+			&statement.OperatingProfit,
+			&statement.OrdinaryProfit,
+			&statement.Profit,
+			&statement.EarningsPerShare,
+			&statement.TotalAssets,
+			&statement.Equity,
+			&statement.EquityToAssetRatio,
+			&statement.BookValuePerShare,
+			&statement.CashFlowsFromOperatingActivities,
+			&statement.CashFlowsFromInvestingActivities,
+			&statement.CashFlowsFromFinancingActivities,
+			&statement.CashAndEquivalents,
+			&statement.ResultDividendPerShareAnnual,
+			&statement.ResultPayoutRatioAnnual,
+			&statement.ForecastDividendPerShareAnnual,
+			&statement.ForecastPayoutRatioAnnual,
+			&statement.NextYearForecastDividendPerShareAnnual,
+			&statement.NextYearForecastPayoutRatioAnnual,
+			&statement.ForecastNetSales,
+			&statement.ForecastOperatingProfit,
+			&statement.ForecastOrdinaryProfit,
+			&statement.ForecastProfit,
+			&statement.ForecastEarningsPerShare,
+			&statement.NextYearForecastNetSales,
+			&statement.NextYearForecastOperatingProfit,
+			&statement.NextYearForecastOrdinaryProfit,
+			&statement.NextYearForecastProfit,
+			&statement.NextYearForecastEarningsPerShare,
+			&statement.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
 		)
 		if err != nil {
 			return nil, err
 		}
-		financial = append(financial, state)
+		statements = append(statements, statement)
 	}
 
 	// エラーチェック
@@ -290,16 +257,16 @@ func GetFinancialInfoAll() (financial []model.FinancialInfo, err error) {
 		return nil, err
 	}
 
-	return financial, nil
+	return statements, nil
 }
 
 /*
 財務情報テーブルを全て削除する関数
   - return) err		エラー
 */
-func DeleteFinancialInfoAll() (err error) {
+func DeleteStatementInfoAll() (err error) {
 	// テーブルの全削除
-	_, err = db.Exec("DELETE FROM financial_info")
+	_, err = db.Exec("DELETE FROM statements_info")
 	if err != nil {
 		log.Error(err)
 		return err

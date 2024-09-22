@@ -42,27 +42,32 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	// リクエストパスによって処理を分岐
 	switch path {
 
-	// 財務情報を取得
+	// 基本情報を取得
 	case "/financial":
+		// postges から基本情報を取得
+		data, err := postgres.GetBasicInfoForApi()
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		sendCsvResponse(w, data)
+
+		// すべての財務情報を取得
+	case "/statement":
 		// コードを取得
 		code := r.URL.Query().Get("code")
-		// コードが指定されていない場合は全データを取得
+		// コードが指定されていない場合はエラー
 		if code == "" {
-			data, err := postgres.GetFinancialsInfoForApi()
-			if err != nil {
-				log.Error(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			sendCsvResponse(w, data)
-			break
+			http.Error(w, "code is required", http.StatusBadRequest)
+			return
 		}
 		// コードが4桁の場合は5桁に変換
 		if len(code) == 4 {
 			code = code + "0"
 		}
 		// postges から財務情報を取得
-		data, err := postgres.GetFinancialInfoForApi(code)
+		data, err := postgres.GetStatementsInfo(code)
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

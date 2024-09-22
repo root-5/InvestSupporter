@@ -76,17 +76,17 @@ func TestJQuants(t *testing.T) {
 	}
 
 	/*
-		GetFinancialInfo
+		GetStatementInfo
 	*/
-	fmt.Println("Test GetFinancialInfo (7203)")
-	financialInfo, err := jquants.FetchFinancailsInfo("7203")
+	fmt.Println("Test GetStatementInfo (7203)")
+	StatementInfo, err := jquants.FetchStatementsInfo("7203")
 	if err != nil {
-		t.Errorf("GetFinancialInfo failed: %v", err)
+		t.Errorf("GetStatementInfo failed: %v", err)
 		return
 	} else {
-		// financialInfo[0] の構造体に含まれる sql.Null~ 型の変数のうち、Valid が false のものを表示
+		// StatementInfo[0] の構造体に含まれる sql.Null~ 型の変数のうち、Valid が false のものを表示
 		pattern, _ := regexp.Compile("sql.Null.*")
-		m := reflect.ValueOf(financialInfo[0])
+		m := reflect.ValueOf(StatementInfo[0])
 		for i := 0; i < m.NumField(); i++ {
 			if pattern.MatchString(reflect.TypeOf(m.Field(i).Interface()).String()) {
 				if !reflect.ValueOf(m.Field(i).Interface()).FieldByName("Valid").Bool() {
@@ -98,15 +98,15 @@ func TestJQuants(t *testing.T) {
 		fmt.Println("")
 	}
 
-	fmt.Println("Test GetFinancialInfo (2024-8-30)")
-	financialInfo, err = jquants.FetchFinancailsInfo("2024-08-30")
+	fmt.Println("Test GetStatementInfo (2024-8-30)")
+	StatementInfo, err = jquants.FetchStatementsInfo("2024-08-30")
 	if err != nil {
-		t.Errorf("GetFinancialInfo failed: %v", err)
+		t.Errorf("GetStatementInfo failed: %v", err)
 		return
 	} else {
-		// financialInfo[0] の構造体に含まれる sql.Null~ 型の変数のうち、Valid が false のものを表示
+		// StatementInfo[0] の構造体に含まれる sql.Null~ 型の変数のうち、Valid が false のものを表示
 		pattern, _ := regexp.Compile("sql.Null.*")
-		m := reflect.ValueOf(financialInfo[0])
+		m := reflect.ValueOf(StatementInfo[0])
 		for i := 0; i < m.NumField(); i++ {
 			if pattern.MatchString(reflect.TypeOf(m.Field(i).Interface()).String()) {
 				if !reflect.ValueOf(m.Field(i).Interface()).FieldByName("Valid").Bool() {
@@ -114,7 +114,7 @@ func TestJQuants(t *testing.T) {
 				}
 			}
 		}
-		fmt.Println(">> len(financialInfo) = ", len(financialInfo))
+		fmt.Println(">> len(StatementInfo) = ", len(StatementInfo))
 		fmt.Println(">> OK")
 		fmt.Println("")
 	}

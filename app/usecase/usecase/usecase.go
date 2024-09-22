@@ -85,11 +85,11 @@ Jquants API から全ての財務情報を取得し、DB を一度削除した�
 ！！！15分程度の実行時間が必要！！！
 - return) err	エラー
 */
-func FetchAndSaveFinancialInfoAll() (err error) {
-	// fmt.Println("EXECUTE FetchAndSaveFinancialInfoAll")
+func FetchAndSaveStatementInfoAll() (err error) {
+	// fmt.Println("EXECUTE FetchAndSaveStatementInfoAll")
 
 	// 財務情報テーブルを全て削除
-	err = postgres.DeleteFinancialInfoAll()
+	err = postgres.DeleteStatementInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -102,46 +102,21 @@ func FetchAndSaveFinancialInfoAll() (err error) {
 		return err
 	}
 
-	// 全ての財務情報を格納するスライス
-	var allFinancials []model.FinancialInfo
-
-	// 一括挿入か分割挿入かを決める変数
-	isDividedInsert := true
-
-	if isDividedInsert {
-		// 上場銘柄一覧の財務情報を取得
-		for _, stock := range stocks {
-			financial, err := jquants.FetchFinancailsInfo(stock.Code)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-
-			// 取得した財務情報を DB に保存
-			err = postgres.InsertFinancialInfo(financial[0])
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-		}
-	} else {
-		// 上場銘柄一覧の財務情報を取得
-		for _, stock := range stocks {
-			financial, err := jquants.FetchFinancailsInfo(stock.Code)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-
-			// 取得した財務情報をスライスに追加
-			allFinancials = append(allFinancials, financial...)
-		}
-
-		// 取得した財務情報を DB に保存
-		err = postgres.InsertFinancialInfoAll(allFinancials)
+	// 上場銘柄一覧の財務情報を取得
+	for _, stock := range stocks {
+		statements, err := jquants.FetchStatementsInfo(stock.Code)
 		if err != nil {
 			log.Error(err)
 			return err
+		}
+
+		// 取得した財務情報を DB に保存
+		if len(statements) != 0 {
+			err = postgres.InsertStatementsInfo(statements)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
 		}
 	}
 
@@ -152,73 +127,69 @@ func FetchAndSaveFinancialInfoAll() (err error) {
 Jquants API から昨日と今日に更新された財務情報を取得し、DB を更新する関数
 - return) err	エラー
 */
-func UpdateTodayFinancialsInfo() (err error) {
-	// fmt.Println("EXECUTE UpdateTodayFinancialsInfo")
+func UpdateTodayStatementsInfo() (err error) {
+	// fmt.Println("EXECUTE UpdateTodayStatementsInfo")
 
 	// 昨日と今日の日付を取得
 	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 	today := time.Now().Format("2006-01-02")
 
 	// 上場銘柄一覧の財務情報を取得
-	yesterdayFinancials, err := jquants.FetchFinancailsInfo(yesterday)
+	yesterdayStatements, err := jquants.FetchStatementsInfo(yesterday)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	todayFinancials, err := jquants.FetchFinancailsInfo(today)
+	todayStatements, err := jquants.FetchStatementsInfo(today)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
 	// 取得した財務情報を DB に保存
-	if len(yesterdayFinancials) != 0 {
-		for _, financial := range yesterdayFinancials {
-			result, err := postgres.UpdateFinancialInfo(financial)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-			// 影響を受けた行数を確認
-			rowsAffected, err := postgres.RowsAffected(result)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
+	if len(yesterdayStatements) != 0 {
+		result, err := postgres.UpdateStatementsInfo(yesterdayStatements)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		// 影響を受けた行数を確認
+		rowsAffected, err := postgres.RowsAffected(result)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 
-			// 影響を受けた行数が0の場合はINSERTを行う
-			if rowsAffected == 0 {
-				err = postgres.InsertFinancialInfo(financial)
-				if err != nil {
-					// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
-					// log.Error(err)
-					return err
-				}
+		// 影響を受けた行数が0の場合はINSERTを行う
+		if rowsAffected == 0 {
+			err = postgres.InsertStatementsInfo(yesterdayStatements)
+			if err != nil {
+				// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
+				// log.Error(err)
+				return err
 			}
 		}
 	}
-	if len(todayFinancials) != 0 {
-		for _, financial := range todayFinancials {
-			result, err := postgres.UpdateFinancialInfo(financial)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-			// 影響を受けた行数を確認
-			rowsAffected, err := postgres.RowsAffected(result)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
+	if len(todayStatements) != 0 {
+		result, err := postgres.UpdateStatementsInfo(todayStatements)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		// 影響を受けた行数を確認
+		rowsAffected, err := postgres.RowsAffected(result)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 
-			// 影響を受けた行数が0の場合はINSERTを行う
-			if rowsAffected == 0 {
-				err = postgres.InsertFinancialInfo(financial)
-				if err != nil {
-					// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
-					// log.Error(err)
-					return err
-				}
+		// 影響を受けた行数が0の場合はINSERTを行う
+		if rowsAffected == 0 {
+			err = postgres.InsertStatementsInfo(todayStatements)
+			if err != nil {
+				// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
+				// log.Error(err)
+				return err
 			}
 		}
 	}
@@ -352,15 +323,15 @@ func CheckData() (err error) {
 	}
 
 	// 財務情報を取得し、長さを確認し、0 の場合は再構築を行う
-	financials, err := postgres.GetFinancialInfoAll()
+	statements, err := postgres.GetStatementInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	if len(financials) == 0 {
+	if len(statements) == 0 {
 		fmt.Println("財務情報が存在しないため、再構築を行います")
 		// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
-		err = FetchAndSaveFinancialInfoAll()
+		err = FetchAndSaveStatementInfoAll()
 		if err != nil {
 			log.Error(err)
 			return err
@@ -392,7 +363,7 @@ func CheckData() (err error) {
 */
 func RebuildData() (err error) {
 	// 財務情報を全て削除
-	err = postgres.DeleteFinancialInfoAll()
+	err = postgres.DeleteStatementInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -419,7 +390,7 @@ func RebuildData() (err error) {
 	time.Sleep(3 * time.Second)
 
 	// 財務情報を全て削除し、取得しなおして DB に保存（15分程度の実行時間が必要）
-	err = FetchAndSaveFinancialInfoAll()
+	err = FetchAndSaveStatementInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err

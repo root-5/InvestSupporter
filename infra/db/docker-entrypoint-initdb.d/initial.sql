@@ -10,8 +10,8 @@ CREATE TABLE sector33_info (
     sector33_name VARCHAR(50)
 );
 
--- 3. 市場区分情報テーブル (market_info)
-CREATE TABLE market_info (
+-- 3. 市場区分情報テーブル (markets_info)
+CREATE TABLE markets_info (
     market_code SMALLINT PRIMARY KEY,
     market_name VARCHAR(50)
 );
@@ -27,14 +27,15 @@ CREATE TABLE stocks_info (
     market_code SMALLINT,
     FOREIGN KEY (sector17_code) REFERENCES sector17_info(sector17_code),
     FOREIGN KEY (sector33_code) REFERENCES sector33_info(sector33_code),
-    FOREIGN KEY (market_code) REFERENCES market_info(market_code)
+    FOREIGN KEY (market_code) REFERENCES markets_info(market_code)
 );
 
--- 5. 財務情報テーブル (financial_info)
-CREATE TABLE financial_info (
-    code CHAR(5) PRIMARY KEY,
+-- 5. 財務情報テーブル (statements_info)
+CREATE TABLE statements_info (
+    disclosure_number BIGINT PRIMARY KEY,
+    code CHAR(5),
     disclosed_date DATE,
-    disclosed_time TIME,
+    type_of_document VARCHAR(75),
     net_sales DECIMAL(20,0),
     operating_profit DECIMAL(20,0),
     ordinary_profit DECIMAL(20,0),
@@ -68,8 +69,8 @@ CREATE TABLE financial_info (
     FOREIGN KEY (code) REFERENCES stocks_info(code)
 );
 
--- 6. 株価情報テーブル (price_info)
-CREATE TABLE price_info (
+-- 6. 株価情報テーブル (prices_info)
+CREATE TABLE prices_info (
     ymd DATE,
     code CHAR(5),
     adjustment_open DECIMAL(10,2),
@@ -83,8 +84,8 @@ CREATE TABLE price_info (
 
 -- インデックスの作成
 CREATE INDEX idx_code_stocks_info ON stocks_info (code);
-CREATE INDEX idx_code_financial_info ON financial_info (code);
-CREATE INDEX idx_code_price_info ON price_info (ymd, code);
+CREATE INDEX idx_code_statements_info ON statements_info (code);
+CREATE INDEX idx_code_prices_info ON prices_info (ymd, code);
 
 -- データの挿入
 -- 17 業種情報テーブル
@@ -146,7 +147,7 @@ INSERT INTO sector33_info (sector33_code, sector33_name) VALUES
     (9999,'その他');
 
 -- 市場区分情報テーブル
-INSERT INTO market_info (market_code, market_name) VALUES
+INSERT INTO markets_info (market_code, market_name) VALUES
     (101,'東証一部'),
     (102,'東証二部'),
     (104,'マザーズ'),

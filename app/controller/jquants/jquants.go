@@ -5,7 +5,7 @@ import (
 	"app/controller/log"
 	"app/domain/model"
 	"os"
-	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -202,10 +202,10 @@ func FetchStocksInfo() (stocksList []model.StocksInfo, err error) {
 /*
 企業の財務情報を取得する関数
 - arg) codeOrDate		銘柄コードまたは日付（YYYY-MM-DD）
-- return) financials	企業の財務情報
+- return) statements	企業の財務情報
 - return) err			エラー
 */
-func FetchFinancailsInfo(codeOrDate string) (financials []model.FinancialInfo, err error) {
+func FetchStatementsInfo(codeOrDate string) (statements []model.StatementInfo, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/fins/statements"
 
@@ -215,19 +215,16 @@ func FetchFinancailsInfo(codeOrDate string) (financials []model.FinancialInfo, e
 		Date string
 	}
 	var queryParams = queryParamsType{}
-	var isCodeMode bool
 
 	// codeOrDate が銘柄コードか日付かでクエリパラメータを変更
 	if len(codeOrDate) == 4 || len(codeOrDate) == 5 {
 		queryParams = queryParamsType{
 			Code: codeOrDate,
 		}
-		isCodeMode = true
 	} else {
 		queryParams = queryParamsType{
 			Date: codeOrDate,
 		}
-		isCodeMode = false
 	}
 
 	// ヘッダー定義
@@ -240,7 +237,7 @@ func FetchFinancailsInfo(codeOrDate string) (financials []model.FinancialInfo, e
 
 	// レスポンスボディ定義
 	type resBodyStruct struct {
-		Statements []jquantsFinancialInfo `json:"statements"`
+		ResStatements []jquantsStatementInfo `json:"statements"`
 	}
 	var resBody resBodyStruct
 
@@ -251,140 +248,58 @@ func FetchFinancailsInfo(codeOrDate string) (financials []model.FinancialInfo, e
 		return nil, err
 	}
 
-	for _, state := range resBody.Statements {
-		// state の中身が空の場合は Code のみ入った構造体を返却
-		if state.Code == "" {
-			financials = append(financials, model.FinancialInfo{
-				Code: codeOrDate,
-			})
+	for _, resStatement := range resBody.ResStatements {
+		// resStatement の中身が空の場合は空の構造体を返却
+		if resStatement.Code == "" {
+			statements = append(statements, model.StatementInfo{})
 		} else {
-			// 型変換（jquantsFinancialInfo 型の配列から model.FinancialInfo 型の配列に変換）
-			financials = append(financials, model.FinancialInfo{
-				Code:                                   state.Code,
-				DisclosedDate:                          convertStringToTime(state.DisclosedDate),
-				DisclosedTime:                          convertStringToTime(state.DisclosedTime),
-				NetSales:                               convertStringToInt64(state.NetSales),
-				OperatingProfit:                        convertStringToInt64(state.OperatingProfit),
-				OrdinaryProfit:                         convertStringToInt64(state.OrdinaryProfit),
-				Profit:                                 convertStringToInt64(state.Profit),
-				EarningsPerShare:                       convertStringToFloat64(state.EarningsPerShare),
-				TotalAssets:                            convertStringToInt64(state.TotalAssets),
-				Equity:                                 convertStringToInt64(state.Equity),
-				EquityToAssetRatio:                     convertStringToFloat64(state.EquityToAssetRatio),
-				BookValuePerShare:                      convertStringToFloat64(state.BookValuePerShare),
-				CashFlowsFromOperatingActivities:       convertStringToInt64(state.CashFlowsFromOperatingActivities),
-				CashFlowsFromInvestingActivities:       convertStringToInt64(state.CashFlowsFromInvestingActivities),
-				CashFlowsFromFinancingActivities:       convertStringToInt64(state.CashFlowsFromFinancingActivities),
-				CashAndEquivalents:                     convertStringToInt64(state.CashAndEquivalents),
-				ResultDividendPerShareAnnual:           convertStringToFloat64(state.ResultDividendPerShareAnnual),
-				ResultPayoutRatioAnnual:                convertStringToFloat64(state.ResultPayoutRatioAnnual),
-				ForecastDividendPerShareAnnual:         convertStringToFloat64(state.ForecastDividendPerShareAnnual),
-				ForecastPayoutRatioAnnual:              convertStringToFloat64(state.ForecastPayoutRatioAnnual),
-				NextYearForecastDividendPerShareAnnual: convertStringToFloat64(state.NextYearForecastDividendPerShareAnnual),
-				NextYearForecastPayoutRatioAnnual:      convertStringToFloat64(state.NextYearForecastPayoutRatioAnnual),
-				ForecastNetSales:                       convertStringToInt64(state.ForecastNetSales),
-				ForecastOperatingProfit:                convertStringToInt64(state.ForecastOperatingProfit),
-				ForecastOrdinaryProfit:                 convertStringToInt64(state.ForecastOrdinaryProfit),
-				ForecastProfit:                         convertStringToInt64(state.ForecastProfit),
-				ForecastEarningsPerShare:               convertStringToFloat64(state.ForecastEarningsPerShare),
-				NextYearForecastNetSales:               convertStringToInt64(state.NextYearForecastNetSales),
-				NextYearForecastOperatingProfit:        convertStringToInt64(state.NextYearForecastOperatingProfit),
-				NextYearForecastOrdinaryProfit:         convertStringToInt64(state.NextYearForecastOrdinaryProfit),
-				NextYearForecastProfit:                 convertStringToInt64(state.NextYearForecastProfit),
-				NextYearForecastEarningsPerShare:       convertStringToFloat64(state.NextYearForecastEarningsPerShare),
-				NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock: convertStringToInt64(state.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock),
-			})
-		}
-	}
-
-	// financials の中身が空の場合は Code のみ入った構造体を返却
-	if len(financials) == 0 {
-		financial := model.FinancialInfo{
-			Code: codeOrDate,
-		}
-		// financials をスライスに変換して返す
-		financials = []model.FinancialInfo{financial}
-	}
-
-	// もしcodeOrDateがコードの場合は融合処理を行いデータをまとめる
-	if isCodeMode {
-		// 統合後の財務情報
-		var financialsMerged model.FinancialInfo
-
-		// APIから返却される内容は古いものから順になっているので、配列の最初の要素から順に処理する
-		for _, financial := range financials {
-			// 初回は統合後の財務情報にそのまま代入
-			if financialsMerged.Code == "" {
-				financialsMerged = financial
-			} else {
-				// 2回目以降は統合処理を行う、ただし新しいデータがない（nil）の場合はスキップ
-				m := reflect.ValueOf(financial)
-				merged := reflect.ValueOf(&financialsMerged).Elem()
-
-				// フィールドごとに統合処理を行う
-				for i := 0; i < m.NumField(); i++ {
-					switch m.Field(i).Type().String() {
-					case "sql.NullInt64":
-						// フィールドが sql.NullInt64 型の場合
-						if m.Field(i).FieldByName("Valid").Bool() {
-							merged.Field(i).FieldByName("Int64").Set(m.Field(i).FieldByName("Int64"))
-							merged.Field(i).FieldByName("Valid").Set(m.Field(i).FieldByName("Valid"))
-						}
-					case "sql.NullFloat64":
-						// フィールドが sql.NullFloat64 型の場合
-						if m.Field(i).FieldByName("Valid").Bool() {
-							merged.Field(i).FieldByName("Float64").Set(m.Field(i).FieldByName("Float64"))
-							merged.Field(i).FieldByName("Valid").Set(m.Field(i).FieldByName("Valid"))
-						}
-					case "sql.NullString":
-						// フィールドが sql.NullString 型の場合
-						if m.Field(i).FieldByName("Valid").Bool() {
-							merged.Field(i).FieldByName("String").Set(m.Field(i).FieldByName("String"))
-							merged.Field(i).FieldByName("Valid").Set(m.Field(i).FieldByName("Valid"))
-						}
-					case "sql.NullTime":
-						// フィールドが sql.NullTime 型の場合
-						if m.Field(i).FieldByName("Valid").Bool() {
-							merged.Field(i).FieldByName("Time").Set(m.Field(i).FieldByName("Time"))
-							merged.Field(i).FieldByName("Valid").Set(m.Field(i).FieldByName("Valid"))
-						}
-					default:
-						if m.Field(i).Interface() != nil {
-							merged.Field(i).Set(m.Field(i))
-						}
-					}
-				}
-			}
-		}
-
-		// 統合前の財務情報を初期化しなおして、統合後の財務情報を返却する
-		financials = make([]model.FinancialInfo, 1)
-		financials[0] = financialsMerged
-	}
-
-	// もしcodeOrDateが日付の場合は各コードごとに GetFinancialInfo を呼び出してデータをまとめる
-	if !isCodeMode {
-		// 統合後の財務情報
-		var financialsMerged []model.FinancialInfo
-
-		// 取得した財務情報を展開
-		for _, financial := range financials {
-			// コードを元に財務情報を取得
-			financialInfo, err := FetchFinancailsInfo(financial.Code)
+			// 開示番号を int64 に変換
+			disclosureNumber, err := strconv.ParseInt(resStatement.DisclosureNumber, 10, 64)
 			if err != nil {
 				log.Error(err)
 				return nil, err
 			}
 
-			// 取得した財務情報を統合
-			financialsMerged = append(financialsMerged, financialInfo[0])
+			// 型変換（jquantsStatementInfo 型の配列から model.StatementInfo 型の配列に変換）
+			statements = append(statements, model.StatementInfo{
+				DisclosureNumber:                       disclosureNumber,
+				Code:                                   resStatement.Code,
+				DisclosedDate:                          convertStringToTime(resStatement.DisclosedDate),
+				TypeOfDocument:                         resStatement.TypeOfDocument,
+				NetSales:                               convertStringToInt64(resStatement.NetSales),
+				OperatingProfit:                        convertStringToInt64(resStatement.OperatingProfit),
+				OrdinaryProfit:                         convertStringToInt64(resStatement.OrdinaryProfit),
+				Profit:                                 convertStringToInt64(resStatement.Profit),
+				EarningsPerShare:                       convertStringToFloat64(resStatement.EarningsPerShare),
+				TotalAssets:                            convertStringToInt64(resStatement.TotalAssets),
+				Equity:                                 convertStringToInt64(resStatement.Equity),
+				EquityToAssetRatio:                     convertStringToFloat64(resStatement.EquityToAssetRatio),
+				BookValuePerShare:                      convertStringToFloat64(resStatement.BookValuePerShare),
+				CashFlowsFromOperatingActivities:       convertStringToInt64(resStatement.CashFlowsFromOperatingActivities),
+				CashFlowsFromInvestingActivities:       convertStringToInt64(resStatement.CashFlowsFromInvestingActivities),
+				CashFlowsFromFinancingActivities:       convertStringToInt64(resStatement.CashFlowsFromFinancingActivities),
+				CashAndEquivalents:                     convertStringToInt64(resStatement.CashAndEquivalents),
+				ResultDividendPerShareAnnual:           convertStringToFloat64(resStatement.ResultDividendPerShareAnnual),
+				ResultPayoutRatioAnnual:                convertStringToFloat64(resStatement.ResultPayoutRatioAnnual),
+				ForecastDividendPerShareAnnual:         convertStringToFloat64(resStatement.ForecastDividendPerShareAnnual),
+				ForecastPayoutRatioAnnual:              convertStringToFloat64(resStatement.ForecastPayoutRatioAnnual),
+				NextYearForecastDividendPerShareAnnual: convertStringToFloat64(resStatement.NextYearForecastDividendPerShareAnnual),
+				NextYearForecastPayoutRatioAnnual:      convertStringToFloat64(resStatement.NextYearForecastPayoutRatioAnnual),
+				ForecastNetSales:                       convertStringToInt64(resStatement.ForecastNetSales),
+				ForecastOperatingProfit:                convertStringToInt64(resStatement.ForecastOperatingProfit),
+				ForecastOrdinaryProfit:                 convertStringToInt64(resStatement.ForecastOrdinaryProfit),
+				ForecastProfit:                         convertStringToInt64(resStatement.ForecastProfit),
+				ForecastEarningsPerShare:               convertStringToFloat64(resStatement.ForecastEarningsPerShare),
+				NextYearForecastNetSales:               convertStringToInt64(resStatement.NextYearForecastNetSales),
+				NextYearForecastOperatingProfit:        convertStringToInt64(resStatement.NextYearForecastOperatingProfit),
+				NextYearForecastOrdinaryProfit:         convertStringToInt64(resStatement.NextYearForecastOrdinaryProfit),
+				NextYearForecastProfit:                 convertStringToInt64(resStatement.NextYearForecastProfit),
+				NextYearForecastEarningsPerShare:       convertStringToFloat64(resStatement.NextYearForecastEarningsPerShare),
+				NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock: convertStringToInt64(resStatement.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock),
+			})
 		}
-
-		// 統合後の財務情報を返却
-		financials = financialsMerged
 	}
-
-	return financials, nil
+	return statements, nil
 }
 
 /*
