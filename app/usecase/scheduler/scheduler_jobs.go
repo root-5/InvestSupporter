@@ -14,15 +14,15 @@ var jobs = Jobs{
 		ExecuteFlag: true,
 	},
 	{
-		Name:        "UpdateTodayStatementsInfo",
+		Name:        "UpdateStatementsInfo",
 		Duration:    24 * time.Hour,
-		Function:    usecase.UpdateTodayStatementsInfo,
+		Function:    usecase.UpdateStatementsInfo,
 		ExecuteFlag: true,
 	},
 	{
-		Name:        "UpdateTodayPricesInfo",
+		Name:        "UpdatePricesInfo",
 		Duration:    1 * time.Hour,
-		Function:    usecase.UpdateTodayPricesInfo,
+		Function:    usecase.UpdatePricesInfo,
 		ExecuteFlag: true,
 	},
 }

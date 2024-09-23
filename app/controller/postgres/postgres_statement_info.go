@@ -209,7 +209,7 @@ func GetStatementsInfo(code string) (statements []model.StatementInfo, err error
   - return) statements	財務情報
   - return) err			エラー
 */
-func GetStatementInfoAll() (statements []model.StatementInfo, err error) {
+func GetTodayStatementInfoAll() (statements []model.StatementInfo, err error) {
 	// データの取得
 	rows, err := db.Query("SELECT t1.* FROM statements_info t1 INNER JOIN (SELECT code,MAX(disclosure_number) FROM statements_info WHERE type_of_document LIKE '%%FinancialStatements%%' GROUP BY code ORDER BY code) t2 ON t1.code = t2.code AND t1.disclosure_number = t2.max")
 	if err != nil {
@@ -284,4 +284,20 @@ func DeleteStatementInfoAll() (err error) {
 	}
 
 	return nil
+}
+
+/*
+財務情報テーブルの最新の開示日を取得する関数
+  - return) date	最新の開示日（例：2024-09-20T00:00:00Z）
+  - return) err		エラー
+*/
+func GetStatementsLatestDisclosedDate() (date string, err error) {
+	// データの取得
+	err = db.QueryRow("SELECT MAX(disclosed_date) FROM statements_info").Scan(&date)
+	if err != nil {
+		log.Error(err)
+		return "", err
+	}
+
+	return date, nil
 }

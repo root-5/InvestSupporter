@@ -9,7 +9,7 @@ import (
 )
 
 /*
-株価テーブルに INSERT する関数
+株価情報テーブルに INSERT する関数
   - arg) price	株価一覧
   - return) err		エラー
 */
@@ -22,7 +22,7 @@ func InsertPricesInfo(price []model.PriceInfo) (err error) {
 	}
 	defer stmt.Close()
 
-	// 株価テーブルに INSERT
+	// 株価情報テーブルに INSERT
 	for _, stock := range price {
 		_, err = stmt.Exec(
 			stock.Date,
@@ -43,7 +43,7 @@ func InsertPricesInfo(price []model.PriceInfo) (err error) {
 }
 
 /*
-株価テーブルを UPDATE する関数
+株価情報テーブルを UPDATE する関数
   - arg) price	株価一覧
   - return) err		エラー
 */
@@ -56,7 +56,7 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 	}
 	defer stmt.Close()
 
-	// 株価テーブルを UPDATE
+	// 株価情報テーブルを UPDATE
 	for _, price := range prices {
 		_, err = stmt.Exec(
 			price.Date,
@@ -77,7 +77,7 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 }
 
 /*
-株価テーブルをすべて取得する関数
+株価情報テーブルをすべて取得する関数
   - arg) ymd		日付
   - arg) code		コード
   - return) prices	株価一覧
@@ -143,7 +143,7 @@ func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error
 }
 
 /*
-財務情報テーブルを DELETE する関数
+株価情報テーブルを DELETE する関数
   - return) err		エラー
 */
 func DeletePriceInfoAll() (err error) {
@@ -155,4 +155,20 @@ func DeletePriceInfoAll() (err error) {
 	}
 
 	return nil
+}
+
+/*
+株価情報テーブルの最新の日付を取得する関数
+  - return) date	最新の日付（例：2024-09-20T00:00:00Z）
+  - return) err		エラー
+*/
+func GetPricesLatestDate() (date string, err error) {
+	// データの取得
+	err = db.QueryRow("SELECT MAX(ymd) FROM prices_info").Scan(&date)
+	if err != nil {
+		log.Error(err)
+		return "", err
+	}
+
+	return date, nil
 }

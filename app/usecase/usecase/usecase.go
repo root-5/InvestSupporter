@@ -124,71 +124,60 @@ func FetchAndSaveStatementInfoAll() (err error) {
 }
 
 /*
-Jquants API から昨日と今日に更新された財務情報を取得し、DB を更新する関数
+財務情報テーブルの最新の開示日と比較し、Jquants API から不足分を更新する関数
 - return) err	エラー
 */
-func UpdateTodayStatementsInfo() (err error) {
-	// fmt.Println("EXECUTE UpdateTodayStatementsInfo")
+func UpdateStatementsInfo() (err error) {
+	// fmt.Println("EXECUTE UpdateStatementsInfo")
 
-	// 昨日と今日の日付を取得
-	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
-	today := time.Now().Format("2006-01-02")
-
-	// 上場銘柄一覧の財務情報を取得
-	yesterdayStatements, err := jquants.FetchStatementsInfo(yesterday)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	todayStatements, err := jquants.FetchStatementsInfo(today)
+	// 財務情報テーブルの最新の開示日（例：2024-09-20T00:00:00Z）を取得
+	lastDisclosureDate, err := postgres.GetStatementsLatestDisclosedDate()
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	// 取得した財務情報を DB に保存
-	if len(yesterdayStatements) != 0 {
-		result, err := postgres.UpdateStatementsInfo(yesterdayStatements)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		// 影響を受けた行数を確認
-		rowsAffected, err := postgres.RowsAffected(result)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
+	// "T" 以降を削除し "2006-01-02" になるように整形
+	lastDisclosureDate = lastDisclosureDate[:10]
 
-		// 影響を受けた行数が0の場合はINSERTを行う
-		if rowsAffected == 0 {
-			err = postgres.InsertStatementsInfo(yesterdayStatements)
-			if err != nil {
-				// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
-				// log.Error(err)
-				return err
-			}
-		}
+	// time.Time に変換
+	lastDisclosureDateParsed, err := time.Parse("2006-01-02", lastDisclosureDate)
+	if err != nil {
+		log.Error(err)
+		return err
 	}
-	if len(todayStatements) != 0 {
-		result, err := postgres.UpdateStatementsInfo(todayStatements)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		// 影響を受けた行数を確認
-		rowsAffected, err := postgres.RowsAffected(result)
+
+	// 今日の日付と比較し、同じなら更新しない
+	if lastDisclosureDateParsed.Format("2006-01-02") == time.Now().Format("2006-01-02") {
+		return nil
+	}
+
+	// 今日の日付と比較し、日数を算出
+	shortageDays := int(time.Since(lastDisclosureDateParsed).Hours()/24) - 1
+
+	// 今日までの不足分の日付をリスト化
+	var dates []time.Time
+	for i := 1; i <= shortageDays; i++ {
+		dates = append(dates, lastDisclosureDateParsed.AddDate(0, 0, i))
+	}
+
+	// 財務情報を取得し、DB に保存
+	for _, date := range dates {
+		// 日付を文字列に変換
+		dateStr := date.Format("2006-01-02")
+
+		// 財務情報を取得
+		statements, err := jquants.FetchStatementsInfo(dateStr)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
 
-		// 影響を受けた行数が0の場合はINSERTを行う
-		if rowsAffected == 0 {
-			err = postgres.InsertStatementsInfo(todayStatements)
+		// 取得した財務情報を DB に保存
+		if len(statements) != 0 {
+			err = postgres.InsertStatementsInfo(statements)
 			if err != nil {
-				// 銘柄一覧に存在しないのに財務情報には存在する形で Jquants API が返す場合があるため、エラーを無視
-				// log.Error(err)
+				log.Error(err)
 				return err
 			}
 		}
@@ -241,56 +230,58 @@ func FetchAndSavePriceInfoAll() (err error) {
 }
 
 /*
-Jquants API から昨日と今日に更新された株価情報を取得し、DB を更新する関数
+株価情報テーブルの最新の日付と比較し、Jquants API から不足分を更新する関数
 - return) err	エラー
 */
-func UpdateTodayPricesInfo() (err error) {
-	// fmt.Println("EXECUTE UpdateTodayPricesInfo")
+func UpdatePricesInfo() (err error) {
+	// fmt.Println("EXECUTE UpdatePricesInfo")
 
-	// 昨日と今日の日付を取得
-	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
-	today := time.Now().Format("2006-01-02")
-
-	// DB から昨日と今日の株価情報を取得
-	yesterdayPricesFromDb, err := postgres.GetPricesInfo("", yesterday)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	todayPricesFromDb, err := postgres.GetPricesInfo("", today)
+	// 株価情報テーブルの最新の開示日（例：2024-09-20T00:00:00Z）を取得
+	lastestDate, err := postgres.GetPricesLatestDate()
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	// 昨日の株価情報がない場合は取得して保存
-	if len(yesterdayPricesFromDb) == 0 {
-		// 昨日の株価情報を取得
-		yesterdayPrices, err := jquants.FetchPricesInfo(yesterday)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		// 取得した株価情報を DB に保存
-		if len(yesterdayPrices) != 0 {
-			err = postgres.InsertPricesInfo(yesterdayPrices)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
-		}
+	// "T" 以降を削除し "2006-01-02" になるように整形
+	lastestDate = lastestDate[:10]
+
+	// time.Time に変換
+	lastestDateParsed, err := time.Parse("2006-01-02", lastestDate)
+	if err != nil {
+		log.Error(err)
+		return err
 	}
 
-	// 今日の株価情報がない場合は取得して保存
-	if len(todayPricesFromDb) == 0 {
-		todayPrices, err := jquants.FetchPricesInfo(today)
+	// 今日の日付と比較し、同じなら更新しない
+	if lastestDateParsed.Format("2006-01-02") == time.Now().Format("2006-01-02") {
+		return nil
+	}
+
+	// 今日の日付と比較し、日数を算出
+	shortageDays := int(time.Since(lastestDateParsed).Hours()/24) - 1
+
+	// 今日までの不足分の日付をリスト化
+	var dates []time.Time
+	for i := 1; i <= shortageDays; i++ {
+		dates = append(dates, lastestDateParsed.AddDate(0, 0, i))
+	}
+
+	// 株価情報を取得し、DB に保存
+	for _, date := range dates {
+		// 日付を文字列に変換
+		dateStr := date.Format("2006-01-02")
+
+		// 株価情報を取得
+		prices, err := jquants.FetchPricesInfo(dateStr)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
+
 		// 取得した株価情報を DB に保存
-		if len(todayPrices) != 0 {
-			err = postgres.InsertPricesInfo(todayPrices)
+		if len(prices) != 0 {
+			err = postgres.InsertPricesInfo(prices)
 			if err != nil {
 				log.Error(err)
 				return err
@@ -323,7 +314,7 @@ func CheckData() (err error) {
 	}
 
 	// 財務情報を取得し、長さを確認し、0 の場合は再構築を行う
-	statements, err := postgres.GetStatementInfoAll()
+	statements, err := postgres.GetTodayStatementInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err
