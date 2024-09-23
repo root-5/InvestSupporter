@@ -89,7 +89,7 @@ func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error
 	var rows *sql.Rows
 	if code == "" && ymd == "" {
 		return nil, fmt.Errorf("code and ymd are empty")
-		// ほかのクエリと比較して処理が重いのでタイムアウトを設定
+		// 全銘柄、全期間のクエリは他のクエリと比較して処理が重いのでタイムアウトを設定
 		// ローカルは問題ないが、本番環境ではデフォルトだとタイムアウトが発生する
 		// >> 最終的にどうにもならなかった、別の手段を考える
 		// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -107,7 +107,7 @@ func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error
 			return nil, err
 		}
 	} else if code == "" && ymd != "" {
-		rows, err = db.Query("SELECT * FROM prices_info WHERE ymd = $1 ORDER BY code ASC", ymd)
+		rows, err = db.Query("SELECT * FROM prices_info WHERE ymd = (SELECT MAX(ymd) FROM prices_info WHERE ymd < $1) ORDER BY code ASC", ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err
