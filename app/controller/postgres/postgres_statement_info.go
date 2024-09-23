@@ -139,7 +139,18 @@ func UpdateStatementsInfo(statements []model.StatementInfo) (result sql.Result, 
 func GetStatementsInfo(code string) (statements []model.StatementInfo, err error) {
 	// データの取得
 	var rows *sql.Rows
-	rows, err = db.Query("SELECT * FROM statements_info WHERE code = $1", code)
+
+	// サブクエリの中身は、同年の同じタイプの文書の中で最新の開示番号一覧を取得するもの
+	// 目的は、財務データの出力内容を決算短信に絞ること（LIKE句の目的）と決算短信の修正があった場合に最新のものだけを取得する（JOIN句の目的）こと
+	rows, err = db.Query(`
+		SELECT t1.*
+		FROM statements_info AS t1
+		INNER JOIN (
+			SELECT MAX(disclosure_number) FROM statements_info WHERE code = $1 AND type_of_document LIKE '%%FinancialStatements%%' GROUP BY CONCAT(EXTRACT(YEAR FROM disclosed_date), type_of_document)
+		) AS t2
+			ON t1.disclosure_number = t2.max
+		ORDER BY t1.disclosure_number ASC
+		`, code)
 	if err != nil {
 		log.Error(err)
 		return []model.StatementInfo{}, err
