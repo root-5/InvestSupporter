@@ -18,7 +18,7 @@ var port = "8080"
 // APIサーバーを起動する関数
 func StartServer() {
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(":" + port, nil)
 }
 
 // リクエストを処理する関数
@@ -138,33 +138,33 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			},
 			{
 				Path:    "/",
-				Sample:  "",
+				Sample:  "/",
 				Explain: "使い方説明",
 			},
 			{
 				Path:    "/howto",
-				Sample:  "",
+				Sample:  "/howto",
 				Explain: "使い方説明（WEBブラウザ）Chromeなどをつかってアクセスしてください",
 			},
 			{
 				Path:    "/financial",
 				Sample:  "/financial",
-				Explain: "財務情報（全上場銘柄）",
+				Explain: "全銘柄基本情報",
 			},
 			{
-				Path:    "/financial?code={{銘柄コード}}",
-				Sample:  "/financial?code=7203",
-				Explain: "財務情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
+				Path:    "/statement?code={{銘柄コード}}",
+				Sample:  "/statement?code=7203",
+				Explain: "全期間財務情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
 			},
 			{
 				Path:    "/price?code={{銘柄コード}}",
 				Sample:  "/price?code=7203",
-				Explain: "株価情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
+				Explain: "全期間株価情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
 			},
 			{
 				Path:    "/price?ymd={{日付}}",
 				Sample:  "/price?ymd=2024-09-02",
-				Explain: "株価情報（日付指定） - {{日付}}は取得したい日付をYYYY-MM-DDで指定",
+				Explain: "全銘柄株価情報（日付指定） - {{日付}}は取得したい日付をYYYY-MM-DDで指定",
 			},
 			{
 				Path:    "/price?code={{銘柄コード}}&ymd={{日付}}",
