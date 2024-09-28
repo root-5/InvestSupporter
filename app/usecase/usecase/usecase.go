@@ -17,8 +17,6 @@ API と DB の上場銘柄一覧のデータが不一致なら、テーブルを
 - return) err	エラー
 */
 func UpdateStocksInfo() (err error) {
-	// fmt.Println("EXECUTE UpdateStocksInfo")
-
 	// 上場銘柄一覧を API から取得
 	stocksNew, err := jquants.FetchStocksInfo()
 	if err != nil {
@@ -85,9 +83,7 @@ Jquants API から全ての財務情報を取得し、DB を一度削除した�
 ！！！15分程度の実行時間が必要！！！
 - return) err	エラー
 */
-func FetchAndSaveStatementInfoAll() (err error) {
-	// fmt.Println("EXECUTE FetchAndSaveStatementInfoAll")
-
+func ResetStatementInfoAll() (err error) {
 	// 財務情報テーブルを全て削除
 	err = postgres.DeleteStatementInfoAll()
 	if err != nil {
@@ -128,8 +124,6 @@ func FetchAndSaveStatementInfoAll() (err error) {
 - return) err	エラー
 */
 func UpdateStatementsInfo() (err error) {
-	// fmt.Println("EXECUTE UpdateStatementsInfo")
-
 	// 財務情報テーブルの最新の開示日（例：2024-09-20T00:00:00Z）を取得
 	lastDisclosureDate, err := postgres.GetStatementsLatestDisclosedDate()
 	if err != nil {
@@ -191,9 +185,7 @@ Jquants API からすべての株価情報を取得し、DB を一度削除し�
 ！！！一時間半程度の実行時間が必要！！！
 - return) err	エラー
 */
-func FetchAndSavePriceInfoAll() (err error) {
-	// fmt.Println("EXECUTE FetchAndSavePriceInfoAll")
-
+func ResetPriceInfoAll() (err error) {
 	// 株価情報テーブルを全て削除
 	err = postgres.DeletePriceInfoAll()
 	if err != nil {
@@ -234,8 +226,6 @@ func FetchAndSavePriceInfoAll() (err error) {
 - return) err	エラー
 */
 func UpdatePricesInfo() (err error) {
-	// fmt.Println("EXECUTE UpdatePricesInfo")
-
 	// 株価情報テーブルの最新の開示日（例：2024-09-20T00:00:00Z）を取得
 	lastestDate, err := postgres.GetPricesLatestDate()
 	if err != nil {
@@ -322,7 +312,7 @@ func CheckData() (err error) {
 	if len(statements) == 0 {
 		fmt.Println("財務情報が存在しないため、再構築を行います")
 		// 財務情報を全て取得し、DB に保存（15分程度の実行時間が必要）
-		err = FetchAndSaveStatementInfoAll()
+		err = ResetStatementInfoAll()
 		if err != nil {
 			log.Error(err)
 			return err
@@ -338,7 +328,7 @@ func CheckData() (err error) {
 	if len(prices) == 0 {
 		fmt.Println("株価情報が存在しないため、再構築を行います")
 		// 株価情報を全て取得し、DB に保存
-		err = FetchAndSavePriceInfoAll()
+		err = ResetPriceInfoAll()
 		if err != nil {
 			log.Error(err)
 			return err
@@ -352,7 +342,7 @@ func CheckData() (err error) {
 全データを削除し、再構築する関数
   - return) エラー
 */
-func RebuildData() (err error) {
+func ResetDataAll() (err error) {
 	// 財務情報を全て削除
 	err = postgres.DeleteStatementInfoAll()
 	if err != nil {
@@ -381,7 +371,7 @@ func RebuildData() (err error) {
 	time.Sleep(3 * time.Second)
 
 	// 財務情報を全て削除し、取得しなおして DB に保存（15分程度の実行時間が必要）
-	err = FetchAndSaveStatementInfoAll()
+	err = ResetStatementInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -390,7 +380,7 @@ func RebuildData() (err error) {
 	time.Sleep(3 * time.Second)
 
 	// 株価情報を全て削除し、取得しなおして DB に保存
-	err = FetchAndSavePriceInfoAll()
+	err = ResetPriceInfoAll()
 	if err != nil {
 		log.Error(err)
 		return err

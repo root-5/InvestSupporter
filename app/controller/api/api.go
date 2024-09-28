@@ -18,7 +18,7 @@ var port = "8080"
 // APIサーバーを起動する関数
 func StartServer() {
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":" + port, nil)
+	http.ListenAndServe(":"+port, nil)
 }
 
 // リクエストを処理する関数
@@ -103,10 +103,27 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		sendCsvResponse(w, data)
 
-	// 上場銘柄一覧を取得
-	case "/admin/rebuild_data":
-		// 全データを削除し、再取得
-		err := usecase.RebuildData()
+	// 株価情報データを削除し、再取得
+	case "/admin/reset/price":
+		err := usecase.ResetPriceInfoAll()
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+	// 財務情報データを削除し、再取得
+	case "/admin/reset/statement":
+		err := usecase.ResetStatementInfoAll()
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+	// 全データを削除し、再取得
+	case "/admin/reset/all":
+		err := usecase.ResetDataAll()
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
