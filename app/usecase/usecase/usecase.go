@@ -205,7 +205,7 @@ func ResetPriceInfoAll() (err error) {
 
 	for _, stock := range stocks {
 		// 株価情報を取得
-		prices, err = jquants.FetchPricesInfo(stock.Code)
+		prices, _, err = jquants.FetchPricesInfo(stock.Code)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -257,13 +257,44 @@ func UpdatePricesInfo() (err error) {
 		dates = append(dates, lastestDateParsed.AddDate(0, 0, i))
 	}
 
+	// 株式分割があった銘柄のコードを格納するスライス
+	var splitStockCodesAll []string
+
 	// 株価情報を取得し、DB に保存
 	for _, date := range dates {
 		// 日付を文字列に変換
 		dateStr := date.Format("2006-01-02")
 
 		// 株価情報を取得
-		prices, err := jquants.FetchPricesInfo(dateStr)
+		prices, splitStockCodes, err := jquants.FetchPricesInfo(dateStr)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+
+		// 取得した株価情報を DB に保存
+		if len(prices) != 0 {
+			err = postgres.InsertPricesInfo(prices)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+
+		splitStockCodesAll = append(splitStockCodesAll, splitStockCodes...)
+	}
+
+	// 株式分割した銘柄の株価情報を削除して再取得
+	for _, splitStockCode := range splitStockCodesAll {
+		// 株価情報を削除
+		err = postgres.DeletePriceInfo(splitStockCode)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+
+		// 株価情報を取得
+		prices, _, err := jquants.FetchPricesInfo(splitStockCode)
 		if err != nil {
 			log.Error(err)
 			return err

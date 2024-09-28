@@ -107,7 +107,7 @@ type jquantsPriceInfo struct {
 	// LowerLimit                string `json: "LowerLimit"`                // 日通ストップ安を記録したか、否かを表すフラグ
 	// Volume                    string `json: "Volume"`                    // 取引高（調整前）
 	// TurnoverValue             string `json: "TurnoverValue"`             // 取引代金
-	// AdjustmentFactor          string `json: "AdjustmentFactor"`          // 調整係数
+	AdjustmentFactor          string `json: "AdjustmentFactor"`          // 調整係数
 	AdjustmentOpen            any    `json: "AdjustmentOpen"`            // 調整済み始値（売買がない場合に Null になるため any）
 	AdjustmentHigh            any    `json: "AdjustmentHigh"`            // 調整済み高値（売買がない場合に Null になるため any）
 	AdjustmentLow             any    `json: "AdjustmentLow"`             // 調整済み安値（売買がない場合に Null になるため any）

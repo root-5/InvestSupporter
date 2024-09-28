@@ -304,11 +304,12 @@ func FetchStatementsInfo(codeOrDate string) (statements []model.StatementInfo, e
 
 /*
 株価を取得する関数
-- arg) codeOrDate		銘柄コードまたは日付（YYYY-MM-DD）
-- return) prices	株価情報
-- return) err			エラー
+- arg) codeOrDate			銘柄コードまたは日付（YYYY-MM-DD）
+- return) prices			株価情報
+- return) splitStockCodes	分割銘柄コード
+- return) err				エラー
 */
-func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
+func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCodes []string ,err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/prices/daily_quotes"
 
@@ -318,19 +319,16 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
 		Date string
 	}
 	var queryParams = queryParamsType{}
-	// var isCodeMode bool
 
 	// codeOrDate が銘柄コードか日付かでクエリパラメータを変更
 	if len(codeOrDate) == 4 || len(codeOrDate) == 5 {
 		queryParams = queryParamsType{
 			Code: codeOrDate,
 		}
-		// isCodeMode = true
 	} else {
 		queryParams = queryParamsType{
 			Date: codeOrDate,
 		}
-		// isCodeMode = false
 	}
 
 	// ヘッダー定義
@@ -351,10 +349,14 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
 	err = get(url, queryParams, headers, &resBody)
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	for _, price := range resBody.Daily_quotes {
+		if (price.AdjustmentFactor != "") {
+			splitStockCodes = append(splitStockCodes, price.Code)
+		}
+
 		// 型変換（jquantsPriceInfo 型の配列から model.StockPrice 型の配列に変換）
 		prices = append(prices, model.PriceInfo{
 			Date:             price.Date,
@@ -367,5 +369,5 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, err error) {
 		})
 	}
 
-	return prices, nil
+	return prices, splitStockCodes, nil
 }

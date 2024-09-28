@@ -143,6 +143,22 @@ func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error
 }
 
 /*
+銘柄コードを指定して、同コードを持つレコードを削除する関数
+  - arg) code		銘柄コード
+  - return) err		エラー
+*/
+func DeletePriceInfo(code string) (err error) {
+	// 銘柄コードを指定して、同コードを持つレコードを削除
+	_, err = db.Exec("DELETE FROM prices_info WHERE code = $1", code)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+/*
 株価情報テーブルを DELETE する関数
   - return) err		エラー
 */
