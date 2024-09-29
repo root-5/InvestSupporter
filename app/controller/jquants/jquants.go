@@ -309,7 +309,7 @@ func FetchStatementsInfo(codeOrDate string) (statements []model.StatementInfo, e
 - return) splitStockCodes	分割銘柄コード
 - return) err				エラー
 */
-func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCodes []string ,err error) {
+func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCodes []string, err error) {
 	// リクエスト先URL
 	url := "https://api.jquants.com/v1/prices/daily_quotes"
 
@@ -353,7 +353,7 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCod
 	}
 
 	for _, price := range resBody.Daily_quotes {
-		if (price.AdjustmentFactor != "") {
+		if price.AdjustmentFactor != 1 {
 			splitStockCodes = append(splitStockCodes, price.Code)
 		}
 

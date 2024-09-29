@@ -1,4 +1,4 @@
-FROM postgres:alpine
+FROM postgres:16-alpine
 
 WORKDIR /var/lib/postgresql/data
 
