@@ -315,8 +315,9 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCod
 
 	// クエリパラメータ定義
 	type queryParamsType struct {
-		Code string
-		Date string
+		Code           string
+		Date           string
+		Pagination_key string
 	}
 	var queryParams = queryParamsType{}
 
@@ -341,32 +342,46 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCod
 
 	// レスポンスボディ定義
 	type resBodyStruct struct {
-		Daily_quotes []jquantsPriceInfo `json:"daily_quotes"`
+		Daily_quotes   []jquantsPriceInfo `json:"daily_quotes"`
+		Pagination_key string             `json:"pagination_key"`
 	}
 	var resBody resBodyStruct
 
-	// GETリクエスト
-	err = get(url, queryParams, headers, &resBody)
-	if err != nil {
-		log.Error(err)
-		return nil, nil, err
-	}
+	// ページネーションキーが存在する限りループ
+	needRoop := true
+	lastPaginationKey := ""
 
-	for _, price := range resBody.Daily_quotes {
-		if price.AdjustmentFactor != 1 {
-			splitStockCodes = append(splitStockCodes, price.Code)
+	for needRoop {
+		lastPaginationKey = resBody.Pagination_key
+		queryParams.Pagination_key = resBody.Pagination_key
+
+		// GETリクエスト
+		err = get(url, queryParams, headers, &resBody)
+		if err != nil {
+			log.Error(err)
+			return nil, nil, err
 		}
 
-		// 型変換（jquantsPriceInfo 型の配列から model.StockPrice 型の配列に変換）
-		prices = append(prices, model.PriceInfo{
-			Date:             price.Date,
-			Code:             price.Code,
-			AdjustmentOpen:   convertAnyToFloat64(price.AdjustmentOpen),
-			AdjustmentHigh:   convertAnyToFloat64(price.AdjustmentHigh),
-			AdjustmentLow:    convertAnyToFloat64(price.AdjustmentLow),
-			AdjustmentClose:  convertAnyToFloat64(price.AdjustmentClose),
-			AdjustmentVolume: convertAnyToFloat64(price.AdjustmentVolume),
-		})
+		if resBody.Pagination_key == lastPaginationKey {
+			needRoop = false
+		}
+
+		for _, price := range resBody.Daily_quotes {
+			if price.AdjustmentFactor != 1 {
+				splitStockCodes = append(splitStockCodes, price.Code)
+			}
+
+			// 型変換（jquantsPriceInfo 型の配列から model.StockPrice 型の配列に変換）
+			prices = append(prices, model.PriceInfo{
+				Date:             price.Date,
+				Code:             price.Code,
+				AdjustmentOpen:   convertAnyToFloat64(price.AdjustmentOpen),
+				AdjustmentHigh:   convertAnyToFloat64(price.AdjustmentHigh),
+				AdjustmentLow:    convertAnyToFloat64(price.AdjustmentLow),
+				AdjustmentClose:  convertAnyToFloat64(price.AdjustmentClose),
+				AdjustmentVolume: convertAnyToFloat64(price.AdjustmentVolume),
+			})
+		}
 	}
 
 	return prices, splitStockCodes, nil

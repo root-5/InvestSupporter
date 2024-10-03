@@ -249,7 +249,7 @@ func UpdatePricesInfo() (err error) {
 	}
 
 	// 今日の日付と比較し、日数を算出
-	shortageDays := int(time.Since(lastestDateParsed).Hours()/24) - 1
+	shortageDays := int(time.Since(lastestDateParsed).Hours() / 24)
 
 	// 今日までの不足分の日付をリスト化
 	var dates []time.Time
