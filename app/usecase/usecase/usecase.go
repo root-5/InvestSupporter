@@ -347,7 +347,7 @@ func GetClosePricesInfo(codes []string) (closePrices [][]string, err error) {
 		// 株価情報から終値だけを取り出し、スライスに格納
 		for i := 0; i < maxRecordsNum; i++ {
 			// 株価情報スライスの長さがコードの長さより短い場合、Valid が false の場合は空文字を追加
-			if i <= len(prices) {
+			if i < len(prices) {
 				if prices[i].AdjustmentClose.Valid {
 					priceText := fmt.Sprintf("%f", prices[i].AdjustmentClose.Float64)
 					closePrices[i] = append(closePrices[i], priceText)
