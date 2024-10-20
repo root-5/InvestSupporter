@@ -189,10 +189,13 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 				Explain: "株価情報（銘柄コード・日付指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
 			},
 		}
-
 		sendCsvResponse(w, data)
 
 	default:
+		// アクセス元のIPアドレスを取得
+		// 将来的には複数回アクセスがあった場合に、そのIPアドレスをブロックするようにする
+		ip := r.RemoteAddr
+		log.Info("Not found: " + ip)
 		fmt.Fprintf(w, "Not found")
 	}
 }
