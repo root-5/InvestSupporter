@@ -320,15 +320,13 @@ func UpdatePricesInfo() (err error) {
   - return) err			エラー
 */
 func GetClosePricesInfo(codes []string) (closePrices [][]string, err error) {
-	// スライスの最大値
-	maxSliceLength := 600 // 600日（2年相当）
-
 	// 日付カラム用にトヨタの株価情報を取得
 	toyotaPrices, err := postgres.GetPricesInfo("72030", "")
 	if err != nil {
 		log.Error(err)
 		return closePrices, err
 	}
+	maxRecordsNum := len(toyotaPrices)
 
 	// 株価情報を取得
 	for _, code := range codes {
@@ -339,15 +337,15 @@ func GetClosePricesInfo(codes []string) (closePrices [][]string, err error) {
 		}
 
 		// 株価情報のスライスを初期化、日付を格納
-		for i := 0; i < maxSliceLength; i++ {
-			if len(closePrices) < maxSliceLength {
+		for i := 0; i < maxRecordsNum; i++ {
+			if len(closePrices) < maxRecordsNum {
 				closePrices = append(closePrices, []string{})
 				dateStr := toyotaPrices[i].Date[:10]
 				closePrices[i] = append(closePrices[i], dateStr)
 			}
 		}
 		// 株価情報から終値だけを取り出し、スライスに格納
-		for i := 0; i < maxSliceLength; i++ {
+		for i := 0; i < maxRecordsNum; i++ {
 			// 株価情報スライスの長さがコードの長さより短い場合、Valid が false の場合は空文字を追加
 			if i <= len(prices) {
 				if prices[i].AdjustmentClose.Valid {

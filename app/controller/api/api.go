@@ -218,6 +218,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 				Sample:  "/price?code=7203&ymd=2024-09-02",
 				Explain: "株価情報（銘柄コード・日付指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
 			},
+			{
+				Path:    "/prices?code={{銘柄コード複数（カンマ区切り）}}",
+				Sample:  "/prices?code=7203,7203",
+				Explain: "株価情報（銘柄コード複数） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定",
+			},
 		}
 
 		sendCsvResponse(w, data)
