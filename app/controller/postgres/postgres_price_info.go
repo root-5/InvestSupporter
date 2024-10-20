@@ -77,7 +77,7 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 }
 
 /*
-株価情報テーブルをすべて取得する関数
+株価情報テーブルを取得する関数
   - arg) ymd		日付
   - arg) code		コード
   - return) prices	株価一覧

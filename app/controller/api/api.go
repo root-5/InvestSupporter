@@ -7,6 +7,8 @@ import (
 	"app/usecase/usecase"
 	"fmt"
 	"net/http"
+	"reflect"
+	"strings"
 )
 
 // ====================================================================================
@@ -73,6 +75,34 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		sendCsvResponse(w, data)
+
+	// 株価終値情報を取得
+	case "/prices":
+		// コードを取得
+		code := r.URL.Query().Get("code")
+		// コードが指定されていない場合はエラー
+		if code == "" {
+			http.Error(w, "codes is required", http.StatusBadRequest)
+			return
+		}
+		// カンマ区切りのコードをスライスに変換
+		codes := strings.Split(code, ",")
+		// コードが4桁の場合は5桁に変換
+		for i := range codes {
+			if len(codes[i]) == 4 {
+				codes[i] = codes[i] + "0"
+			}
+		}
+		// DB から株価情報を取得
+		data, err := usecase.GetClosePricesInfo(codes)
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// fmt.Println(len(data))
+		// fmt.Println(data)
 		sendCsvResponse(w, data)
 
 	// 株価情報を取得
@@ -235,17 +265,42 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 // ====================================================================================
 // レスポンスの処理関数
 // ====================================================================================
-// 構造体をjson形式の文字列に変換してレスポンスを返す関数
+// 構造体やスライスをjson形式の文字列に変換してレスポンスを返す関数
 func sendCsvResponse(w http.ResponseWriter, data interface{}) {
-	// CSV形式の文字列に変換
-	csvString, err := structToCSV(data)
-	if err != nil {
-		log.Error(err)
-		http.Error(w, "no data", http.StatusInternalServerError)
-		return
-	}
+	v := reflect.ValueOf(data)
+	switch v.Kind() {
+	case reflect.Struct: // 構造体の場合
+		// CSV形式の文字列に変換
+		csvString, err := structToCSV(data)
+		if err != nil {
+			log.Error(err)
+			http.Error(w, "no data", http.StatusInternalServerError)
+			return
+		}
+		// w.Header().Set("Content-Type", "application/json") // これを有効にすると、CSV がダウンロードされる
+		w.Write([]byte(csvString))
 
-	// レスポンスを返す
-	// w.Header().Set("Content-Type", "application/csv") // これをオンするとダウンロードされる
-	w.Write([]byte(csvString))
+	case reflect.Slice: // スライスの場合
+		// 型アサーション
+		dataSlice, ok := data.([][]string)
+		if !ok {
+			http.Error(w, "type assertion error", http.StatusInternalServerError)
+			return
+		}
+		csvString := ""
+		for i := range dataSlice {
+			for j := range dataSlice[i] {
+				csvString += dataSlice[i][j]
+				if j < len(dataSlice[i])-1 {
+					csvString += ","
+				} 
+			}
+			csvString += "\n"
+		}
+		// w.Header().Set("Content-Type", "text/csv") // これを有効にすると、CSV がダウンロードされる
+		w.Write([]byte(csvString))
+
+	default:
+		http.Error(w, "unsupported data type", http.StatusBadRequest)
+	}
 }

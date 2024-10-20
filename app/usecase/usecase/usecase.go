@@ -314,6 +314,62 @@ func UpdatePricesInfo() (err error) {
 }
 
 /*
+株価情報テーブルから複数のコードを指定して終値だけを600日（2年相当）分まとめて取得する関数
+  - arg) codes			銘柄コードのスライス
+  - return) closePrices	株価情報の二次元スライス
+  - return) err			エラー
+*/
+func GetClosePricesInfo(codes []string) (closePrices [][]string, err error) {
+	// スライスの最大値
+	maxSliceLength := 600 // 600日（2年相当）
+
+	// 日付カラム用にトヨタの株価情報を取得
+	toyotaPrices, err := postgres.GetPricesInfo("72030", "")
+	if err != nil {
+		log.Error(err)
+		return closePrices, err
+	}
+
+	// 株価情報を取得
+	for _, code := range codes {
+		prices, err := postgres.GetPricesInfo(code, "")
+		if err != nil {
+			log.Error(err)
+			return closePrices, err
+		}
+
+		// 株価情報のスライスを初期化、日付を格納
+		for i := 0; i < maxSliceLength; i++ {
+			if len(closePrices) < maxSliceLength {
+				closePrices = append(closePrices, []string{})
+				dateStr := toyotaPrices[i].Date[:10]
+				closePrices[i] = append(closePrices[i], dateStr)
+			}
+		}
+		// 株価情報から終値だけを取り出し、スライスに格納
+		for i := 0; i < maxSliceLength; i++ {
+			// 株価情報スライスの長さがコードの長さより短い場合、Valid が false の場合は空文字を追加
+			if i <= len(prices) {
+				if prices[i].AdjustmentClose.Valid {
+					priceText := fmt.Sprintf("%f", prices[i].AdjustmentClose.Float64)
+					closePrices[i] = append(closePrices[i], priceText)
+				} else {
+					closePrices[i] = append(closePrices[i], "")
+				}
+			} else {
+				closePrices[i] = append(closePrices[i], "")
+			}
+		}
+	}
+
+	// ヘッダー行（["日付", code1, code2,..]）を頭に追加
+	header := append([]string{"日付"}, codes...)
+	closePrices = append([][]string{header}, closePrices...)
+
+	return closePrices, nil
+}
+
+/*
 DB のデータを確認し、データがない場合はデータを取得し、保存する関数
   - return) エラー
 */
