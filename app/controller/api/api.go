@@ -7,7 +7,6 @@ import (
 	"app/usecase/usecase"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strings"
 )
 
@@ -162,8 +161,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 説明用 html
 	case "/howto":
-		// index.html を返す
 		http.ServeFile(w, r, "controller/api/index.html")
+
+	// ファビコン
+	case "/favicon.ico":
+		http.ServeFile(w, r, "controller/api/smile.ico")
 
 	// 説明用
 	case "/":
@@ -230,6 +232,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		// アクセス元のIPアドレスを取得
 		// 将来的には複数回アクセスがあった場合に、そのIPアドレスをブロックするようにする
 		ip := r.RemoteAddr
+		log.Info(path)
 		log.Info("Not found: " + ip)
 		fmt.Fprintf(w, "Not found")
 	}
@@ -275,9 +278,21 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 // ====================================================================================
 // 構造体やスライスをjson形式の文字列に変換してレスポンスを返す関数
 func sendCsvResponse(w http.ResponseWriter, data interface{}) {
-	v := reflect.ValueOf(data)
-	switch v.Kind() {
-	case reflect.Struct: // 構造体の場合
+	dataSlice, ok := data.([][]string)
+	if ok {
+		csvString := ""
+		for i := range dataSlice {
+			for j := range dataSlice[i] {
+				csvString += dataSlice[i][j]
+				if j < len(dataSlice[i])-1 {
+					csvString += ","
+				}
+			}
+			csvString += "\n"
+		}
+		// w.Header().Set("Content-Type", "text/csv") // これを有効にすると、CSV がダウンロードされる
+		w.Write([]byte(csvString))
+	} else {
 		// CSV形式の文字列に変換
 		csvString, err := structToCSV(data)
 		if err != nil {
@@ -287,28 +302,5 @@ func sendCsvResponse(w http.ResponseWriter, data interface{}) {
 		}
 		// w.Header().Set("Content-Type", "application/json") // これを有効にすると、CSV がダウンロードされる
 		w.Write([]byte(csvString))
-
-	case reflect.Slice: // スライスの場合
-		// 型アサーション
-		dataSlice, ok := data.([][]string)
-		if !ok {
-			http.Error(w, "type assertion error", http.StatusInternalServerError)
-			return
-		}
-		csvString := ""
-		for i := range dataSlice {
-			for j := range dataSlice[i] {
-				csvString += dataSlice[i][j]
-				if j < len(dataSlice[i])-1 {
-					csvString += ","
-				} 
-			}
-			csvString += "\n"
-		}
-		// w.Header().Set("Content-Type", "text/csv") // これを有効にすると、CSV がダウンロードされる
-		w.Write([]byte(csvString))
-
-	default:
-		http.Error(w, "unsupported data type", http.StatusBadRequest)
 	}
 }
