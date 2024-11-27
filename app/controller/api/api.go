@@ -4,6 +4,7 @@ package api
 import (
 	"app/controller/log"
 	"app/controller/postgres"
+	"app/controller/scraping"
 	"app/usecase/usecase"
 	"fmt"
 	"net/http"
@@ -130,6 +131,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		sendCsvResponse(w, data)
+
+	// 決算発表日を取得
+	case "/announce_date":
+		data := scraping.GetAnnounceDate()
 		sendCsvResponse(w, data)
 
 	// 株価情報データを削除し、再取得

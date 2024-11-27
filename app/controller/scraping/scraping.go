@@ -2,21 +2,19 @@
 package scraping
 
 import (
-	"encoding/csv"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
-	"time"
 
 	"golang.org/x/net/html"
 )
 
-const OUTPUT_DIR = "./output"
+// const OUTPUT_DIR = "./output"
 
-func GetAnnounceDate() {
+func GetAnnounceDate() [][]string {
 	maxPageNum := 10
+
 	var resultData [][]string
 
 	for pageNum := 1; pageNum <= maxPageNum; pageNum++ {
@@ -24,20 +22,20 @@ func GetAnnounceDate() {
 		resp, err := http.Get(url)
 		if err != nil {
 			fmt.Println("Error fetching URL:", err)
-			return
+			return nil
 		}
 		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Println("Error reading response body:", err)
-			return
+			return nil
 		}
 
 		doc, err := html.Parse(strings.NewReader(string(body)))
 		if err != nil {
 			fmt.Println("Error parsing HTML:", err)
-			return
+			return nil
 		}
 
 		var tdEles []string
@@ -64,12 +62,14 @@ func GetAnnounceDate() {
 		for _, td := range tdEles {
 			tdArray = append(tdArray, strings.TrimSpace(td))
 		}
+		fmt.Println(tdArray)
 
 		column := 7
 		var tdSquareArray [][]string
 		for i := 0; i < len(tdArray); i += column {
 			tdSquareArray = append(tdSquareArray, tdArray[i:i+column])
 		}
+		fmt.Println(tdSquareArray)
 
 		for _, tdRow := range tdSquareArray {
 			tdRow = tdRow[:len(tdRow)-1]
@@ -87,26 +87,28 @@ func GetAnnounceDate() {
 		}
 	}
 
-	today := time.Now()
-	year := today.Year()
-	month := fmt.Sprintf("%02d", int(today.Month()))
-	date := fmt.Sprintf("%02d", today.Day())
-	fileName := fmt.Sprintf("%s/決算発表日一覧_%d%s%s.csv", OUTPUT_DIR, year, month, date)
+	return resultData
 
-	file, err := os.Create(fileName)
-	if err != nil {
-		fmt.Println("Error creating file:", err)
-		return
-	}
-	defer file.Close()
+	// today := time.Now()
+	// year := today.Year()
+	// month := fmt.Sprintf("%02d", int(today.Month()))
+	// date := fmt.Sprintf("%02d", today.Day())
+	// fileName := fmt.Sprintf("%s/決算発表日一覧_%d%s%s.csv", OUTPUT_DIR, year, month, date)
 
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
+	// file, err := os.Create(fileName)
+	// if err != nil {
+	// 	fmt.Println("Error creating file:", err)
+	// 	return
+	// }
+	// defer file.Close()
 
-	for _, row := range resultData {
-		if err := writer.Write(row); err != nil {
-			fmt.Println("Error writing to CSV:", err)
-			return
-		}
-	}
+	// writer := csv.NewWriter(file)
+	// defer writer.Flush()
+
+	// for _, row := range resultData {
+	// 	if err := writer.Write(row); err != nil {
+	// 		fmt.Println("Error writing to CSV:", err)
+	// 		return
+	// 	}
+	// }
 }
