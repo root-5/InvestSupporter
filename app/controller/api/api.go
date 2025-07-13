@@ -86,10 +86,20 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "codes is required", http.StatusBadRequest)
 			return
 		}
-		// 日付が指定されているが、10文字（YYYY-MM-DD）でない場合はエラー
-		if ymd != "" && len(ymd) != 10 {
-			http.Error(w, "ymd format is invalid", http.StatusBadRequest)
-			return
+		// 日付フォーマットをチェック
+		if ymd != "" {
+			isDateRange := strings.Contains(ymd, "~")
+			if isDateRange {
+				if len(ymd) != 21 { // "YYYY-MM-DD~YYYY-MM-DD"
+					http.Error(w, "ymd range format is invalid. use YYYY-MM-DD~YYYY-MM-DD", http.StatusBadRequest)
+					return
+				}
+			} else {
+				if len(ymd) != 10 { // "YYYY-MM-DD"
+					http.Error(w, "ymd format is invalid. use YYYY-MM-DD", http.StatusBadRequest)
+					return
+				}
+			}
 		}
 		// カンマ区切りのコードをスライスに変換
 		codes := strings.Split(code, ",")
@@ -115,14 +125,22 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		// コードと日付を取得
 		code := r.URL.Query().Get("code")
 		ymd := r.URL.Query().Get("ymd")
-		// コードと日付が指定されていない場合はエラー
-		if code == "" && ymd == "" {
+		// 日付フォーマットをチェック
+		if ymd != "" {
+			isDateRange := strings.Contains(ymd, "~")
+			if isDateRange {
+				if len(ymd) != 21 { // "YYYY-MM-DD~YYYY-MM-DD"
+					http.Error(w, "ymd range format is invalid. use YYYY-MM-DD~YYYY-MM-DD", http.StatusBadRequest)
+					return
+				}
+			} else {
+				if len(ymd) != 10 { // "YYYY-MM-DD"
+					http.Error(w, "ymd format is invalid. use YYYY-MM-DD", http.StatusBadRequest)
+					return
+				}
+			}
+		} else if code == "" {
 			http.Error(w, "code or ymd is required", http.StatusBadRequest)
-			return
-		}
-		// 日付が10文字（YYYY-MM-DD）でない場合はエラー
-		if code == "" && len(ymd) != 10 {
-			http.Error(w, "ymd format is invalid", http.StatusBadRequest)
 			return
 		}
 		// コードが4桁の場合は5桁に変換
@@ -225,13 +243,13 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			},
 			{
 				Path:    "/price?ymd={{日付}}",
-				Sample:  "/price?ymd=2024-09-02",
-				Explain: "全銘柄株価情報（日付指定） - {{日付}}は取得したい日付をYYYY-MM-DDで指定",
+				Sample:  "/price?ymd=2024-09-02 または /price?ymd=2024-09-02~2024-09-09",
+				Explain: "全銘柄株価情報（日付指定） - {{日付}}は取得したい日付をYYYY-MM-DDまたはYYYY-MM-DD~YYYY-MM-DDで指定",
 			},
 			{
 				Path:    "/price?code={{銘柄コード}}&ymd={{日付}}",
-				Sample:  "/price?code=7203&ymd=2024-09-02",
-				Explain: "株価情報（銘柄コード・日付指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
+				Sample:  "/price?code=7203&ymd=2024-09-02 または /price?code=7203&ymd=2024-09-02~2024-09-09",
+				Explain: "株価情報（銘柄コード・日付指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定、{{日付}}は取得したい日付をYYYY-MM-DDまたはYYYY-MM-DD~YYYY-MM-DDで指定",
 			},
 			{
 				Path:    "/closeprice?code={{銘柄コード複数（カンマ区切り）}}",
@@ -240,8 +258,8 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			},
 			{
 				Path:    "/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}",
-				Sample:  "/closeprice?code=7203,7203&ymd=2024-09-02",
-				Explain: "株価情報（銘柄コード複数・日付指定） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
+				Sample:  "/closeprice?code=7203,7203&ymd=2024-09-02 または /closeprice?code=7203,7203&ymd=2024-09-02~2024-09-09",
+				Explain: "株価情報（銘柄コード複数・日付指定） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定、{{日付}}は取得したい日付をYYYY-MM-DDまたはYYYY-MM-DD~YYYY-MM-DDで指定",
 			},
 		}
 		sendCsvResponse(w, data)

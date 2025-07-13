@@ -6,6 +6,7 @@ import (
 	"app/domain/model"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -86,41 +87,38 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
   - return) err		エラー
 */
 func GetPricesInfo(codes []string, ymd string) (prices []model.PriceInfo, err error) {
+	// ymd を ~ で分割
+	ymdRange := strings.Split(ymd, "~")
+	isDateRange := len(ymdRange) == 2
 
 	// code と ymd の値によって SQL 文を変更
 	var rows *sql.Rows
 	if len(codes) == 0 && ymd == "" {
 		return nil, fmt.Errorf("codes and ymd are empty")
-		// 全銘柄、全期間のクエリは他のクエリと比較して処理が重いのでタイムアウトを設定
-		// ローカルは問題ないが、本番環境ではデフォルトだとタイムアウトが発生する
-		// >> 最終的にどうにもならなかった、別の手段を考える
-		// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		// defer cancel()
-
-		// rows, err = db.QueryContext(ctx, "SELECT * FROM prices_info")
-		// if err != nil {
-		// 	log.Error(err)
-		// 	return nil, err
-		// }
 	} else if len(codes) > 0 && ymd == "" {
+		// 銘柄指定、日付指定なし
 		rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) ORDER BY ymd DESC", pq.Array(codes))
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
 	} else if len(codes) == 0 && ymd != "" {
-		rows, err = db.Query("SELECT * FROM prices_info WHERE ymd = (SELECT MAX(ymd) FROM prices_info WHERE ymd < $1) ORDER BY code ASC", ymd)
-		if err != nil {
-			log.Error(err)
-			return nil, err
+		if isDateRange {
+			// 銘柄指定なし、日付範囲指定あり
+			rows, err = db.Query("SELECT * FROM prices_info WHERE ymd BETWEEN $1 AND $2 ORDER BY ymd, code ASC", ymdRange[0], ymdRange[1])
+		} else {
+			// 銘柄指定なし、単一日付指定あり
+			rows, err = db.Query("SELECT * FROM prices_info WHERE ymd = (SELECT MAX(ymd) FROM prices_info WHERE ymd < $1) ORDER BY code ASC", ymd)
 		}
-	} else {
-		sql := "SELECT * FROM prices_info WHERE code = ANY($1) AND ymd = $2"
-		rows, err = db.Query(sql, pq.Array(codes), ymd)
-		if err != nil {
-			log.Error(err)
-			return nil, err
+	} else { // len(codes) > 0 && ymd != ""
+		if isDateRange {
+			// 銘柄指定あり、日付範囲指定あり
+			rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) AND ymd BETWEEN $2 AND $3 ORDER BY ymd, code ASC", pq.Array(codes), ymdRange[0], ymdRange[1])
+		} else {
+			// 銘柄指定あり、単一日付指定あり
+			rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) AND ymd = $2", pq.Array(codes), ymd)
 		}
+	}
+
+	if err != nil {
+		log.Error(err)
+		return nil, err
 	}
 
 	// 取得したデータを格納
