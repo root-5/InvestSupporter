@@ -77,7 +77,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		sendCsvResponse(w, data)
 
 	// 株価終値情報を取得
-	case "/prices":
+	case "/closeprice":
 		// コードと日付を取得
 		code := r.URL.Query().Get("code")
 		ymd := r.URL.Query().Get("ymd")
@@ -234,13 +234,13 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 				Explain: "株価情報（銘柄コード・日付指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
 			},
 			{
-				Path:    "/prices?code={{銘柄コード複数（カンマ区切り）}}",
-				Sample:  "/prices?code=7203,7203",
+				Path:    "/closeprice?code={{銘柄コード複数（カンマ区切り）}}",
+				Sample:  "/closeprice?code=7203,7203",
 				Explain: "株価情報（銘柄コード複数） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定",
 			},
 			{
-				Path:    "/prices?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}",
-				Sample:  "/prices?code=7203,7203&ymd=2024-09-02",
+				Path:    "/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}",
+				Sample:  "/closeprice?code=7203,7203&ymd=2024-09-02",
 				Explain: "株価情報（銘柄コード複数・日付指定） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
 			},
 		}
