@@ -7,6 +7,7 @@ import (
 	"app/controller/postgres"
 	"app/domain/model"
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -316,48 +317,57 @@ func UpdatePricesInfo() (err error) {
 /*
 株価情報テーブルから複数のコードを指定して終値だけを600日（2年相当）分まとめて取得する関数
   - arg) codes			銘柄コードのスライス
+  - arg) ymd			取得する日付（YYYY-MM-DD形式）
   - return) closePrices	株価情報の二次元スライス
   - return) err			エラー
 */
-func GetClosePricesInfo(codes []string) (closePrices [][]string, err error) {
-	// 日付カラム用にトヨタの株価情報を取得
-	toyotaPrices, err := postgres.GetPricesInfo("72030", "")
+func GetClosePricesInfo(codes []string, ymd string) (closePrices [][]string, err error) {
+	// 株価情報を取得
+	prices, err := postgres.GetPricesInfo(codes, ymd)
 	if err != nil {
 		log.Error(err)
 		return closePrices, err
 	}
-	maxRecordsNum := len(toyotaPrices)
 
-	// 株価情報を取得
-	for _, code := range codes {
-		prices, err := postgres.GetPricesInfo(code, "")
-		if err != nil {
-			log.Error(err)
-			return closePrices, err
+	// 日付ごとに価格情報をマップで整理
+	priceMap := make(map[string]map[string]string)
+	dateSet := make(map[string]bool)
+
+	for _, price := range prices {
+		dateStr := price.Date[:10] // YYYY-MM-DD形式に変換
+		dateSet[dateStr] = true
+
+		if priceMap[dateStr] == nil {
+			priceMap[dateStr] = make(map[string]string)
 		}
 
-		// 株価情報のスライスを初期化、日付を格納
-		for i := 0; i < maxRecordsNum; i++ {
-			if len(closePrices) < maxRecordsNum {
-				closePrices = append(closePrices, []string{})
-				dateStr := toyotaPrices[i].Date[:10]
-				closePrices[i] = append(closePrices[i], dateStr)
-			}
+		if price.AdjustmentClose.Valid {
+			priceMap[dateStr][price.Code] = fmt.Sprintf("%.6f", price.AdjustmentClose.Float64)
+		} else {
+			priceMap[dateStr][price.Code] = ""
 		}
-		// 株価情報から終値だけを取り出し、スライスに格納
-		for i := 0; i < maxRecordsNum; i++ {
-			// 株価情報スライスの長さがコードの長さより短い場合、Valid が false の場合は空文字を追加
-			if i < len(prices) {
-				if prices[i].AdjustmentClose.Valid {
-					priceText := fmt.Sprintf("%f", prices[i].AdjustmentClose.Float64)
-					closePrices[i] = append(closePrices[i], priceText)
-				} else {
-					closePrices[i] = append(closePrices[i], "")
-				}
+	}
+
+	// 日付を降順でソート
+	var dates []string
+	for date := range dateSet {
+		dates = append(dates, date)
+	}
+	sort.Slice(dates, func(i, j int) bool {
+		return dates[i] > dates[j]
+	})
+
+	// CSVデータを構築
+	for _, date := range dates {
+		row := []string{date}
+		for _, code := range codes {
+			if price, exists := priceMap[date][code]; exists {
+				row = append(row, price)
 			} else {
-				closePrices[i] = append(closePrices[i], "")
+				row = append(row, "")
 			}
 		}
+		closePrices = append(closePrices, row)
 	}
 
 	// ヘッダー行（["日付", code1, code2,..]）を頭に追加
@@ -405,7 +415,7 @@ func CheckData() (err error) {
 	}
 
 	// 株価情報を取得し、長さを確認し、0 の場合は再構築を行う
-	prices, err := postgres.GetPricesInfo("72030", "")
+	prices, err := postgres.GetPricesInfo([]string{"72030"}, "")
 	if err != nil {
 		log.Error(err)
 		return err

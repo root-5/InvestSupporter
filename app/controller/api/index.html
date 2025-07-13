@@ -57,8 +57,13 @@
             </tr>
             <tr>
                 <td>/prices?code={{銘柄コード複数（カンマ区切り）}}</td>
-                <td><a href="/prices?code=7203,7203">/prices?code=7203,7203</a></td>
+                <td><a href="/prices?code=7203,7267">/prices?code=7203,7267</a></td>
                 <td>株価情報（銘柄コード複数）<br> - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定</td>
+            </tr>
+            <tr>
+                <td>/prices?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}</td>
+                <td><a href="/prices?code=7203,7267&ymd=2024-09-02">/prices?code=7203,7267&ymd=2024-09-02</a></td>
+                <td>株価情報（銘柄コード複数・日付指定）<br> - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定<br> - {{日付}}はYYYY-MM-DDの形式で指定</td>
             </tr>
         </tbody>
     </table>

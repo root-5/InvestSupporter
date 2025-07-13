@@ -6,6 +6,8 @@ import (
 	"app/domain/model"
 	"database/sql"
 	"fmt"
+
+	"github.com/lib/pq"
 )
 
 /*
@@ -83,12 +85,12 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
   - return) prices	株価一覧
   - return) err		エラー
 */
-func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error) {
+func GetPricesInfo(codes []string, ymd string) (prices []model.PriceInfo, err error) {
 
 	// code と ymd の値によって SQL 文を変更
 	var rows *sql.Rows
-	if code == "" && ymd == "" {
-		return nil, fmt.Errorf("code and ymd are empty")
+	if len(codes) == 0 && ymd == "" {
+		return nil, fmt.Errorf("codes and ymd are empty")
 		// 全銘柄、全期間のクエリは他のクエリと比較して処理が重いのでタイムアウトを設定
 		// ローカルは問題ないが、本番環境ではデフォルトだとタイムアウトが発生する
 		// >> 最終的にどうにもならなかった、別の手段を考える
@@ -100,20 +102,21 @@ func GetPricesInfo(code string, ymd string) (prices []model.PriceInfo, err error
 		// 	log.Error(err)
 		// 	return nil, err
 		// }
-	} else if code != "" && ymd == "" {
-		rows, err = db.Query("SELECT * FROM prices_info WHERE code = $1 ORDER BY ymd DESC", code)
+	} else if len(codes) > 0 && ymd == "" {
+		rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) ORDER BY ymd DESC", pq.Array(codes))
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
-	} else if code == "" && ymd != "" {
+	} else if len(codes) == 0 && ymd != "" {
 		rows, err = db.Query("SELECT * FROM prices_info WHERE ymd = (SELECT MAX(ymd) FROM prices_info WHERE ymd < $1) ORDER BY code ASC", ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
 	} else {
-		rows, err = db.Query("SELECT * FROM prices_info WHERE code = $1 AND ymd = $2", code, ymd)
+		sql := "SELECT * FROM prices_info WHERE code = ANY($1) AND ymd = $2"
+		rows, err = db.Query(sql, pq.Array(codes), ymd)
 		if err != nil {
 			log.Error(err)
 			return nil, err

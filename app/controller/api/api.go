@@ -78,11 +78,17 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 株価終値情報を取得
 	case "/prices":
-		// コードを取得
+		// コードと日付を取得
 		code := r.URL.Query().Get("code")
+		ymd := r.URL.Query().Get("ymd")
 		// コードが指定されていない場合はエラー
 		if code == "" {
 			http.Error(w, "codes is required", http.StatusBadRequest)
+			return
+		}
+		// 日付が指定されているが、10文字（YYYY-MM-DD）でない場合はエラー
+		if ymd != "" && len(ymd) != 10 {
+			http.Error(w, "ymd format is invalid", http.StatusBadRequest)
 			return
 		}
 		// カンマ区切りのコードをスライスに変換
@@ -94,7 +100,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		// DB から株価情報を取得
-		data, err := usecase.GetClosePricesInfo(codes)
+		data, err := usecase.GetClosePricesInfo(codes, ymd)
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -114,7 +120,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "code or ymd is required", http.StatusBadRequest)
 			return
 		}
-		// 日付が YYYY-MM-DD の形式でない場合はエラー
+		// 日付が10文字（YYYY-MM-DD）でない場合はエラー
 		if code == "" && len(ymd) != 10 {
 			http.Error(w, "ymd format is invalid", http.StatusBadRequest)
 			return
@@ -123,8 +129,15 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		if len(code) == 4 {
 			code = code + "0"
 		}
+		// コードが指定されているときはスライスに変換、そうでないときは空のスライス
+		var codes []string
+		if code != "" {
+			codes = []string{code}
+		} else {
+			codes = []string{}
+		}
 		// DB から株価情報を取得
-		data, err := postgres.GetPricesInfo(code, ymd)
+		data, err := postgres.GetPricesInfo(codes, ymd)
 		if err != nil {
 			log.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -224,6 +237,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 				Path:    "/prices?code={{銘柄コード複数（カンマ区切り）}}",
 				Sample:  "/prices?code=7203,7203",
 				Explain: "株価情報（銘柄コード複数） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定",
+			},
+			{
+				Path:    "/prices?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}",
+				Sample:  "/prices?code=7203,7203&ymd=2024-09-02",
+				Explain: "株価情報（銘柄コード複数・日付指定） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定、{{日付}}は取得したい日付をYYYY-MM-DDで指定",
 			},
 		}
 		sendCsvResponse(w, data)
