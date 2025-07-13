@@ -96,7 +96,7 @@ func GetPricesInfo(codes []string, ymd string) (prices []model.PriceInfo, err er
 	if len(codes) == 0 && ymd == "" {
 		return nil, fmt.Errorf("codes and ymd are empty")
 	} else if len(codes) > 0 && ymd == "" {
-		// 銘柄指定、日付指定なし
+		// 銘柄指定あり、日付指定なし
 		rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) ORDER BY ymd DESC", pq.Array(codes))
 	} else if len(codes) == 0 && ymd != "" {
 		if isDateRange {
@@ -104,7 +104,7 @@ func GetPricesInfo(codes []string, ymd string) (prices []model.PriceInfo, err er
 			rows, err = db.Query("SELECT * FROM prices_info WHERE ymd BETWEEN $1 AND $2 ORDER BY ymd, code ASC", ymdRange[0], ymdRange[1])
 		} else {
 			// 銘柄指定なし、単一日付指定あり
-			rows, err = db.Query("SELECT * FROM prices_info WHERE ymd = (SELECT MAX(ymd) FROM prices_info WHERE ymd < $1) ORDER BY code ASC", ymd)
+			rows, err = db.Query("SELECT * FROM prices_info WHERE ymd = (SELECT MAX(ymd) FROM prices_info WHERE ymd <= $1) ORDER BY code ASC", ymd)
 		}
 	} else { // len(codes) > 0 && ymd != ""
 		if isDateRange {
@@ -112,7 +112,7 @@ func GetPricesInfo(codes []string, ymd string) (prices []model.PriceInfo, err er
 			rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) AND ymd BETWEEN $2 AND $3 ORDER BY ymd, code ASC", pq.Array(codes), ymdRange[0], ymdRange[1])
 		} else {
 			// 銘柄指定あり、単一日付指定あり
-			rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) AND ymd = $2", pq.Array(codes), ymd)
+			rows, err = db.Query("SELECT * FROM prices_info WHERE code = ANY($1) AND ymd = (SELECT MAX(ymd) FROM prices_info WHERE ymd <= $2) ORDER BY code ASC", pq.Array(codes), ymd)
 		}
 	}
 

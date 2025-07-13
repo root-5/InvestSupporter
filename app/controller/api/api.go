@@ -200,69 +200,8 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 説明用
 	case "/":
-		type explainStruct struct {
-			Path    string `json:"GoogleスプレッドシートのIMPORTDATA関数の引数に以下のURLパスを指定してください"`
-			Sample  string `json:""`
-			Explain string `json:""`
-		}
-		data := []explainStruct{
-			{
-				Path:    "",
-				Sample:  "",
-				Explain: "",
-			},
-			{
-				Path:    "URLパス",
-				Sample:  "例",
-				Explain: "取得できるデータ",
-			},
-			{
-				Path:    "/",
-				Sample:  "/",
-				Explain: "使い方説明",
-			},
-			{
-				Path:    "/howto",
-				Sample:  "/howto",
-				Explain: "使い方説明（WEBブラウザ）Chromeなどをつかってアクセスしてください",
-			},
-			{
-				Path:    "/financial",
-				Sample:  "/financial",
-				Explain: "全銘柄基本情報",
-			},
-			{
-				Path:    "/statement?code={{銘柄コード}}",
-				Sample:  "/statement?code=7203",
-				Explain: "全期間財務情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
-			},
-			{
-				Path:    "/price?code={{銘柄コード}}",
-				Sample:  "/price?code=7203",
-				Explain: "全期間株価情報（銘柄コード指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定",
-			},
-			{
-				Path:    "/price?ymd={{日付}}",
-				Sample:  "/price?ymd=2024-09-02 または /price?ymd=2024-09-02~2024-09-09",
-				Explain: "全銘柄株価情報（日付指定） - {{日付}}は取得したい日付をYYYY-MM-DDまたはYYYY-MM-DD~YYYY-MM-DDで指定",
-			},
-			{
-				Path:    "/price?code={{銘柄コード}}&ymd={{日付}}",
-				Sample:  "/price?code=7203&ymd=2024-09-02 または /price?code=7203&ymd=2024-09-02~2024-09-09",
-				Explain: "株価情報（銘柄コード・日付指定） - {{銘柄コード}}は取得したい銘柄を4桁または5桁で指定、{{日付}}は取得したい日付をYYYY-MM-DDまたはYYYY-MM-DD~YYYY-MM-DDで指定",
-			},
-			{
-				Path:    "/closeprice?code={{銘柄コード複数（カンマ区切り）}}",
-				Sample:  "/closeprice?code=7203,7203",
-				Explain: "株価情報（銘柄コード複数） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定",
-			},
-			{
-				Path:    "/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}",
-				Sample:  "/closeprice?code=7203,7203&ymd=2024-09-02 または /closeprice?code=7203,7203&ymd=2024-09-02~2024-09-09",
-				Explain: "株価情報（銘柄コード複数・日付指定） - {{銘柄コード複数（カンマ区切り）}}は取得したい銘柄を4桁または5桁でカンマ区切りで指定、{{日付}}は取得したい日付をYYYY-MM-DDまたはYYYY-MM-DD~YYYY-MM-DDで指定",
-			},
-		}
-		sendCsvResponse(w, data)
+		resText := "<a href=\"./howto\">./howto</a>"
+		w.Write([]byte(resText))
 
 	default:
 		// アクセス元のIPアドレスを取得
