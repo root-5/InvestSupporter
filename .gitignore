@@ -8,6 +8,8 @@
 
 # DBデータ
 infra/db/data
+infra/db/data.bk
+infra/db/backup/*.dump
 
 # ログファイル
 infra/observer/log
