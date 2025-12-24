@@ -4,10 +4,12 @@
 具体的には JquantsAPI 等から取得した全銘柄の財務・株価データをデータベースに利用しやすい形に整形・ストックし、 Google スプレッドシートから IMPORTDATA 関数で呼び出せる API エンドポイントを提供する。
 このリポジトリは Golang のアプリコードとアプリ用・データベース用・監視用の 3 つの Docker コンテナの設定方法を管理している。
 
+## 全体構成
+
 投資系システム全体は現状以下の構成になっている。
 
 - InvestSupporter
-  - EC2、常時起動
+  - EC2 (t3.nano)、常時起動
   - 財務データ、株価データの提供
   - JquantsAPI からの情報を取得、整形保存し、API エンドポイントを提供
 - sbiChromeExtension
@@ -17,12 +19,6 @@
 - スプレッドシート 2 種類
   - 投資状況の視覚化を行うシート、銘柄分析用シート、sbiChromeExtension と異なり追加計算や変更が用意でモバイルからも閲覧可能
   - GAS での Gmail の約定メール取得と IMPORTDATA 関数での InvestSupporter からのデータ取得が起点
-
-## ドキュメント
-
-- [要件定義書](./documents/要件定義書.md)
-- [基本設計書](./documents/基本設計書.md)
-- [テーブル定義書](./documents/テーブル定義書.md)
 
 ## 実装済み機能一覧
 
@@ -40,15 +36,21 @@
   - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}` - 株価終値情報（銘柄コード複数）
   - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}` - 株価終値情報（銘柄コード複数・日付指定）
 
-## インフラ
+## 利用ツール
 
-AWS の EC2 (t3.nano) を使用中。現時点で諸々合わせた運用コストは 11 ドル/月。
+- Docker
+- TablePlus（ローカル）
+
+## ドキュメント
+
+- [基本設計書](./documents/基本設計書.md)
+- [テーブル定義書](./documents/テーブル定義書.md)
+- [J-Quants API について](https://jpx.gitbook.io/j-quants-ja)
+- [Godoc](http://localhost:8081/) - ローカル環境専用ドキュメント。ただし、関数や変数はプライベートでないもののみ確認可能。
 
 # 作業メモ
 
-## 環境構築
-
-### コマンド
+## コマンド
 
 **基本用途**
 
@@ -83,24 +85,7 @@ sudo rm -rf infra/db/data/
 - `docker system prune -a` : イメージ、コンテナ、ネットワークを全て削除する
 - `sudo rm -rf infra/db/data/` : DB のデータを削除する
 
-## ドキュメント
-
-[Godoc](http://localhost:8081/)
-
-Godoc を採用しているので、ローカル環境なら上記のリンクからドキュメントを確認できる。ただし、記載されている関数や変数は大文字から始まるもの（プライベートでないもの）のみが表示される。
-
-## 利用ツール
-
-- [GitHub](https://github.com/root-5/InvestSupporter)
-- Docker
-- TablePlus（ローカル）
-
-## 参考リンク集
-
-- [J-Quants API について](https://jpx.gitbook.io/j-quants-ja)
-- [godoc の記法まとめ](https://zenn.dev/harachan/articles/db3149c1a19c32)
-
-# アイデア・修正案
+## アイデア・修正案
 
 - セキュリティ強化
   - （api_security.go）
