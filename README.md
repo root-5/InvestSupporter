@@ -2,8 +2,9 @@
 
 自らの投資を効率化することを目的としたアプリケーション。
 具体的には JquantsAPI 等から取得した全銘柄の財務・株価データをデータベースに利用しやすい形に整形・ストックし、 Google スプレッドシートから IMPORTDATA 関数で呼び出せる API エンドポイントを提供する。
+このリポジトリは Golang のアプリコードとアプリ用・データベース用・監視用の 3 つの Docker コンテナの設定方法を管理している。
 
-投資系システムは現状以下の構成になっている。
+投資系システム全体は現状以下の構成になっている。
 
 - InvestSupporter
   - EC2、常時起動
@@ -16,8 +17,6 @@
 - スプレッドシート 2 種類
   - 投資状況の視覚化を行うシート、銘柄分析用シート、sbiChromeExtension と異なり追加計算や変更が用意でモバイルからも閲覧可能
   - GAS での Gmail の約定メール取得と IMPORTDATA 関数での InvestSupporter からのデータ取得が起点
-
-このリポジトリは Golang のアプリコードとアプリ用・データベース用・監視用の 3 つの Docker コンテナの設定方法を管理している。
 
 ## ドキュメント
 
@@ -43,28 +42,11 @@
 
 ## インフラ
 
-AWS の EC2 (t3.nano) を使用し、現時点で諸々合わせた運用コストは 11 ドル/月。
-Lambda, Supabase を使えばコスト低減可能だが、特に Supabase の有料基準変更の可能性があり、またマネージドサービス依存を下げるため EC2 を選択した。
-
-今後何年も運用するつもりであり、マネージドサービスに合わせて対応をせまられたり、ダウンタイム発生の場合のデータ整合性確認などは下手すれば数日かかるためそのあたりの労力コストも考慮したうえでの判断。
-
-ただ、流動的にコードを変えることを許容して Supabase, TypeScript 構成でコストを抑えられることは覚えてはおく。
+AWS の EC2 (t3.nano) を使用中。現時点で諸々合わせた運用コストは 11 ドル/月。
 
 # 作業メモ
 
 ## 環境構築
-
-今回の環境構築には Docker を使用して、基本的に開発もその中で行う形をとった。
-また、Air を使用したコード改変時ホットリロードと、Godoc でのドキュメント生成を行っている。
-
-Air によって出力されるログなどは Docker Decktop の各コンテナの「Logs」項目から閲覧できる。
-
-### 構築手順
-
-1. `go mod init InvestSupporter`
-2. Docker + Air で開発環境を構築
-   1. .air.toml はコンテナ内で `air init` で作成
-   2. compose.yaml, app.local.dockerfile は参考リンクなどをもとに作成
 
 ### コマンド
 
@@ -83,10 +65,6 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 - `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
 - `curl http://127.0.0.1:8080/financial` : 財務データ取得の確認
 
-**作業用**
-
-- `go mod tidy` : go.mod に記載されているパッケージを整理する（.go ファイルで使われていないパッケージの削除）
-
 **DB バックアップとレストア**
 
 1. `docker-compose exec db bash /var/lib/postgresql/backup/backup.sh`
@@ -97,6 +75,7 @@ Air によって出力されるログなどは Docker Decktop の各コンテナ
 ```bash
 docker-compose -f="compose.local.yaml" down -v && \
 docker system prune -a && \
+sudo mv infra/db/data/ infra/db/data_backup_$(date +%Y%m%d%H%M%S)/ && \
 sudo rm -rf infra/db/data/
 ```
 
@@ -118,30 +97,8 @@ Godoc を採用しているので、ローカル環境なら上記のリンク�
 
 ## 参考リンク集
 
-1. [Go 環境セットアップ DevelopersIO](https://dev.classmethod.jp/articles/go-setup-and-sample/)
-2. [Air で始める Go 開発](https://zenn.dev/urakawa_jinsei/articles/a5a222f67a4fac)
-3. [J-Quants API について](https://jpx.gitbook.io/j-quants-ja)
-4. [GitHub リポジトリ](https://github.com/root-5/InvestSupporter)
-5. [godoc の記法まとめ](https://zenn.dev/harachan/articles/db3149c1a19c32)
-
-# 開発メモ
-
-## 開発開始時の状態
-
-- Go は今回が初めて
-- フレームワークなしでの開発も初めて
-- アーキテクチャを強く意識した開発も初めて
-
-## 開発の流れ
-
-1. 特に今の自分では最初から完璧なアーキテクチャ、ディレクトリ構成、関数設計を行うことは困難だった
-2. 試したかったテスト駆動は先に関数の完成系がイメージできなければ難しいものだったので一旦棚上げ
-   1. 今更思ったが、テストが有効なのはプロダクトの全体が理解できていない人間が改修する際や変更による影響範囲が大きくなった際であって、理解しやすいかつ影響の範囲が小さいプロダクトにおいてはあまり意味がないかもしれない
-3. 最初はとにかく書いてはリファクタリングを繰り返した
-4. ある程度の構成ができたら、テスト駆動開発に移行したい
-5. どんな環境でも `git clone` と env ファイルの設定したうえで `docker-compose up -d` だけで動くようにしたい
-6. jquantsAPI からのデータを一次データとして、完全な形でデータベースにローカル保存することも考えたが、これはあまりにも DB が重たくなってしまい移行やコピーなどがしづらくなったり、API が使える限り API を一次データとみなせるたりするので断念した
-7. 実際にスプレッドシート側でいろいろ使ってみて、自分の分析に役立つようなデータを返せるよう改善
+- [J-Quants API について](https://jpx.gitbook.io/j-quants-ja)
+- [godoc の記法まとめ](https://zenn.dev/harachan/articles/db3149c1a19c32)
 
 # アイデア・修正案
 
@@ -155,3 +112,5 @@ Godoc を採用しているので、ローカル環境なら上記のリンク�
   - EC2 インスタンスの起動時に docker-compose が自動で走るように設定（ステートレス化）
     - 現在はサーバーが落ちることがなくなってきたため不要になってきた、後回し
   - 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要
+- インフラの Terraform + GCP 移行
+- CI/CD 導入
