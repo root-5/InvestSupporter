@@ -2,7 +2,6 @@ package main
 
 import (
 	"app/controller/api"
-	"app/controller/jquants"
 	"app/controller/log"
 	"app/controller/postgres"
 	"app/usecase/scheduler"
@@ -19,12 +18,7 @@ func main() {
 	if err != nil {
 		log.Error(err)
 	}
-	time.Sleep(3 * time.Second)
-
-	// Jquants の初期化
-	log.Info("Jquants の初期化")
-	jquants.SchedulerStart()
-	time.Sleep(3 * time.Second)
+	time.Sleep(1 * time.Second)
 
 	// DB のデータを確認し、問題がある場合は修正
 	err = usecase.CheckData()
