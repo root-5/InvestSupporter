@@ -25,8 +25,9 @@
 - [基本設計書](./documents/基本設計書.md)
 - [テーブル定義書](./documents/テーブル定義書.md)
 - [システム構成](./documents/システム構成.md)
-- [J-Quants API について](https://jpx.gitbook.io/j-quants-ja)
-- [GoDoc](http://localhost:8081/) - ローカル環境専用、関数や変数はプライベートでないもののみ確認可能。
+- [J-Quants API ドキュメント](https://jpx-jquants.com/ja/spec)
+- [j-quants-doc-mcp](https://github.com/J-Quants/j-quants-doc-mcp) - v2 移行をほぼ完結させるくらいには便利
+- [GoDoc](http://localhost:8081/) - ローカル環境専用、関数や変数はプライベートでないもののみ確認可能
 
 # 作業メモ
 
@@ -60,7 +61,7 @@
 
 - [x] GoDoc の修正 or 削除
 - [x] AI エージェント用設定追加
-- [ ] JquantsAPI を v1 から v2 に移行
+- [x] JquantsAPI を v1 から v2 に移行
 - [ ] インフラの Terraform + GCP 移行
 - [ ] CI/CD 導入
 - [ ] セキュリティ強化

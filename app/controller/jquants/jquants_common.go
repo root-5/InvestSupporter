@@ -19,12 +19,6 @@ import (
 // 共通変数
 // ====================================================================================
 
-// リフレッシュトークン
-var refreshToken string
-
-// IDトークン
-var IdToken string
-
 // HTTPクライアント
 var httpClient = &http.Client{}
 
@@ -65,23 +59,44 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 		headerVal := reflect.ValueOf(headers)
 		headerType := reflect.TypeOf(headers)
 		for i := 0; i < headerVal.NumField(); i++ {
-			req.Header.Set(strings.ToLower(headerType.Field(i).Name), fmt.Sprintf("%v", headerVal.Field(i).Interface()))
+			headerName := headerType.Field(i).Tag.Get("json")
+			if headerName == "" {
+				headerName = strings.ToLower(headerType.Field(i).Name)
+			}
+			req.Header.Set(headerName, fmt.Sprintf("%v", headerVal.Field(i).Interface()))
 		}
 	}
 
 	// リクエスト送信
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		log.Error(err)
-		fmt.Println("30秒待機後に再リクエストします")
-
-		// 30秒待機したのち再リクエスト
-		time.Sleep(30 * time.Second)
+	var resp *http.Response
+	maxRetries := 10
+	for i := 0; i < maxRetries; i++ {
 		resp, err = httpClient.Do(req)
+
+		// ネットワークエラー時の再試行
 		if err != nil {
 			log.Error(err)
-			return err
+			fmt.Println("レスポンスがありません、30秒待機後に再リクエストします")
+			time.Sleep(30 * time.Second)
+			continue
 		}
+
+		// レートリミットに抵触した場合は5秒待機してリトライ
+		if resp.StatusCode == 429 {
+			resp.Body.Close()
+			fmt.Printf("レートリミットに抵触しました (リトライ: %d/%d)\n", i+1, maxRetries)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		// 正常にレスポンスが返ってきた場合はループを抜ける
+		break
+	}
+	if err != nil {
+		return err
+	}
+	if resp == nil {
+		return fmt.Errorf("リトライ回数を超過しました")
 	}
 	defer resp.Body.Close()
 
