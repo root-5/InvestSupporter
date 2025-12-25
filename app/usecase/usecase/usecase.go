@@ -101,6 +101,9 @@ func ResetStatementInfoAll() (err error) {
 
 	// 上場銘柄一覧の財務情報を取得
 	for _, stock := range stocks {
+		// レート制限を考慮 (Light プラン: 1分間に60回まで)
+		time.Sleep(1000 * time.Millisecond)
+
 		statements, err := jquants.FetchStatementsInfo(stock.Code)
 		if err != nil {
 			log.Error(err)
