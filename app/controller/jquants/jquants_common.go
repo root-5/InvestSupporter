@@ -41,24 +41,7 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 		queryParamType := reflect.TypeOf(queryParams)
 		params := url.Values{}
 		for i := 0; i < queryParamVal.NumField(); i++ {
-			tag := queryParamType.Field(i).Tag.Get("json")
-			key := ""
-			omitempty := false
-			if tag != "" {
-				parts := strings.Split(tag, ",")
-				key = parts[0]
-				if len(parts) > 1 && parts[1] == "omitempty" {
-					omitempty = true
-				}
-			} else {
-				key = strings.ToLower(queryParamType.Field(i).Name)
-			}
-
-			val := fmt.Sprintf("%v", queryParamVal.Field(i).Interface())
-			if omitempty && val == "" {
-				continue
-			}
-			params.Add(key, val)
+			params.Add(strings.ToLower(queryParamType.Field(i).Name), fmt.Sprintf("%v", queryParamVal.Field(i).Interface()))
 		}
 		reqUrl += "?" + params.Encode()
 	}
@@ -154,24 +137,7 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 		queryParamType := reflect.TypeOf(queryParams)
 		params := url.Values{}
 		for i := 0; i < queryParamVal.NumField(); i++ {
-			tag := queryParamType.Field(i).Tag.Get("json")
-			key := ""
-			omitempty := false
-			if tag != "" {
-				parts := strings.Split(tag, ",")
-				key = parts[0]
-				if len(parts) > 1 && parts[1] == "omitempty" {
-					omitempty = true
-				}
-			} else {
-				key = strings.ToLower(queryParamType.Field(i).Name)
-			}
-
-			val := fmt.Sprintf("%v", queryParamVal.Field(i).Interface())
-			if omitempty && val == "" {
-				continue
-			}
-			params.Add(key, val)
+			params.Add(strings.ToLower(queryParamType.Field(i).Name), fmt.Sprintf("%v", queryParamVal.Field(i).Interface()))
 		}
 		reqUrl += "?" + params.Encode()
 	}
