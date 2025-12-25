@@ -52,8 +52,8 @@ func TestJQuants(t *testing.T) {
 	*/
 	fmt.Println("Test SchedulerStart")
 	jquants.SchedulerStart()
-	if len(jquants.IdToken) < 10 {
-		t.Errorf("SchedulerStart failed: %v", err)
+	if os.Getenv("JQUANTS_API_KEY") == "" {
+		t.Errorf("JQUANTS_API_KEY is not set")
 		return
 	} else {
 		fmt.Println(">> OK")

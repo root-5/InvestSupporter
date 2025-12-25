@@ -19,12 +19,6 @@ import (
 // 共通変数
 // ====================================================================================
 
-// リフレッシュトークン
-var refreshToken string
-
-// IDトークン
-var IdToken string
-
 // HTTPクライアント
 var httpClient = &http.Client{}
 
@@ -47,7 +41,24 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 		queryParamType := reflect.TypeOf(queryParams)
 		params := url.Values{}
 		for i := 0; i < queryParamVal.NumField(); i++ {
-			params.Add(strings.ToLower(queryParamType.Field(i).Name), fmt.Sprintf("%v", queryParamVal.Field(i).Interface()))
+			tag := queryParamType.Field(i).Tag.Get("json")
+			key := ""
+			omitempty := false
+			if tag != "" {
+				parts := strings.Split(tag, ",")
+				key = parts[0]
+				if len(parts) > 1 && parts[1] == "omitempty" {
+					omitempty = true
+				}
+			} else {
+				key = strings.ToLower(queryParamType.Field(i).Name)
+			}
+
+			val := fmt.Sprintf("%v", queryParamVal.Field(i).Interface())
+			if omitempty && val == "" {
+				continue
+			}
+			params.Add(key, val)
 		}
 		reqUrl += "?" + params.Encode()
 	}
@@ -65,7 +76,11 @@ func get[T any](reqUrl string, queryParams any, headers any, resBody *T) (err er
 		headerVal := reflect.ValueOf(headers)
 		headerType := reflect.TypeOf(headers)
 		for i := 0; i < headerVal.NumField(); i++ {
-			req.Header.Set(strings.ToLower(headerType.Field(i).Name), fmt.Sprintf("%v", headerVal.Field(i).Interface()))
+			headerName := headerType.Field(i).Tag.Get("json")
+			if headerName == "" {
+				headerName = strings.ToLower(headerType.Field(i).Name)
+			}
+			req.Header.Set(headerName, fmt.Sprintf("%v", headerVal.Field(i).Interface()))
 		}
 	}
 
@@ -122,7 +137,24 @@ func post[T any](reqUrl string, queryParams any, reqBody any, resBody *T) (err e
 		queryParamType := reflect.TypeOf(queryParams)
 		params := url.Values{}
 		for i := 0; i < queryParamVal.NumField(); i++ {
-			params.Add(strings.ToLower(queryParamType.Field(i).Name), fmt.Sprintf("%v", queryParamVal.Field(i).Interface()))
+			tag := queryParamType.Field(i).Tag.Get("json")
+			key := ""
+			omitempty := false
+			if tag != "" {
+				parts := strings.Split(tag, ",")
+				key = parts[0]
+				if len(parts) > 1 && parts[1] == "omitempty" {
+					omitempty = true
+				}
+			} else {
+				key = strings.ToLower(queryParamType.Field(i).Name)
+			}
+
+			val := fmt.Sprintf("%v", queryParamVal.Field(i).Interface())
+			if omitempty && val == "" {
+				continue
+			}
+			params.Add(key, val)
 		}
 		reqUrl += "?" + params.Encode()
 	}

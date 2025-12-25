@@ -16,12 +16,7 @@ type Jobs []Job
 
 // 定期実行する関数とその設定をまとめた構造体
 var jobs = Jobs{
-	{
-		Name:        "setIdToken",
-		Duration:    24 * time.Hour,
-		Function:    setIdToken,
-		ExecuteFlag: true,
-	},
+	// API Key 認証への移行に伴い、トークン更新ジョブは不要となりました
 }
 
 // 定期実行を行う関数
