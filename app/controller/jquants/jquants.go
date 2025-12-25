@@ -228,7 +228,7 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCod
 			needRoop = false
 		}
 
-		for _, price := range resBody.Daily_quotes {
+		for _, price := range resBody.DailyQuotes {
 			if price.AdjustmentFactor != 1 {
 				splitStockCodes = append(splitStockCodes, price.Code)
 			}

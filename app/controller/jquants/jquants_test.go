@@ -41,8 +41,8 @@ func TestJQuants(t *testing.T) {
 		os.Setenv(envLineSlice[0], envLineSlice[1])
 	}
 	// 環境変数がセットされているか確認
-	if os.Getenv("JQUANTS_EMAIL") == "" || os.Getenv("JQUANTS_PASS") == "" {
-		t.Errorf("Set env failed: %v", err)
+	if os.Getenv("JQUANTS_API_KEY") == "" {
+		t.Errorf("Set env failed: JQUANTS_API_KEY is not set")
 		fmt.Println("")
 		return
 	}
