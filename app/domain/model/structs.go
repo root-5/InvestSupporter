@@ -1,3 +1,4 @@
+// データ構造体定義
 package model
 
 import (

@@ -1,4 +1,3 @@
-// 定期実行を行う関数をまとめたパッケージ
 package jquants
 
 import (

@@ -7,4 +7,4 @@ RUN go install golang.org/x/tools/cmd/godoc@latest
 
 # ボリュームマウントはRUNの直前で行われる
 
-CMD ["air", "-c", ".air.toml", "&&", "godoc", "-http=:8081"]
+CMD ["sh", "-c", "godoc -http=:8081 & air -c .air.toml"]

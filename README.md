@@ -26,7 +26,7 @@
 - [テーブル定義書](./documents/テーブル定義書.md)
 - [システム構成](./documents/システム構成.md)
 - [J-Quants API について](https://jpx.gitbook.io/j-quants-ja)
-- [Godoc](http://localhost:8081/) - ローカル環境専用ドキュメント。ただし、関数や変数はプライベートでないもののみ確認可能。
+- [GoDoc](http://localhost:8081/) - ローカル環境専用、関数や変数はプライベートでないもののみ確認可能。
 
 # 作業メモ
 
@@ -35,6 +35,7 @@
 - **基本用途**
   - `docker-compose -f="compose.local.yaml" up -d` : （ローカル）全てのコンテナを立ち上げる
   - `docker-compose -f="compose.local.yaml" down` : 全てのコンテナを停止する
+  - `docker-compose -f="compose.local.yaml" down --rmi all` : 全てのコンテナを停止し、イメージも削除する
   - `docker-compose -f="compose.local.yaml" down -v` : 全てのコンテナを停止し、ボリュームも削除する
   - `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
   - `docker-compose down` : 全てのコンテナを停止する
@@ -57,6 +58,7 @@
 
 ## アイデア・修正案
 
+- [x] GoDoc の修正 or 削除
 - [ ] JquantsAPI を v1 から v2 に移行
 - [ ] インフラの Terraform + GCP 移行
 - [ ] CI/CD 導入

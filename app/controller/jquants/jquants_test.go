@@ -1,4 +1,3 @@
-// JQuants API を利用するための関数をまとめたパッケージ
 package jquants_test
 
 import (

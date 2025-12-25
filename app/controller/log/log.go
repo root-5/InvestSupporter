@@ -1,3 +1,4 @@
+// 独自ログパッケージ
 package log
 
 import (
