@@ -25,6 +25,7 @@
   - `domain/model/`: ドメイン層、データ構造とモデル
 - `infra/`: インフラ設定 (Dockerfiles など)
 - `documents/`: プロジェクトドキュメント
+- `pyproject.toml`: Python 環境設定 (J-Quants MCP 専用)
 
 ## コーディング規約
 

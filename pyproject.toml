@@ -1,3 +1,4 @@
+# python および uv は Jquants MCP を利用する目的だけで利用している
 [project]
 name = "investsupporter"
 version = "0.1.0"
