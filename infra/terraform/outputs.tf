@@ -9,7 +9,7 @@ output "instance_name" {
 }
 
 output "external_ip" {
-  value = google_compute_address.static_ip.address
+  value = google_compute_instance.app_server.network_interface[0].access_config[0].nat_ip
 }
 
 output "ssh_command" {

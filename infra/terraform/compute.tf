@@ -1,8 +1,3 @@
-resource "google_compute_address" "static_ip" {
-  name   = "invest-supporter-ip"
-  region = var.region
-}
-
 resource "google_compute_instance" "app_server" {
   name         = var.instance_name
   machine_type = var.machine_type
@@ -21,9 +16,8 @@ resource "google_compute_instance" "app_server" {
   network_interface {
     network    = google_compute_network.vpc_network.id
     subnetwork = google_compute_subnetwork.subnet.id
-    access_config {
-      nat_ip = google_compute_address.static_ip.address
-    }
+    # access_config を空で定義すると GCP がエフェメラル IP を自動割当
+    access_config {}
   }
 
   metadata = {
