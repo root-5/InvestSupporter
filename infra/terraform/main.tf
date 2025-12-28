@@ -1,5 +1,8 @@
 terraform {
-  required_version = ">= 1.9.0"
+  # Terraform のバージョン指定、.terraform-version も同様に設定
+  required_version = ">= 1.14.3"
+
+  # プロバイダー指定、「拡張機能」に近い概念で各クラウドの API を操作するための宣言
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -15,6 +18,7 @@ terraform {
   # }
 }
 
+# プロバイダーの設定情報
 provider "google" {
   project = var.project_id
   region  = var.region
