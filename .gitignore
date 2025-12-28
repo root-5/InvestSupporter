@@ -2,26 +2,20 @@
 /app/tmp
 
 # 環境変数ファイル
-/infra/app/.env
-/infra/db/.env
-/infra/observer/.env
+*.env
+
+# Terraform 関係
+*.tfvars
 
 # DBデータ
-infra/db/data
-infra/db/data.bk
+infra/db/data*
 infra/db/backup/*.dump
 
 # ログファイル
 infra/observer/log
 
 # 秘密鍵
-/infra/InvestSupporter.pem
-
-# モックアップファイル
-*mockup.js
+*.pem
 
 # 本番環境設定メモ
 README.prod.md
-
-# 他
-/test.go
