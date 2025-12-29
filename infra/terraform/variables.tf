@@ -26,12 +26,6 @@ variable "machine_type" {
   default     = "e2-micro" # ARM インスタンスは規模が大きいものしか提供されていなかったので e2-micro を選択
 }
 
-variable "instance_name" {
-  description = "インスタンス名"
-  type        = string
-  default     = "invest-supporter-app"
-}
-
 variable "allowed_ssh_ips" {
   description = "SSH 接続を許可する IP リスト"
   type        = list(string)

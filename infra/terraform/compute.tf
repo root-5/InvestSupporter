@@ -1,9 +1,7 @@
 resource "google_compute_instance" "app_server" {
-  name         = var.instance_name
+  name         = "invest-supporter-app"
   machine_type = var.machine_type
   zone         = var.zone
-
-  tags = ["ssh-enabled", "http-server"]
 
   boot_disk {
     initialize_params {

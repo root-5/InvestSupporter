@@ -23,7 +23,6 @@ resource "google_compute_firewall" "allow_ssh" {
   }
 
   source_ranges = var.allowed_ssh_ips
-  target_tags   = ["ssh-enabled"]
 }
 
 # ファイアウォールルールの作成 (アプリケーション用)
@@ -37,5 +36,4 @@ resource "google_compute_firewall" "allow_app" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["http-server"]
 }
