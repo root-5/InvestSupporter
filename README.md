@@ -63,7 +63,7 @@
 - [x] AI エージェント用設定追加
 - [x] JquantsAPI を v1 から v2 に移行 << 17 時以降に正しく新規データが入るか確認する
 - [ ] インフラの Terraform + GCP 移行
-- [ ] CI/CD 導入
+- [ ] CI/CD 導入 (GitHub Actions + GCP IAP)
 - [ ] データの整形処理を追加
 - [ ] セキュリティ強化
   - [ ] （api_security.go）

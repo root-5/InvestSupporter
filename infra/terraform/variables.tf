@@ -23,7 +23,7 @@ variable "zone" {
 variable "machine_type" {
   description = "GCE タイプ"
   type        = string
-  default     = "e2-micro"
+  default     = "e2-micro" # ARM インスタンスは規模が大きいものしか提供されていなかったので e2-micro を選択
 }
 
 variable "instance_name" {
