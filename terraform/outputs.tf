@@ -13,5 +13,5 @@ output "external_ip" {
 }
 
 output "ssh_command" {
-  value = "gcloud compute ssh ${google_compute_instance.app_server.name} --zone ${var.zone}"
+  value = "gcloud compute ssh ${google_compute_instance.app_server.name} --zone ${var.zone} --tunnel-through-iap"
 }

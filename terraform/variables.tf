@@ -26,12 +26,6 @@ variable "machine_type" {
   default     = "e2-micro" # ARM インスタンスは規模が大きいものしか提供されていなかったので e2-micro を選択
 }
 
-variable "allowed_ssh_ips" {
-  description = "SSH 接続を許可する IP リスト"
-  type        = list(string)
-  default     = ["1.1.1.1"] # セキュリティのため、運用時は特定のIPに制限
-}
-
 variable "oslogin_members" {
   description = "OS Login を付与するメンバー一覧 (例: user:you@example.com)"
   type        = list(string)

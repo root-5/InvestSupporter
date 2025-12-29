@@ -22,7 +22,7 @@ resource "google_compute_firewall" "allow_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = var.allowed_ssh_ips
+  source_ranges = ["35.235.240.0/20"] # IAP の IP 範囲
 }
 
 # ファイアウォールルールの作成 (アプリケーション用)

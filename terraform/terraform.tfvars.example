@@ -1,6 +1,5 @@
 project_id = "your-gcp-project-id"
 region     = "asia-northeast1"
 zone       = "asia-northeast1-a"
-allowed_ssh_ips = ["1.1.1.1", "35.235.240.0/20"] # 自分のIPアドレス + IAP 用の範囲
 oslogin_members      = [] # 例: ["user:you@example.com"]
 osadminlogin_members = [] # 例: ["user:you@example.com"]
