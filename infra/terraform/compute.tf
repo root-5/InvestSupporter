@@ -4,11 +4,8 @@ resource "google_compute_instance" "app_server" {
   zone         = var.zone
 
   boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-13-trixie-v20251209" # Debian 13
-      size  = 10 # GB単位
-      type  = "pd-standard" # 標準永続ディスク、最安(HDD)
-    }
+    auto_delete = false # インスタンス削除時にディスクを保持
+    source      = google_compute_disk.default.self_link
   }
 
   # インスタンスを VPC ネットワークに接続
@@ -48,4 +45,14 @@ resource "google_compute_instance" "app_server" {
   # service_account {
   #   scopes = ["cloud-platform"]
   # }
+}
+
+# 永続ディスクを boot_disk 外で定義する
+# インスタンス削除時にディスクを保持でき、サイズ変更もインスタンスを停止せず可能
+resource "google_compute_disk" "default" {
+  name  = "invest-supporter-app-disk"
+  zone  = var.zone
+  image = "debian-cloud/debian-13-trixie-v20251209" # Debian 13
+  size  = 10 # GB単位
+  type  = "pd-standard" # 標準永続ディスク、最安(HDD)
 }
