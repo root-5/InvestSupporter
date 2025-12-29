@@ -12,7 +12,9 @@ resource "google_compute_instance" "app_server" {
   network_interface {
     network    = google_compute_network.vpc_network.id
     subnetwork = google_compute_subnetwork.subnet.id
+
     # access_config を空で定義すると GCP がエフェメラル IP を自動割当
+    # IAP に移行した際は不要になる
     access_config {}
   }
 
@@ -41,10 +43,11 @@ resource "google_compute_instance" "app_server" {
     # 再起動後も docker を自動起動する設定は Debian の場合デフォルトで有効
   EOF
 
-  # サービスアカウントの設定 (説明を見る限り不要そう、必要なら戻す)
-  # service_account {
-  #   scopes = ["cloud-platform"]
-  # }
+  # サービスアカウントの設定
+  # インスタンス自体の権限、コメントアウトするとデフォルトが割り当てられてしまうので注意
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/devstorage.read_only"] # GCS からオブジェクトを読み取る権限のみに制限
+  }
 }
 
 # 永続ディスクを boot_disk 外で定義する

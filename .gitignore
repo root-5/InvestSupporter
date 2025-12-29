@@ -6,7 +6,8 @@
 
 # Terraform 関係
 *.tfvars
-*.terraform
+*.tfstate
+.terraform/
 
 # DBデータ
 containers/db/data*
