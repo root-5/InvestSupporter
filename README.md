@@ -14,17 +14,15 @@
   - `/howto` - 使い方説明（WEB ブラウザ）
   - `/financial` - 全銘柄基本情報
   - `/statement?code={{銘柄コード}}` - 全期間財務情報（銘柄コード指定）
-  - `/price?code={{銘柄コード}}` - 全期間株価情報（銘柄コード指定）
-  - `/price?ymd={{日付}}` - 全銘柄株価情報（日付指定）
-  - `/price?code={{銘柄コード}}&ymd={{日付}}` - 株価情報（銘柄コード・日付指定）
-  - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}` - 株価終値情報（銘柄コード複数）
-  - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}` - 株価終値情報（銘柄コード複数・日付指定）
+  - `/price?code={{銘柄コード}}&ymd={{日付}}` - 株価情報（銘柄コード・日付を指定可能）
+  - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}` - 株価終値情報（銘柄コード複数・日付を指定可能）
 
 ## ドキュメント
 
 - [基本設計書](./documents/基本設計書.md)
 - [テーブル定義書](./documents/テーブル定義書.md)
 - [システム構成](./documents/システム構成.md)
+- [作業メモ](./documents/作業メモ.md)
 - [J-Quants API ドキュメント](https://jpx-jquants.com/ja/spec)
 - [j-quants-doc-mcp](https://github.com/J-Quants/j-quants-doc-mcp) - v2 移行をほぼ完結させるくらいには便利
 - [GoDoc](http://localhost:8081/) - ローカル環境専用、関数や変数はプライベートでないもののみ確認可能
@@ -40,10 +38,6 @@
   - `docker-compose -f="compose.local.yaml" down -v` : 全てのコンテナを停止し、ボリュームも削除する
   - `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
   - `docker-compose down` : 全てのコンテナを停止する
-  - `docker-compose up -d app` : app コンテナを起動する
-  - `docker-compose down app`: app コンテナだけ停止する
-  - `docker-compose exec app sh` : app コンテナに入る
-  - `docker-compose logs app -f` : app コンテナのログを表示する
   - `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
   - `curl http://127.0.0.1:8080/financial` : 財務データ取得の確認
 - **DB バックアップとレストア**
@@ -62,7 +56,7 @@
 - [x] GoDoc の修正 or 削除
 - [x] AI エージェント用設定追加
 - [x] JquantsAPI を v1 から v2 に移行 << 17 時以降に正しく新規データが入るか確認する
-- [ ] インフラの Terraform + GCP 移行
+- [x] インフラの Terraform + GCP 移行
 - [ ] CI/CD 導入 (GitHub Actions + GCP IAP)
 - [ ] データの整形処理を追加
 - [ ] セキュリティ強化
