@@ -1,4 +1,4 @@
 project_id = "your-gcp-project-id"
 region     = "asia-northeast1"
 zone       = "asia-northeast1-a"
-allowed_ssh_ips = ["1.1.1.1"] # 自分のIPアドレスに変更してください
+allowed_ssh_ips = ["1.1.1.1", "35.235.240.0/20"] # 自分のIPアドレス + IAP 用の範囲
