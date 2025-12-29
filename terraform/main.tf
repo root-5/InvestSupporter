@@ -18,8 +18,8 @@ terraform {
   # インフラ作成 (terraform apply) 時点では存在している必要があるため、事前に手動で作成しておくこと
   # パブリックアクセス不可かつバージョニング有効化を強く推奨
   backend "gcs" {
-    bucket  = "invest-supporter"
-    prefix  = "terraform/state"
+    bucket = "invest-supporter"
+    prefix = "terraform/state"
   }
 }
 

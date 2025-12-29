@@ -53,6 +53,6 @@ resource "google_compute_disk" "default" {
   name  = "invest-supporter-app-disk"
   zone  = var.zone
   image = "debian-cloud/debian-13-trixie-v20251209" # Debian 13
-  size  = 10 # GB単位
-  type  = "pd-standard" # 標準永続ディスク、最安(HDD)
+  size  = 10                                        # GB単位
+  type  = "pd-standard"                             # 標準永続ディスク、最安(HDD)
 }
