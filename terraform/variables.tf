@@ -31,3 +31,15 @@ variable "allowed_ssh_ips" {
   type        = list(string)
   default     = ["1.1.1.1"] # セキュリティのため、運用時は特定のIPに制限
 }
+
+variable "oslogin_members" {
+  description = "OS Login を付与するメンバー一覧 (例: user:you@example.com)"
+  type        = list(string)
+  default     = []
+}
+
+variable "osadminlogin_members" {
+  description = "OS Admin Login を付与するメンバー一覧 (例: user:you@example.com)"
+  type        = list(string)
+  default     = []
+}
