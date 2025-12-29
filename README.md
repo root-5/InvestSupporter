@@ -53,8 +53,8 @@
   ```bash
   docker-compose -f="compose.local.yaml" down -v && \
   docker system prune -a && \
-  sudo mv infra/db/data/ infra/db/data_backup_$(date +%Y%m%d%H%M%S)/ && \
-  sudo rm -rf infra/db/data/
+  sudo mv containers/db/data/ containers/db/data_backup_$(date +%Y%m%d%H%M%S)/ && \
+  sudo rm -rf containers/db/data/
   ```
 
 ## アイデア・修正案

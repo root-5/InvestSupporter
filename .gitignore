@@ -8,11 +8,11 @@
 *.tfvars
 
 # DBデータ
-infra/db/data*
-infra/db/backup/*.dump
+containers/db/data*
+containers/db/backup/*.dump
 
 # ログファイル
-infra/observer/log
+containers/observer/log
 
 # 秘密鍵
 *.pem

@@ -2,10 +2,10 @@ services:
     app:
         build:
             context: .
-            dockerfile: ./infra/app/app.dockerfile
+            dockerfile: ./containers/app/app.dockerfile
         tty: true  # コンテナを起動したままにする
         env_file:
-            - ./infra/app/.env
+            - ./containers/app/.env
         environment:
             - TZ=Asia/Tokyo
         ports:
@@ -18,15 +18,15 @@ services:
     db:
         build:
             context: .
-            dockerfile: ./infra/db/db.dockerfile
+            dockerfile: ./containers/db/db.dockerfile
         env_file:
-            - ./infra/db/.env
+            - ./containers/db/.env
         environment:
             - TZ=Asia/Tokyo
         volumes:
-            - ./infra/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
-            - ./infra/db/data:/var/lib/postgresql
-            - ./infra/db/backup:/var/lib/postgresql/backup
+            - ./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
+            - ./containers/db/data:/var/lib/postgresql
+            - ./containers/db/backup:/var/lib/postgresql/backup
         ports:
             - 5432:5432
         networks:
@@ -35,14 +35,14 @@ services:
     observer:
         build:
             context: .
-            dockerfile: ./infra/observer/observer.dockerfile
+            dockerfile: ./containers/observer/observer.dockerfile
         tty: true
         env_file:
-            - ./infra/observer/.env
+            - ./containers/observer/.env
         environment:
             - TZ=Asia/Tokyo
         volumes:
-            - ./infra/observer/log:/log
+            - ./containers/observer/log:/log
         networks:
             - backend
         restart: always
