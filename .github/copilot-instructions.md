@@ -23,8 +23,10 @@
     - `jquants/`: J-Quants API クライアント
   - `usecase/`: ユースケース層
   - `domain/model/`: ドメイン層、データ構造とモデル
-- `infra/`: インフラ設定 (Dockerfiles など)
+- `containers/`: インフラ設定 (Dockerfiles など)
+- `terraform/`: Terraform インフラコード
 - `documents/`: プロジェクトドキュメント
+- `pyproject.toml`: Python 環境設定 (J-Quants MCP 専用)
 
 ## コーディング規約
 

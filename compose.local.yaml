@@ -2,10 +2,10 @@ services:
     app-local:
         build:
             context: .
-            dockerfile: ./infra/app/app.local.dockerfile
+            dockerfile: ./containers/app/app.local.dockerfile
         tty: true  # コンテナを起動したままにする
         env_file:
-            - ./infra/app/.env
+            - ./containers/app/.env
         environment:
             - TZ=Asia/Tokyo
         volumes:
@@ -20,15 +20,15 @@ services:
     db:
         build:
             context: .
-            dockerfile: ./infra/db/db.dockerfile
+            dockerfile: ./containers/db/db.dockerfile
         env_file:
-            - ./infra/db/.env
+            - ./containers/db/.env
         environment:
             - TZ=Asia/Tokyo
         volumes:
-            - ./infra/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
-            - ./infra/db/data:/var/lib/postgresql
-            - ./infra/db/backup:/var/lib/postgresql/backup
+            - ./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
+            - ./containers/db/data:/var/lib/postgresql
+            - ./containers/db/backup:/var/lib/postgresql/backup
         ports:
             - 5432:5432
         networks:

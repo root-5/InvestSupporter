@@ -21,7 +21,7 @@ func TestJQuants(t *testing.T) {
 	var err error
 
 	// .env ファイルを読み込む
-	envText, err := os.Open("../../../infra/app/.env")
+	envText, err := os.Open("../../../containers/app/.env")
 	if err != nil {
 		t.Errorf("Open .env failed: %v", err)
 		return

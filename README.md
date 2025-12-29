@@ -14,17 +14,15 @@
   - `/howto` - 使い方説明（WEB ブラウザ）
   - `/financial` - 全銘柄基本情報
   - `/statement?code={{銘柄コード}}` - 全期間財務情報（銘柄コード指定）
-  - `/price?code={{銘柄コード}}` - 全期間株価情報（銘柄コード指定）
-  - `/price?ymd={{日付}}` - 全銘柄株価情報（日付指定）
-  - `/price?code={{銘柄コード}}&ymd={{日付}}` - 株価情報（銘柄コード・日付指定）
-  - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}` - 株価終値情報（銘柄コード複数）
-  - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}` - 株価終値情報（銘柄コード複数・日付指定）
+  - `/price?code={{銘柄コード}}&ymd={{日付}}` - 株価情報（銘柄コード・日付を指定可能）
+  - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}` - 株価終値情報（銘柄コード複数・日付を指定可能）
 
 ## ドキュメント
 
 - [基本設計書](./documents/基本設計書.md)
 - [テーブル定義書](./documents/テーブル定義書.md)
 - [システム構成](./documents/システム構成.md)
+- [作業メモ](./documents/作業メモ.md)
 - [J-Quants API ドキュメント](https://jpx-jquants.com/ja/spec)
 - [j-quants-doc-mcp](https://github.com/J-Quants/j-quants-doc-mcp) - v2 移行をほぼ完結させるくらいには便利
 - [GoDoc](http://localhost:8081/) - ローカル環境専用、関数や変数はプライベートでないもののみ確認可能
@@ -40,10 +38,6 @@
   - `docker-compose -f="compose.local.yaml" down -v` : 全てのコンテナを停止し、ボリュームも削除する
   - `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
   - `docker-compose down` : 全てのコンテナを停止する
-  - `docker-compose up -d app` : app コンテナを起動する
-  - `docker-compose down app`: app コンテナだけ停止する
-  - `docker-compose exec app sh` : app コンテナに入る
-  - `docker-compose logs app -f` : app コンテナのログを表示する
   - `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
   - `curl http://127.0.0.1:8080/financial` : 財務データ取得の確認
 - **DB バックアップとレストア**
@@ -53,8 +47,8 @@
   ```bash
   docker-compose -f="compose.local.yaml" down -v && \
   docker system prune -a && \
-  sudo mv infra/db/data/ infra/db/data_backup_$(date +%Y%m%d%H%M%S)/ && \
-  sudo rm -rf infra/db/data/
+  sudo mv containers/db/data/ containers/db/data_backup_$(date +%Y%m%d%H%M%S)/ && \
+  sudo rm -rf containers/db/data/
   ```
 
 ## アイデア・修正案
@@ -62,17 +56,17 @@
 - [x] GoDoc の修正 or 削除
 - [x] AI エージェント用設定追加
 - [x] JquantsAPI を v1 から v2 に移行 << 17 時以降に正しく新規データが入るか確認する
-- [ ] インフラの Terraform + GCP 移行
-- [ ] CI/CD 導入
+- [x] インフラの Terraform + GCP 移行
+- [ ] CI/CD 導入 (GitHub Actions + GCP IAP)
 - [ ] データの整形処理を追加
 - [ ] セキュリティ強化
   - [ ] （api_security.go）
   - [ ] 不正な URL パスを叩かれた際に IP を記録しておき、一定回数以上アクセスがあった場合はその IP をブロックする
   - [ ] 正規の URL であっても、一定回数以上のアクセスがあった場合はメッセージを出してアクセスを制限する
-- [ ] GoDoc が使えなくなっている
 - [ ] structToCsv はほとんど AI 任せなので後で再確認
 - [ ] 冗長性
   - [ ] EC2 インスタンスの起動時に docker-compose が自動で走るように設定（ステートレス化）
     - [ ] 現在はサーバーが落ちることがなくなってきたため不要になってきた、後回し
   - [ ] 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要
-- [ ] 命名方法をデファクトスタンダードに統一 ＞ このままでも良いかも？一旦後回し
+- [ ] ドメイン取得してエンドポイントを独自ドメインで公開する (優先度低、現状は動的 IP 直打ち)
+- [ ] コンテナまではリポジトリ管理下に置くが、Terraform はプライベートの別リポジトリに分離する方が長期的にはいいかも

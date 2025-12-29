@@ -1,0 +1,5 @@
+project_id = "your-gcp-project-id"
+region     = "asia-northeast1"
+zone       = "asia-northeast1-a"
+oslogin_members      = [] # 例: ["user:you@example.com"]
+osadminlogin_members = [] # 例: ["user:you@example.com"]
