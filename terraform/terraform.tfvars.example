@@ -1,5 +1,13 @@
+# GCP プロジェクトとリージョン設定
 project_id = "your-gcp-project-id"
 region     = "asia-northeast1"
 zone       = "asia-northeast1-a"
 oslogin_members      = [] # 例: ["user:you@example.com"]
 osadminlogin_members = [] # 例: ["user:you@example.com"]
+
+# Workload Identity Federation (GitHub Actions 用)
+workload_identity_pool_id     = "github-actions-pool"
+workload_identity_provider_id = "github-actions-provider"
+github_repository             = "root-5/InvestSupporter"
+github_allowed_refs           = ["refs/heads/main"]
+actions_service_account_id    = "github-actions-service-account"

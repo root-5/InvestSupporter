@@ -37,3 +37,33 @@ variable "osadminlogin_members" {
   type        = list(string)
   default     = []
 }
+
+variable "workload_identity_pool_id" {
+  description = "Workload Identity Pool の ID"
+  type        = string
+  default     = "github-actions-pool"
+}
+
+variable "workload_identity_provider_id" {
+  description = "Workload Identity Provider の ID"
+  type        = string
+  default     = "github-actions-provider"
+}
+
+variable "github_repository" {
+  description = "GitHub Actions で許可するリポジトリ (owner/name)"
+  type        = string
+  default     = "root-5/InvestSupporter"
+}
+
+variable "github_allowed_refs" {
+  description = "GitHub Actions で許可する ref のリスト"
+  type        = list(string)
+  default     = ["refs/heads/main"]
+}
+
+variable "actions_service_account_id" {
+  description = "GitHub Actions 用サービスアカウントのアカウント ID (メールではなく ID 部分)"
+  type        = string
+  default     = "github-actions-service-account"
+}
