@@ -16,16 +16,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 認証 (Workload Identity Federation)
+      - name: 認証 (Workload Identity Federation) # https://github.com/google-github-actions/auth
         uses: google-github-actions/auth@v3
-        description: https://github.com/google-github-actions/auth
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
 
-      - name: gcloud コマンドのセットアップ
+      - name: gcloud コマンドのセットアップ # https://github.com/google-github-actions/setup-gcloud、version は指定せず latest を使用
         uses: google-github-actions/setup-gcloud@v2
-        description: https://github.com/google-github-actions/setup-gcloud、version は指定せず latest を使用
 
       - name: デプロイコマンドを実行
         env:
