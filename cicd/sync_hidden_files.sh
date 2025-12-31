@@ -69,11 +69,12 @@ if [[ -z "$dump_file_name" ]]; then
 fi
 
 # db コンテナを起動、バックアップ復元スクリプトを実行
+# まれに restore.sh 実行時に DB のレスポンス受付が間に合わず失敗することがあるため sleep 10 を挟む
 echo "DB コンテナを起動し、バックアップ復元スクリプトを実行します"
 gcloud compute ssh "$INSTANCE_NAME" \
 	--zone="$ZONE" \
 	--project="$PROJECT_ID" \
 	--tunnel-through-iap \
 	--quiet \
-	--command="sudo -u appuser bash -c 'cd /home/appuser/InvestSupporter && docker compose up -d db && echo \"$dump_file_name | docker compose exec db bash /var/lib/postgresql/backup/restore.sh\"'"
+	--command="sudo -u appuser bash -c \"cd /home/appuser/InvestSupporter && docker compose up -d db && sleep 10 && echo $dump_file_name | docker compose exec db bash /var/lib/postgresql/backup/restore.sh\""
 echo "DB バックアップの復元が完了しました"
