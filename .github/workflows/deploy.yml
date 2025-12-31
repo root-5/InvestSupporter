@@ -1,0 +1,41 @@
+name: deploy-to-gcp-vm
+
+# main ブランチへのプッシュ時にトリガー
+on:
+  push:
+    branches: ["main"]
+
+# GitHub Actions の権限設定
+# 詳細: https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+permissions:
+  contents: read # コードの読み取り権限
+  id-token: write # Workload Identity Federation 用の ID トークン発行権限
+
+# ジョブ定義
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 認証 (Workload Identity Federation)
+        uses: google-github-actions/auth@v3
+        description: https://github.com/google-github-actions/auth
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: gcloud コマンドのセットアップ
+        uses: google-github-actions/setup-gcloud@v2
+        description: https://github.com/google-github-actions/setup-gcloud、version は指定せず latest を使用
+
+      - name: デプロイコマンドを実行
+        env:
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          ZONE: ${{ vars.GCP_ZONE }}
+        run: |
+          gcloud compute ssh invest-supporter-app \
+            --zone="$ZONE" \
+            --project="$PROJECT_ID" \
+            --command="bash ./cicd/update_app.sh" \
+            --tunnel-through-iap \
+            --strict-host-key-checking=no \
+            --quiet
