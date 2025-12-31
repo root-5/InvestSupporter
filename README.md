@@ -17,6 +17,14 @@
   - `/price?code={{銘柄コード}}&ymd={{日付}}` - 株価情報（銘柄コード・日付を指定可能）
   - `/closeprice?code={{銘柄コード複数（カンマ区切り）}}&ymd={{日付}}` - 株価終値情報（銘柄コード複数・日付を指定可能）
 
+## 使用技術
+
+- インフラ: GCP (Compute Engine), Terraform, Docker
+- 言語: Golang, SQL, Shell
+- データベース: PostgreSQL
+- CI/CD: GitHub Actions
+- その他ライブラリ・ツール: GitHub Copilot, J-Quants API, J-Quants MCP
+
 ## ドキュメント
 
 - [基本設計書](./documents/基本設計書.md)
@@ -27,9 +35,9 @@
 - [j-quants-doc-mcp](https://github.com/J-Quants/j-quants-doc-mcp) - v2 移行をほぼ完結させるくらいには便利
 - [GoDoc](http://localhost:8081/) - ローカル環境専用、関数や変数はプライベートでないもののみ確認可能
 
-# 作業メモ
+## 作業用
 
-## コマンド
+### コマンド
 
 - **基本用途**
   - `docker-compose -f="compose.local.yaml" up -d` : （ローカル）全てのコンテナを立ち上げる
@@ -50,14 +58,14 @@
   sudo mv containers/db/data/ containers/db/data_backup_$(date +%Y%m%d%H%M%S)/ && \
   sudo rm -rf containers/db/data/
   ```
+- **本番環境接続**
+  - ` gcloud compute ssh invest-supporter-app --zone asia-northeast1-a --tunnel-through-iap`
 
-## アイデア・修正案
+### アイデア・修正案
 
-- [x] GoDoc の修正 or 削除
-- [x] AI エージェント用設定追加
-- [x] JquantsAPI を v1 から v2 に移行 << 17 時以降に正しく新規データが入るか確認する
-- [x] インフラの Terraform + GCP 移行
-- [x] CI/CD 導入 (GitHub Actions + GCP IAP)
+- [ ] AWS 関連のコードとインフラを完全削除
+  - [ ] .pem、手順書の一部等
+  - [ ] AWS WEB コンソール上でのリソース削除 (VPC、EC2、ネットワーク、ユーザーなど)
 - [ ] データの整形処理を追加
 - [ ] セキュリティ強化
   - [ ] （api_security.go）

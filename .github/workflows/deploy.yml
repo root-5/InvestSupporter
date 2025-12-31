@@ -1,5 +1,14 @@
 name: deploy-to-gcp-vm
 
+
+# main ブランチ変更時に GCP VM にアプリケーションを更新するワークフロー
+# 事前に GitHub のシークレット (Settings > Secrets and variables > Actions) に以下を登録しておく必要がある
+# - GCP_PROJECT_ID: GCP プロジェクト ID
+# - GCP_WORKLOAD_IDENTITY_PROVIDER: Workload Identity Federation プロバイダのリソース名
+# - GCP_SERVICE_ACCOUNT_EMAIL: GCP サービスアカウントのメールアドレス
+# - GCP_ZONE: デプロイ先 VM インスタンスのゾーン (例: asia-northeast1-a)
+
+
 # main ブランチへのプッシュ時にトリガー
 on:
   push:
