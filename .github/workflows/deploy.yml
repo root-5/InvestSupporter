@@ -34,7 +34,7 @@ jobs:
           gcloud compute ssh invest-supporter-app \
             --zone="$ZONE" \
             --project="$PROJECT_ID" \
-            --command="bash ./cicd/update_app.sh" \
+            --command="bash ~/InvestSupporter/cicd/update_app.sh" \
             --tunnel-through-iap \
             --strict-host-key-checking=no \
             --quiet
