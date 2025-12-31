@@ -68,3 +68,9 @@ resource "google_project_iam_member" "github_actions_os_admin" {
   role    = "roles/compute.osAdminLogin"
   member  = google_service_account.github_actions.member
 }
+
+resource "google_project_iam_member" "github_actions_compute_viewer" {
+  project = var.project_id
+  role    = "roles/compute.viewer"
+  member  = google_service_account.github_actions.member
+}
