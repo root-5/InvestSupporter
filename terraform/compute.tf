@@ -1,3 +1,10 @@
+# 静的外部IPアドレスを作成
+# GCP では稼働中インスタンスの固定IP割り当てが無料、この構成をとれば VM 再起動後も IP アドレスが変わらない
+resource "google_compute_address" "app_static_ip" {
+  name   = "invest-supporter-app-static-ip"
+  region = var.region
+}
+
 resource "google_compute_instance" "app_server" {
   name         = "invest-supporter-app"
   machine_type = var.machine_type
@@ -13,9 +20,10 @@ resource "google_compute_instance" "app_server" {
     network    = google_compute_network.vpc_network.id
     subnetwork = google_compute_subnetwork.subnet.id
 
-    # access_config を空で定義すると GCP がエフェメラル IP を自動割当
-    # IAP に移行した際は不要になる
-    access_config {}
+    # 固定IPを割り当て
+    access_config {
+      nat_ip = google_compute_address.app_static_ip.address
+    }
   }
 
   # OS Login を有効化
