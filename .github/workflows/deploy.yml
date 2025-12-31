@@ -34,7 +34,7 @@ jobs:
           gcloud compute ssh invest-supporter-app \
             --zone="$ZONE" \
             --project="$PROJECT_ID" \
-            --command="sudo bash -c \"cd /home/hujisannrokuoumunaku_shigoto_gma/InvestSupporter && git pull && sudo bash cicd/update_app.sh\"" \
+            --command="sudo -u appuser bash -c \"cd /home/appuser/InvestSupporter && git pull && bash cicd/update_app.sh\"" \
             --tunnel-through-iap \
             --strict-host-key-checking=no \
             --quiet

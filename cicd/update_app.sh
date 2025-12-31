@@ -13,6 +13,7 @@ git fetch origin main
 git reset --hard origin/main
 
 # テストのためここで終了
+touch $APP_DIR/ci_cd_compleeeeeeeeeeeeted.txt
 exit 0
 
 # アプリをビルド・再起動
