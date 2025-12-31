@@ -36,11 +36,19 @@ resource "google_compute_instance" "app_server" {
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     apt-get update
     apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    # 再起動後も docker を自動起動する設定は Debian の場合デフォルトで有効 (systemd 設定不要)
+
+    # appuser ユーザーとディレクトリを作成
+    useradd -m -d /home/appuser appuser
+
     # ユーザーを docker グループに追加、sudo なしで docker コマンドを実行可能にする
     groupadd docker
-    usermod -aG docker $USER
+    usermod -aG docker appuser
     newgrp docker
-    # 再起動後も docker を自動起動する設定は Debian の場合デフォルトで有効
+
+    # 初期アプリケーション配置
+    cd /home/appuser
+    sudo -u appuser git clone https://github.com/root-5/InvestSupporter.git
   EOF
 
   # サービスアカウントの設定

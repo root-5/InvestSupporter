@@ -46,13 +46,34 @@ for file in "${FILES[@]}"; do
 done
 
 # tar で相対パスのまま圧縮し、リモートで展開する
-# リモート側は ~/InvestSupporter を前提に展開
+# リモート側は /home/appuser/InvestSupporter 配下に展開
 tar --null -czf - --files-from <(printf '%s\0' "${FILES[@]}") |
 	gcloud compute ssh "$INSTANCE_NAME" \
 		--zone="$ZONE" \
 		--project="$PROJECT_ID" \
 		--tunnel-through-iap \
 		--quiet \
-		-- -T "bash -c 'cd ~/InvestSupporter && tar xzf -'"
-
+		-- -T "sudo -u appuser bash -c 'cd /home/appuser/InvestSupporter && tar xzf -'"
 echo "同期完了"
+
+# dump ファイルがない場合はここで終了
+dump_file_name=""
+for file in "${FILES[@]}"; do
+	if [[ "$file" == ./containers/db/backup/*.dump ]]; then
+		dump_file_name=$(basename "$file")
+		break
+	fi
+done
+if [[ -z "$dump_file_name" ]]; then
+	exit 0
+fi
+
+# db コンテナを起動、バックアップ復元スクリプトを実行
+echo "DB コンテナを起動し、バックアップ復元スクリプトを実行します"
+gcloud compute ssh "$INSTANCE_NAME" \
+	--zone="$ZONE" \
+	--project="$PROJECT_ID" \
+	--tunnel-through-iap \
+	--quiet \
+	--command="sudo -u appuser bash -c 'cd /home/appuser/InvestSupporter && docker compose up -d db && echo \"$dump_file_name | docker compose exec db bash /var/lib/postgresql/backup/restore.sh\"'"
+echo "DB バックアップの復元が完了しました"
