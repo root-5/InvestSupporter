@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# 本番インスタンス上でアプリケーションを最新化するスクリプト
+# GitHub Actions からの実行が基本
+
 APP_DIR="$HOME/InvestSupporter"
 
 cd "$APP_DIR"
