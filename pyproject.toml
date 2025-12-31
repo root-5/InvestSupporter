@@ -2,7 +2,7 @@
 [project]
 name = "investsupporter"
 version = "0.1.0"
-description = "Add your description here"
+description = "Jquants MCP を利用する目的で作成したプロジェクト、必要ないならば削除しても良い"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
