@@ -19,7 +19,7 @@ jobs:
       - name: 認証 (Workload Identity Federation) # https://github.com/google-github-actions/auth
         uses: google-github-actions/auth@v3
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: gcloud コマンドのセットアップ # https://github.com/google-github-actions/setup-gcloud、version は指定せず latest を使用
@@ -27,8 +27,8 @@ jobs:
 
       - name: デプロイコマンドを実行
         env:
-          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-          ZONE: ${{ vars.GCP_ZONE }}
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          ZONE: ${{ secrets.GCP_ZONE }}
         run: |
           gcloud compute ssh invest-supporter-app \
             --zone="$ZONE" \
