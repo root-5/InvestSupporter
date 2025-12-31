@@ -44,6 +44,17 @@ resource "google_service_account" "github_actions" {
   project      = var.project_id
 }
 
+# インスタンスのサービスアカウントを実行できる権限を付与
+resource "google_service_account_iam_member" "github_actions_act_as_instance_sa" {
+  service_account_id = format(
+    "projects/%s/serviceAccounts/%s-compute@developer.gserviceaccount.com",
+    var.project_id,
+    data.google_project.current.number,
+  )
+  role   = "roles/iam.serviceAccountUser"
+  member = google_service_account.github_actions.member
+}
+
 # サービスアカウントへの Workload Identity ユーザー権限付与
 resource "google_service_account_iam_member" "github_actions_iam_workload_identity_user" {
   service_account_id = google_service_account.github_actions.name
