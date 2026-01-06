@@ -52,29 +52,21 @@
   - `docker-compose exec db bash /var/lib/postgresql/backup/backup.sh`
   - `docker-compose exec db bash /var/lib/postgresql/backup/restore.sh`
 - **ローカル環境完全リセット**
-  ```bash
-  docker-compose -f="compose.local.yaml" down -v && \
-  docker system prune -a && \
-  sudo mv containers/db/data/ containers/db/data_backup_$(date +%Y%m%d%H%M%S)/ && \
-  sudo rm -rf containers/db/data/
-  ```
+  - `docker-compose -f="compose.local.yaml" down -v && docker system prune -a` : コンテナ・イメージ・ボリュームを全て削除
+  - `sudo mv containers/db/data/ containers/db/data_backup_$(date +%Y%m%d%H%M%S)/ && sudo rm -rf containers/db/data/` : db データをバックアップして削除
 - **本番環境接続**
-  - ` gcloud compute ssh invest-supporter-app --zone asia-northeast1-a --tunnel-through-iap`
+  - `gcloud compute ssh invest-supporter-app --zone asia-northeast1-a --tunnel-through-iap`
 
 ### アイデア・修正案
 
-- [ ] AWS 関連のコードとインフラを完全削除
-  - [ ] .pem、手順書の一部等
-  - [ ] AWS WEB コンソール上でのリソース削除 (VPC、EC2、ネットワーク、ユーザーなど)
+- [x] AWS 関連のコードとインフラを完全削除
+  - [x] .pem、手順書の一部等
+  - [x] AWS WEB コンソール上でのリソース削除 (VPC、EC2、ネットワーク、ユーザーなど)
 - [ ] データの整形処理を追加
 - [ ] セキュリティ強化
   - [ ] （api_security.go）
   - [ ] 不正な URL パスを叩かれた際に IP を記録しておき、一定回数以上アクセスがあった場合はその IP をブロックする
   - [ ] 正規の URL であっても、一定回数以上のアクセスがあった場合はメッセージを出してアクセスを制限する
 - [ ] structToCsv はほとんど AI 任せなので後で再確認
-- [ ] 冗長性
-  - [ ] EC2 インスタンスの起動時に docker-compose が自動で走るように設定（ステートレス化）
-    - [ ] 現在はサーバーが落ちることがなくなってきたため不要になってきた、後回し
-  - [ ] 本番環境では app コンテナを 2 つビルドし、片方を通常用、もう片方を通常用が落ちた際のスケジューラー維持用として運用する。DB は一つにする代わりに排他ロックが必要
-- [ ] ドメイン取得してエンドポイントを独自ドメインで公開する (優先度低、現状は動的 IP 直打ち)
+- [ ] ドメイン取得してエンドポイントを独自ドメインで公開する (優先度低、固定 IP で基本は十分)
 - [ ] コンテナまではリポジトリ管理下に置くが、Terraform はプライベートの別リポジトリに分離する方が長期的にはいいかも
