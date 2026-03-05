@@ -3,6 +3,11 @@ services:
         build:
             context: .
             dockerfile: ./containers/app/app.local.dockerfile
+        deploy:
+            resources:
+                limits:
+                    cpus: '1'       # 1コアに制限
+                    memory: 256M    # メモリを256MBに制限
         tty: true  # コンテナを起動したままにする
         env_file:
             - ./containers/app/.env
@@ -21,6 +26,11 @@ services:
         build:
             context: .
             dockerfile: ./containers/db/db.dockerfile
+        deploy:
+            resources:
+                limits:
+                    cpus: '1'       # 1コアに制限
+                    memory: 256M    # メモリを256MBに制限
         env_file:
             - ./containers/db/.env
         environment:
