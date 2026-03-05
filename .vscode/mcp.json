@@ -3,6 +3,8 @@
     "j-quants-doc-mcp": {
       "command": "uvx",
       "args": [
+        "--from",
+        "git+https://github.com/J-Quants/j-quants-doc-mcp",
         "j-quants-doc-mcp"
       ]
     }
