@@ -26,7 +26,7 @@ services:
             - TZ=Asia/Tokyo
         volumes:
             - ./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
-            - ./containers/db/data:/var/lib/postgresql
+            - ./containers/db/data:/var/lib/postgresql/data
             - ./containers/db/backup:/var/lib/postgresql/backup
         ports:
             - 5432:5432

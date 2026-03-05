@@ -40,19 +40,22 @@
 ### コマンド
 
 - **基本用途**
-  - `docker-compose -f="compose.local.yaml" up -d` : （ローカル）全てのコンテナを立ち上げる
-  - `docker-compose -f="compose.local.yaml" down` : 全てのコンテナを停止する
-  - `docker-compose -f="compose.local.yaml" down --rmi all` : 全てのコンテナを停止し、イメージも削除する
-  - `docker-compose -f="compose.local.yaml" down -v` : 全てのコンテナを停止し、ボリュームも削除する
-  - `docker-compose up -d` : （本番）全てのコンテナを立ち上げる
-  - `docker-compose down` : 全てのコンテナを停止する
+  - `docker compose -f="compose.local.yaml" up -d` : 全てのコンテナを立ち上げる
+  - `docker compose -f="compose.local.yaml" up -d --force-recreate` : 全てのコンテナを強制的に再作成して立ち上げる
+  - `docker compose -f="compose.local.yaml" down` : 全てのコンテナを停止する
+  - `docker compose -f="compose.local.yaml" down --rmi all` : 全てのコンテナを停止し、イメージも削除する
+  - `docker compose -f="compose.local.yaml" down -v` : 全てのコンテナを停止し、ボリュームも削除する
+  - `docker compose -f="compose.local.yaml" logs -f` : ログ閲覧
+  - `docker compose -f="compose.local.yaml" exec app-local ash` : app コンテナに入る
+  - `docker compose up -d` : （本番）全てのコンテナを立ち上げる
+  - `docker compose down` : 全てのコンテナを停止する
   - `psql -h 127.0.0.1 -p 5432 -U user financial_data` : db に接続する
   - `curl http://127.0.0.1:8080/financial` : 財務データ取得の確認
 - **DB バックアップとレストア**
-  - `docker-compose exec db bash /var/lib/postgresql/backup/backup.sh`
-  - `docker-compose exec db bash /var/lib/postgresql/backup/restore.sh`
+  - `docker compose exec db bash /var/lib/postgresql/backup/backup.sh`
+  - `docker compose exec db bash /var/lib/postgresql/backup/restore.sh`
 - **ローカル環境完全リセット**
-  - `docker-compose -f="compose.local.yaml" down -v && docker system prune -a` : コンテナ・イメージ・ボリュームを全て削除
+  - `docker compose -f="compose.local.yaml" down -v && docker system prune -a` : コンテナ・イメージ・ボリュームを全て削除
   - `sudo mv containers/db/data/ containers/db/data_backup_$(date +%Y%m%d%H%M%S)/ && sudo rm -rf containers/db/data/` : db データをバックアップして削除
 - **本番環境接続**
   - `gcloud compute ssh invest-supporter-app --zone asia-northeast1-a --tunnel-through-iap`
@@ -70,3 +73,8 @@
 - [ ] structToCsv はほとんど AI 任せなので後で再確認
 - [ ] ドメイン取得してエンドポイントを独自ドメインで公開する (優先度低、固定 IP で基本は十分)
 - [ ] コンテナまではリポジトリ管理下に置くが、Terraform はプライベートの別リポジトリに分離する方が長期的にはいいかも
+- [ ] 高速化
+  - [ ] メモリを 2~4GB に増やす
+  - [ ] HDD から SSD に変更する
+  - [ ] Docker network + localhost 問題？
+- [ ] 1449 札幌
