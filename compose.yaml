@@ -19,6 +19,7 @@ services:
         build:
             context: .
             dockerfile: ./containers/db/db.dockerfile
+        shm_size: 256m  # パフォーマンス向上のため共有メモリサイズを 256MB に設定、デフォルトは 64MB
         env_file:
             - ./containers/db/.env
         environment:
