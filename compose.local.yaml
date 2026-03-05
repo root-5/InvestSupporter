@@ -3,6 +3,11 @@ services:
         build:
             context: .
             dockerfile: ./containers/app/app.local.dockerfile
+        deploy:
+            resources:
+                limits:
+                    cpus: '1'       # 1コアに制限
+                    memory: 256M    # メモリを256MBに制限
         tty: true  # コンテナを起動したままにする
         env_file:
             - ./containers/app/.env
@@ -21,13 +26,19 @@ services:
         build:
             context: .
             dockerfile: ./containers/db/db.dockerfile
+        shm_size: 256m  # パフォーマンス向上のため共有メモリサイズを 256MB に設定、デフォルトは 64MB
+        deploy:
+            resources:
+                limits:
+                    cpus: '1'       # 1コアに制限
+                    memory: 256M    # メモリを256MBに制限
         env_file:
             - ./containers/db/.env
         environment:
             - TZ=Asia/Tokyo
         volumes:
             - ./containers/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d/
-            - ./containers/db/data:/var/lib/postgresql
+            - ./containers/db/data:/var/lib/postgresql/data
             - ./containers/db/backup:/var/lib/postgresql/backup
         ports:
             - 5432:5432

@@ -85,7 +85,7 @@ CREATE TABLE prices_info (
 -- インデックスの作成
 CREATE INDEX idx_code_stocks_info ON stocks_info (code);
 CREATE INDEX idx_code_statements_info ON statements_info (code);
-CREATE INDEX idx_code_prices_info ON prices_info (ymd, code);
+CREATE INDEX idx_code_prices_info ON prices_info (code, ymd); -- code を先にすることで、コードでの株価情報の検索が高速化される
 
 -- データの挿入
 -- 17 業種情報テーブル
