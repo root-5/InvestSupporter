@@ -58,10 +58,10 @@ func InsertStatementsInfo(statements []model.StatementInfo) (err error) {
 			statement.NextYearForecastEarningsPerShare,
 			statement.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
 		)
-	}
-	if err != nil {
-		log.Error(err)
-		return err
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 	}
 
 	return nil
