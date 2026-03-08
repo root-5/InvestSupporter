@@ -13,8 +13,7 @@ import (
 
 /*
 Jquants API から上場銘柄一覧を取得し、DB に保存する関数
-API と DB の上場銘柄一覧の長さが不一致なら、テーブルを削除した上で INSERT する
-API と DB の上場銘柄一覧のデータが不一致なら、テーブルを UPDATE する
+API に存在し DB に存在しない銘柄は INSERT し、既存銘柄の差分は UPDATE する
 - return) err	エラー
 */
 func UpdateStocksInfo() (err error) {
@@ -32,44 +31,35 @@ func UpdateStocksInfo() (err error) {
 		return err
 	}
 
-	// API と DB の上場銘柄の数が不一致なら、不足分を特定してその分だけ INSERT
-	if len(stocksOld) != len(stocksNew) {
-		// API と DB の上場銘柄の差分を特定
-		var diffStocks []model.StocksInfo
-		for _, stockNew := range stocksNew {
-			isSame := false
-			for _, stockOld := range stocksOld {
-				if stockNew.Code == stockOld.Code {
-					isSame = true
-					break
-				}
-			}
-			if !isSame {
-				diffStocks = append(diffStocks, stockNew)
-			}
+	stocksOldMap := make(map[string]model.StocksInfo, len(stocksOld))
+	for _, stockOld := range stocksOld {
+		stocksOldMap[stockOld.Code] = stockOld
+	}
+
+	var insertStocks []model.StocksInfo
+	var updateStocks []model.StocksInfo
+	for _, stockNew := range stocksNew {
+		stockOld, ok := stocksOldMap[stockNew.Code]
+		if !ok {
+			insertStocks = append(insertStocks, stockNew)
+			continue
 		}
 
-		// 上場銘柄一覧を追加
-		err = postgres.InsertStocksInfo(diffStocks)
+		if stockOld != stockNew {
+			updateStocks = append(updateStocks, stockNew)
+		}
+	}
+
+	if len(insertStocks) != 0 {
+		err = postgres.InsertStocksInfo(insertStocks)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
 	}
 
-	// API と DB の上場銘柄データが不一致なら、不足分を特定してその分だけ UPDATE
-	var diffStocks []model.StocksInfo
-	var isSame bool
-	for i := range stocksOld {
-		if stocksOld[i] != stocksNew[i] {
-			diffStocks = append(diffStocks, stocksNew[i])
-			isSame = false
-			break
-		}
-	}
-	if !isSame {
-		// 上場銘柄一覧を更新
-		err = postgres.UpdateStocksInfo(diffStocks)
+	if len(updateStocks) != 0 {
+		err = postgres.UpdateStocksInfo(updateStocks)
 		if err != nil {
 			log.Error(err)
 			return err
@@ -128,6 +118,18 @@ func ResetStatementInfoAll() (err error) {
 - return) err	エラー
 */
 func UpdateStatementsInfo() (err error) {
+	stocks, err := postgres.GetStocksInfo()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// stocks_info に存在する銘柄コードの集合を作成する
+	stockCodeSet := make(map[string]struct{}, len(stocks))
+	for _, stock := range stocks {
+		stockCodeSet[stock.Code] = struct{}{}
+	}
+
 	// 財務情報テーブルの最新の開示日（例：2024-09-20T00:00:00Z）を取得
 	lastDisclosureDate, err := postgres.GetStatementsLatestDisclosedDate()
 	if err != nil {
@@ -171,9 +173,23 @@ func UpdateStatementsInfo() (err error) {
 			return err
 		}
 
+		var filteredStatements []model.StatementInfo
+		skippedCount := 0
+		for _, statement := range statements {
+			if _, ok := stockCodeSet[statement.Code]; !ok {
+				skippedCount++
+				continue
+			}
+
+			filteredStatements = append(filteredStatements, statement)
+		}
+		if skippedCount != 0 {
+			log.Info(fmt.Sprintf("stocks_info に存在しない銘柄コードの財務情報を %d 件スキップしました", skippedCount))
+		}
+
 		// 取得した財務情報を DB に保存
-		if len(statements) != 0 {
-			err = postgres.InsertStatementsInfo(statements)
+		if len(filteredStatements) != 0 {
+			err = postgres.InsertStatementsInfo(filteredStatements)
 			if err != nil {
 				log.Error(err)
 				return err
@@ -230,6 +246,18 @@ func ResetPriceInfoAll() (err error) {
 - return) err	エラー
 */
 func UpdatePricesInfo() (err error) {
+	stocks, err := postgres.GetStocksInfo()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// stocks_info に存在する銘柄コードの集合を作成する
+	stockCodeSet := make(map[string]struct{}, len(stocks))
+	for _, stock := range stocks {
+		stockCodeSet[stock.Code] = struct{}{}
+	}
+
 	// 株価情報テーブルの最新の開示日（例：2024-09-20T00:00:00Z）を取得
 	lastestDate, err := postgres.GetPricesLatestDate()
 	if err != nil {
@@ -276,16 +304,39 @@ func UpdatePricesInfo() (err error) {
 			return err
 		}
 
+		// stocks_info に存在しない銘柄コードは保存対象から除外する
+		var filteredPrices []model.PriceInfo
+		var filteredSplitStockCodes []string
+		skippedCount := 0
+		for _, price := range prices {
+			if _, ok := stockCodeSet[price.Code]; !ok {
+				skippedCount++
+				continue
+			}
+
+			filteredPrices = append(filteredPrices, price)
+		}
+		for _, splitStockCode := range splitStockCodes {
+			if _, ok := stockCodeSet[splitStockCode]; !ok {
+				continue
+			}
+
+			filteredSplitStockCodes = append(filteredSplitStockCodes, splitStockCode)
+		}
+		if skippedCount != 0 {
+			log.Info(fmt.Sprintf("stocks_info に存在しない銘柄コードの株価情報を %d 件スキップしました", skippedCount))
+		}
+
 		// 取得した株価情報を DB に保存
-		if len(prices) != 0 {
-			err = postgres.InsertPricesInfo(prices)
+		if len(filteredPrices) != 0 {
+			err = postgres.InsertPricesInfo(filteredPrices)
 			if err != nil {
 				log.Error(err)
 				return err
 			}
 		}
 
-		splitStockCodesAll = append(splitStockCodesAll, splitStockCodes...)
+		splitStockCodesAll = append(splitStockCodesAll, filteredSplitStockCodes...)
 	}
 
 	// 株式分割した銘柄の株価情報を削除して再取得
