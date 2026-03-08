@@ -54,6 +54,6 @@ func schedulerExec(jobs []Job) {
 
 // 定期実行を開始する関数
 func SchedulerStart() {
-	// fmt.Println("EXECUTE SchedulerStart")
-	schedulerExec(jobs)
+	// Scheduler が main 処理をブロックしないように別 goroutine で起動する
+	go schedulerExec(jobs)
 }
