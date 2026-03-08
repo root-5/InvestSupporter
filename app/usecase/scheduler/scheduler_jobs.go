@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// 定期実行する関数とその設定をまとめた構造体
-var jobs = Jobs{
+// 定期実行する関数とその設定をまとめたスライス
+var jobs = []Job{
 	{
 		Name:        "UpdateStocksInfo",
 		Duration:    6 * time.Hour,
