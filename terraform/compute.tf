@@ -35,6 +35,10 @@ resource "google_compute_instance" "app_server" {
   # スタートアップスクリプト、インスタンス起動時に一度だけ root 権限で実行される
   metadata_startup_script = <<-EOF
     #!/bin/bash
+    # Docker の公開ポートで必要となる IP forwarding を永続的に有効化
+    printf 'net.ipv4.ip_forward=1\n' > /etc/sysctl.d/99-investsupporter-ipforward.conf
+    /usr/sbin/sysctl --system
+
     # Docker のインストール
     # https://matsuand.github.io/docs.docker.jp.onthefly/engine/install/debian/#install-using-the-repository
     apt-get update
