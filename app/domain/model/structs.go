@@ -123,4 +123,5 @@ type PriceInfo struct {
 	AdjustmentLow    sql.NullFloat64 `json:"調整後安値"`  // 調整後安値
 	AdjustmentClose  sql.NullFloat64 `json:"調整後終値"`  // 調整後終値
 	AdjustmentVolume sql.NullFloat64 `json:"調整後出来高"` // 調整後出来高
+	AdjustmentFactor sql.NullFloat64 `json:"調整係数"`    // 調整係数
 }

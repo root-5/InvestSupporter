@@ -17,7 +17,7 @@ import (
 */
 func InsertPricesInfo(price []model.PriceInfo) (err error) {
 	// Prepare を利用して SQL 文を実行
-	stmt, err := db.Prepare("INSERT INTO prices_info (ymd, code, adjustment_open, adjustment_high, adjustment_low, adjustment_close, adjustment_volume) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+	stmt, err := db.Prepare("INSERT INTO prices_info (ymd, code, adjustment_open, adjustment_high, adjustment_low, adjustment_close, adjustment_volume, adjustment_factor) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
 	if err != nil {
 		log.Error(err)
 		return err
@@ -34,6 +34,7 @@ func InsertPricesInfo(price []model.PriceInfo) (err error) {
 			stock.AdjustmentLow,
 			stock.AdjustmentClose,
 			stock.AdjustmentVolume,
+			stock.AdjustmentFactor,
 		)
 		if err != nil {
 			log.Error(err)
@@ -51,7 +52,7 @@ func InsertPricesInfo(price []model.PriceInfo) (err error) {
 */
 func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 	// Prepare を利用して SQL 文を実行
-	stmt, err := db.Prepare("UPDATE prices_info SET adjustment_open = $3, adjustment_high = $4, adjustment_low = $5, adjustment_close = $6, adjustment_volume = $7 WHERE ymd = $1 AND code = $2")
+	stmt, err := db.Prepare("UPDATE prices_info SET adjustment_open = $3, adjustment_high = $4, adjustment_low = $5, adjustment_close = $6, adjustment_volume = $7, adjustment_factor = $8 WHERE ymd = $1 AND code = $2")
 	if err != nil {
 		log.Error(err)
 		return err
@@ -68,6 +69,7 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 			price.AdjustmentLow,
 			price.AdjustmentClose,
 			price.AdjustmentVolume,
+			price.AdjustmentFactor,
 		)
 		if err != nil {
 			log.Error(err)
@@ -131,6 +133,7 @@ func GetPricesInfo(codes []string, ymd string) (prices []model.PriceInfo, err er
 			&price.AdjustmentLow,
 			&price.AdjustmentClose,
 			&price.AdjustmentVolume,
+			&price.AdjustmentFactor,
 		)
 		if err != nil {
 			log.Error(err)

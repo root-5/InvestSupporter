@@ -242,6 +242,7 @@ func FetchPricesInfo(codeOrDate string) (prices []model.PriceInfo, splitStockCod
 				AdjustmentLow:    convertAnyToFloat64(price.AdjustmentLow),
 				AdjustmentClose:  convertAnyToFloat64(price.AdjustmentClose),
 				AdjustmentVolume: convertAnyToFloat64(price.AdjustmentVolume),
+				AdjustmentFactor: convertAnyToFloat64(price.AdjustmentFactor),
 			})
 		}
 	}

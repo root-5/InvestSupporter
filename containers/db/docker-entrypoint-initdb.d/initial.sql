@@ -78,6 +78,7 @@ CREATE TABLE prices_info (
     adjustment_low DECIMAL(10,2),
     adjustment_close DECIMAL(10,2),
     adjustment_volume DECIMAL(20,0),
+    adjustment_factor DECIMAL(10,5),
     PRIMARY KEY (ymd, code),
     FOREIGN KEY (code) REFERENCES stocks_info(code)
 );
