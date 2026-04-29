@@ -4,6 +4,7 @@ package api
 import (
 	"app/controller/log"
 	"app/controller/postgres"
+	"app/domain/model"
 	"app/usecase/usecase"
 	"fmt"
 	"net/http"
@@ -58,7 +59,6 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	case "/statement":
 		// コードを取得
 		code := r.URL.Query().Get("code")
-		// コードが指定されていない場合はエラー
 		if code == "" {
 			http.Error(w, "code is required", http.StatusBadRequest)
 			return
@@ -76,17 +76,41 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		sendCsvResponse(w, data)
 
+	// リアルタイム・マージ済みの最新財務情報を取得
+	case "/realtime-summary":
+		// コードを取得
+		code := r.URL.Query().Get("code")
+		if code == "" {
+			http.Error(w, "code is required", http.StatusBadRequest)
+			return
+		}
+		// コードが4桁の場合は5桁に変換
+		if len(code) == 4 {
+			code = code + "0"
+		}
+		// usecase からリアルタイム情報を取得
+		data, err := usecase.GetRealtimeSummary(code)
+		if err != nil {
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var responseData []model.StatementInfo
+		if data.Code != "" {
+			responseData = append(responseData, data)
+		}
+		sendCsvResponse(w, responseData)
+
 	// 株価終値情報を取得
 	case "/closeprice":
 		// コードと日付を取得
 		code := r.URL.Query().Get("code")
 		ymd := r.URL.Query().Get("ymd")
-		// コードが指定されていない場合はエラー
 		if code == "" {
 			http.Error(w, "codes is required", http.StatusBadRequest)
 			return
 		}
-		// 日付フォーマットをチェック
 		if ymd != "" {
 			isDateRange := strings.Contains(ymd, "~")
 			if isDateRange {
@@ -101,9 +125,8 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-		// カンマ区切りのコードをスライスに変換
+		// カンマ区切りのコードをスライスに変換、コードが4桁の場合は5桁に変換
 		codes := strings.Split(code, ",")
-		// コードが4桁の場合は5桁に変換
 		for i := range codes {
 			if len(codes[i]) == 4 {
 				codes[i] = codes[i] + "0"
@@ -125,7 +148,6 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		// コードと日付を取得
 		code := r.URL.Query().Get("code")
 		ymd := r.URL.Query().Get("ymd")
-		// 日付フォーマットをチェック
 		if ymd != "" {
 			isDateRange := strings.Contains(ymd, "~")
 			if isDateRange {

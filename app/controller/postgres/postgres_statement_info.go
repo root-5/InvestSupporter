@@ -300,3 +300,81 @@ func GetStatementsLatestDisclosedDate() (date string, err error) {
 
 	return date, nil
 }
+
+/*
+指定した銘柄の最新の「四半期決算等の実績情報（FinancialStatements）」と、
+その実績以降に開示された「最新の予想修正・配当修正情報」をすべて取得する関数
+  - arg) code    銘柄コード
+  - return) statements 該当する財務情報と修正情報の配列
+  - return) err        エラー
+*/
+func GetLatestStatementAndRevisions(code string) (statements []model.StatementInfo, err error) {
+	query := `
+WITH latest_fs AS (
+SELECT disclosed_date, disclosure_number
+FROM statements_info
+WHERE code = $1 AND type_of_document LIKE '%FinancialStatements%'
+ORDER BY disclosed_date DESC, disclosure_number DESC
+LIMIT 1
+)
+SELECT s.*
+FROM statements_info s
+JOIN latest_fs l ON s.code = $1 
+	AND (s.disclosed_date > l.disclosed_date OR (s.disclosed_date = l.disclosed_date AND s.disclosure_number >= l.disclosure_number))
+WHERE s.code = $1
+ORDER BY s.disclosed_date ASC, s.disclosure_number ASC
+`
+	rows, err := db.Query(query, code)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var statement model.StatementInfo
+		err := rows.Scan(
+			&statement.DisclosureNumber,
+			&statement.Code,
+			&statement.DisclosedDate,
+			&statement.TypeOfDocument,
+			&statement.NetSales,
+			&statement.OperatingProfit,
+			&statement.OrdinaryProfit,
+			&statement.Profit,
+			&statement.EarningsPerShare,
+			&statement.TotalAssets,
+			&statement.Equity,
+			&statement.EquityToAssetRatio,
+			&statement.BookValuePerShare,
+			&statement.CashFlowsFromOperatingActivities,
+			&statement.CashFlowsFromInvestingActivities,
+			&statement.CashFlowsFromFinancingActivities,
+			&statement.CashAndEquivalents,
+			&statement.ResultDividendPerShareAnnual,
+			&statement.ResultPayoutRatioAnnual,
+			&statement.ForecastDividendPerShareAnnual,
+			&statement.ForecastPayoutRatioAnnual,
+			&statement.NextYearForecastDividendPerShareAnnual,
+			&statement.NextYearForecastPayoutRatioAnnual,
+			&statement.ForecastNetSales,
+			&statement.ForecastOperatingProfit,
+			&statement.ForecastOrdinaryProfit,
+			&statement.ForecastProfit,
+			&statement.ForecastEarningsPerShare,
+			&statement.NextYearForecastNetSales,
+			&statement.NextYearForecastOperatingProfit,
+			&statement.NextYearForecastOrdinaryProfit,
+			&statement.NextYearForecastProfit,
+			&statement.NextYearForecastEarningsPerShare,
+			&statement.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock,
+		)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		statements = append(statements, statement)
+	}
+
+	return statements, nil
+}

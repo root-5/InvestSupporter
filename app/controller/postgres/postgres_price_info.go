@@ -191,3 +191,41 @@ func GetPricesLatestDate() (date string, err error) {
 
 	return date, nil
 }
+
+/*
+/*
+基準日以降に発生した株式分割の累積調整係数を取得する関数
+  - arg) code      銘柄コード
+  - arg) sinceDate 基準日 (この日以降の分割を対象とする)
+  - return) factor 累積調整係数
+  - return) err    エラー
+*/
+func GetCumulativeAdjustmentFactor(code string, sinceDate string) (float64, error) {
+	query := `
+	SELECT adjustment_factor
+	FROM prices_info
+	WHERE code = $1
+		AND ymd > $2
+		AND adjustment_factor IS NOT NULL
+		AND adjustment_factor != 1.0
+	`
+	rows, err := db.Query(query, code, sinceDate)
+	if err != nil {
+		log.Error(err)
+		return 1.0, err
+	}
+	defer rows.Close()
+
+	cumulativeFactor := 1.0
+	for rows.Next() {
+		var factor float64
+		err := rows.Scan(&factor)
+		if err != nil {
+			log.Error(err)
+			return 1.0, err
+		}
+		cumulativeFactor *= factor
+	}
+
+	return cumulativeFactor, nil
+}
