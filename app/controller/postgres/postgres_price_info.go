@@ -17,7 +17,7 @@ import (
 */
 func InsertPricesInfo(price []model.PriceInfo) (err error) {
 	// Prepare を利用して SQL 文を実行
-	stmt, err := db.Prepare("INSERT INTO prices_info (ymd, code, adjustment_open, adjustment_high, adjustment_low, adjustment_close, adjustment_volume) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+	stmt, err := db.Prepare("INSERT INTO prices_info (ymd, code, adjustment_open, adjustment_high, adjustment_low, adjustment_close, adjustment_volume, adjustment_factor) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
 	if err != nil {
 		log.Error(err)
 		return err
@@ -34,6 +34,7 @@ func InsertPricesInfo(price []model.PriceInfo) (err error) {
 			stock.AdjustmentLow,
 			stock.AdjustmentClose,
 			stock.AdjustmentVolume,
+			stock.AdjustmentFactor,
 		)
 		if err != nil {
 			log.Error(err)
@@ -51,7 +52,7 @@ func InsertPricesInfo(price []model.PriceInfo) (err error) {
 */
 func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 	// Prepare を利用して SQL 文を実行
-	stmt, err := db.Prepare("UPDATE prices_info SET adjustment_open = $3, adjustment_high = $4, adjustment_low = $5, adjustment_close = $6, adjustment_volume = $7 WHERE ymd = $1 AND code = $2")
+	stmt, err := db.Prepare("UPDATE prices_info SET adjustment_open = $3, adjustment_high = $4, adjustment_low = $5, adjustment_close = $6, adjustment_volume = $7, adjustment_factor = $8 WHERE ymd = $1 AND code = $2")
 	if err != nil {
 		log.Error(err)
 		return err
@@ -68,6 +69,7 @@ func UpdatePricesInfo(prices []model.PriceInfo) (err error) {
 			price.AdjustmentLow,
 			price.AdjustmentClose,
 			price.AdjustmentVolume,
+			price.AdjustmentFactor,
 		)
 		if err != nil {
 			log.Error(err)
@@ -131,6 +133,7 @@ func GetPricesInfo(codes []string, ymd string) (prices []model.PriceInfo, err er
 			&price.AdjustmentLow,
 			&price.AdjustmentClose,
 			&price.AdjustmentVolume,
+			&price.AdjustmentFactor,
 		)
 		if err != nil {
 			log.Error(err)
@@ -187,4 +190,42 @@ func GetPricesLatestDate() (date string, err error) {
 	}
 
 	return date, nil
+}
+
+/*
+/*
+基準日以降に発生した株式分割の累積調整係数を取得する関数
+  - arg) code      銘柄コード
+  - arg) sinceDate 基準日 (この日以降の分割を対象とする)
+  - return) factor 累積調整係数
+  - return) err    エラー
+*/
+func GetCumulativeAdjustmentFactor(code string, sinceDate string) (float64, error) {
+	query := `
+	SELECT adjustment_factor
+	FROM prices_info
+	WHERE code = $1
+		AND ymd > $2
+		AND adjustment_factor IS NOT NULL
+		AND adjustment_factor != 1.0
+	`
+	rows, err := db.Query(query, code, sinceDate)
+	if err != nil {
+		log.Error(err)
+		return 1.0, err
+	}
+	defer rows.Close()
+
+	cumulativeFactor := 1.0
+	for rows.Next() {
+		var factor float64
+		err := rows.Scan(&factor)
+		if err != nil {
+			log.Error(err)
+			return 1.0, err
+		}
+		cumulativeFactor *= factor
+	}
+
+	return cumulativeFactor, nil
 }

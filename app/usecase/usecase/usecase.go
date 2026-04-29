@@ -7,7 +7,9 @@ import (
 	"app/controller/postgres"
 	"app/domain/model"
 	"fmt"
+	"reflect"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -536,4 +538,95 @@ func ResetDataAll() (err error) {
 	}
 
 	return nil
+}
+
+/*
+指定銘柄の最新財務情報と修正情報、及び株式分割を統合したリアルタイム情報を作成して返却する
+- arg) code    銘柄コード
+- return) summary 最新準拠に統合・補正された財務情報
+- return) err     エラー
+*/
+func GetRealtimeSummary(code string) (model.StatementInfo, error) {
+	// 1. 最新の四半期決算とそれ以降の修正情報を取得（古い順から新しい順で取得される）
+	statements, err := postgres.GetLatestStatementAndRevisions(code)
+	if err != nil {
+		log.Error(err)
+		return model.StatementInfo{}, err
+	}
+	if len(statements) == 0 {
+		return model.StatementInfo{}, nil
+	}
+
+	// 2. リスト内の直近四半期報告書（FinancialStatements を含む）のインデックスを特定
+	baseIdx := 0
+	for i, stmt := range statements {
+		if strings.Contains(stmt.TypeOfDocument, "FinancialStatements") {
+			baseIdx = i
+		}
+	}
+
+	// 3. 直近四半期報告書をベースとし、それ以降の修正情報を雑マージして統合データ(merged)を作成
+	// （一株あたり指標は後で再計算するため、ここでは整合性を気にせず Valid なフィールドを上書きする）
+	merged := statements[baseIdx]
+	for _, stmt := range statements[baseIdx+1:] {
+
+		// 開示番号・日付・種別などは常に最新データで更新
+		merged.DisclosureNumber = stmt.DisclosureNumber
+		merged.DisclosedDate = stmt.DisclosedDate
+		merged.TypeOfDocument = stmt.TypeOfDocument
+
+		// sql.Null* 型のフィールドは Valid の場合に上書き
+		mv := reflect.ValueOf(&merged).Elem()
+		sv := reflect.ValueOf(stmt)
+		for j := 0; j < mv.NumField(); j++ {
+			src := sv.Field(j)
+			validField := src.FieldByName("Valid")
+			if !validField.IsValid() || !validField.Bool() {
+				continue
+			}
+			mv.Field(j).Set(src)
+		}
+	}
+
+	// 4. ベース四半期報告書発表日以降に発生した株式分割の累積比率をDBから取得
+	baseDate := statements[baseIdx].DisclosedDate.Time.Format("2006-01-02")
+	factor, err := postgres.GetCumulativeAdjustmentFactor(code, baseDate)
+	if err != nil {
+		log.Error(err)
+		return model.StatementInfo{}, err
+	}
+
+	// 5. 分割がある場合（factor != 1.0）、1株当たり指標と株式数の算出値を補正する
+	// （期末発行済み株式数を使って一株あたり指標を再計算する方式は自己株式の有無が反映されないため誤った数値になる可能性があるため、分割比率で単純に補正する方式を採用する）
+	if factor != 1.0 {
+		if merged.EarningsPerShare.Valid {
+			merged.EarningsPerShare.Float64 *= factor
+		}
+		if merged.BookValuePerShare.Valid {
+			merged.BookValuePerShare.Float64 *= factor
+		}
+		if merged.ResultDividendPerShareAnnual.Valid {
+			merged.ResultDividendPerShareAnnual.Float64 *= factor
+		}
+		if merged.ForecastDividendPerShareAnnual.Valid {
+			merged.ForecastDividendPerShareAnnual.Float64 *= factor
+		}
+		if merged.NextYearForecastDividendPerShareAnnual.Valid {
+			merged.NextYearForecastDividendPerShareAnnual.Float64 *= factor
+		}
+		if merged.ForecastEarningsPerShare.Valid {
+			merged.ForecastEarningsPerShare.Float64 *= factor
+		}
+		if merged.NextYearForecastEarningsPerShare.Valid {
+			merged.NextYearForecastEarningsPerShare.Float64 *= factor
+		}
+
+		if merged.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock.Valid {
+			// factorは分割の場合(例: 1:3) 0.33... なので、これで割ると株数は3倍になる
+			merged.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock.Int64 =
+				int64(float64(merged.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock.Int64) / factor)
+		}
+	}
+
+	return merged, nil
 }
