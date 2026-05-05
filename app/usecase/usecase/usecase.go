@@ -580,6 +580,9 @@ func GetRealtimeSummary(code string) (model.StatementInfo, error) {
 		sv := reflect.ValueOf(stmt)
 		for j := 0; j < mv.NumField(); j++ {
 			src := sv.Field(j)
+			if src.Kind() != reflect.Struct {
+				continue
+			}
 			validField := src.FieldByName("Valid")
 			if !validField.IsValid() || !validField.Bool() {
 				continue
